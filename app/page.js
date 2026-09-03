@@ -1,90 +1,50 @@
-import Link from "next/link";
+import HeroSection from "@/components/home/HeroSection";
+import ServicesBento from "@/components/home/ServicesBento";
+import FeaturedProjects from "@/components/home/FeaturedProjects";
+import TechMarquee from "@/components/home/TechMarquee";
+import MetricsSection from "@/components/home/MetricsSection";
+import Testimonials from "@/components/home/Testimonials";
+import ContactCTA from "@/components/home/ContactCTA";
 
-const CAPABILITIES = [
-  {
-    no: "01",
-    title: "Software Development",
-    body: "Robust, enterprise-grade systems built for scale and maintainability.",
+export const metadata = {
+  // NOTE: layout.js's `title.template` only applies to *child* route segments,
+  // and app/page.js shares layout.js's segment — so the brand suffix the
+  // template would otherwise add has to be spelled out here.
+  title: { absolute: "Software, Data & Digital Engineering | STR Solutions Ltd." },
+  description:
+    "STR Solutions Ltd. is a Dhaka-based studio building enterprise-grade software, mobile, cloud, and data platforms engineered for scale.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    // A page-level `openGraph` replaces the parent's wholesale rather than
+    // merging into it, so siteName/locale from layout.js are restated here.
+    siteName: "STR Solutions Ltd.",
+    locale: "en_US",
+    title: "STR Solutions Ltd. — Digital products, engineered for scale",
+    description:
+      "Web applications, mobile solutions, custom software, and cloud infrastructure for teams that need production-grade systems.",
+    url: "/",
+    type: "website",
+    images: [{ url: "/og/home.jpg", width: 1200, height: 630, alt: "STR Solutions Ltd." }],
   },
-  {
-    no: "02",
-    title: "Web Development",
-    body: "Modern, performant web experiences that convert visitors into customers.",
+  twitter: {
+    card: "summary_large_image",
+    title: "STR Solutions Ltd. — Digital products, engineered for scale",
+    description:
+      "Web, mobile, custom software, and cloud infrastructure, built for production.",
+    images: ["/og/home.jpg"],
   },
-  {
-    no: "03",
-    title: "Data Science & Analytics",
-    body: "Turning raw data into decisions with advanced analytics and modeling.",
-  },
-  {
-    no: "04",
-    title: "Digital Marketing",
-    body: "Measurable growth through search, content, and performance campaigns.",
-  },
-];
+};
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 pb-20 pt-20 md:pt-28">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-[--text-muted]">
-          STR Solutions Ltd. — Dhaka, Bangladesh
-        </p>
-        <h1 className="mt-6 max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[--text] sm:text-6xl">
-          We engineer software, data, and digital products{" "}
-          <span className="text-primary">built for scale</span>.
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[--text-muted]">
-          A product and engineering studio partnering with teams to design,
-          build, and ship systems that hold up in production.
-        </p>
-        <div className="mt-9 flex flex-wrap items-center gap-4">
-          <Link
-            href="/contact"
-            className="bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[--color-primary-hover]"
-          >
-            Start a project
-          </Link>
-          <Link
-            href="/projects"
-            className="border border-[--border] px-6 py-3 text-sm font-semibold text-[--text] transition-colors hover:border-primary hover:text-primary"
-          >
-            View our work
-          </Link>
-        </div>
-      </section>
-
-      {/* Capabilities */}
-      <section className="border-t border-[--border]">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex items-end justify-between">
-            <h2 className="text-2xl font-bold tracking-tight text-[--text]">
-              What we do
-            </h2>
-            <Link
-              href="/services"
-              className="text-sm font-medium text-[--text-muted] transition-colors hover:text-[--text]"
-            >
-              All services →
-            </Link>
-          </div>
-
-          <div className="mt-10 grid gap-px border border-[--border] bg-[--border] sm:grid-cols-2">
-            {CAPABILITIES.map((c) => (
-              <article key={c.no} className="bg-[--surface] p-8">
-                <span className="font-mono text-xs text-[--text-muted]">{c.no}</span>
-                <h3 className="mt-3 text-lg font-semibold text-[--text]">
-                  {c.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[--text-muted]">
-                  {c.body}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroSection />
+      <ServicesBento />
+      <FeaturedProjects />
+      <TechMarquee />
+      <MetricsSection />
+      <Testimonials />
+      <ContactCTA />
     </>
   );
 }

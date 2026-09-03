@@ -69,3 +69,43 @@
     background-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
   }
 }
+/* ── Phase 3: motion + structural utilities (pure CSS) ────────── */
+
+@theme {
+  /* Registers the `animate-marquee` utility. */
+  --animate-marquee: marquee 38s linear infinite;
+}
+
+/* The marquee track is rendered twice, so -50% lands the clone exactly where
+   the original started → seamless loop. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Faint structural graph-paper grid; lines follow the theme border colour. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Aligned figures so stat counters don't jitter. */
+@utility nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Edge fade for marquees / overflow rows. */
+@utility mask-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none !important;
+  }
+}
