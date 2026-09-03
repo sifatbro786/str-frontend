@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/*
+  next-themes toggles the `dark` class on <html> (attribute="class").
+  Tailwind v4 defaults `dark:` to the prefers-color-scheme media query, so we
+  redefine the variant to be driven by the class instead.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand surfaces */
+  --color-bg-dark: #0b0f17;
+  --color-bg-light: #f8fafc;
+
+  /* Brand palette */
+  --color-primary: #007bff;
+  --color-primary-hover: #0069d9;
+  --color-accent: #e85a2a;
+  --color-accent-hover: #d24d20;
+
+  /* Neutral scale tuned for the two surfaces */
+  --color-ink: #0b0f17;
+  --color-ink-soft: #334155;
+  --color-ink-muted: #64748b;
+  --color-line: #e2e8f0;
+  --color-line-dark: #1e2634;
+
+  /* Typography */
+  --font-sans: var(--font-jakarta), "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Layout */
+  --spacing-gutter: 1.5rem;
+}
+
+/* Semantic tokens that flip with the theme. Consumed as bg-[--surface] etc.
+   or via the base rules below. */
+:root {
+  --surface: var(--color-bg-light);
+  --surface-elevated: #ffffff;
+  --text: var(--color-ink);
+  --text-muted: var(--color-ink-muted);
+  --border: var(--color-line);
+}
+
+.dark {
+  --surface: var(--color-bg-dark);
+  --surface-elevated: #111725;
+  --text: #e6ebf2;
+  --text-muted: #8b97a8;
+  --border: var(--color-line-dark);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Avoid the flash between theme resolution and paint. */
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
+  }
+}
