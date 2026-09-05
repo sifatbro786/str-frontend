@@ -1,44 +1,56 @@
-const STACK = [
-  "Next.js", "React", "Node.js", "Express", "MongoDB", "PostgreSQL",
-  "TypeScript", "Tailwind", "AWS", "Docker", "Redis", "GraphQL",
-  "Kubernetes", "Figma", "Vercel", "Prisma",
-];
+import { techMarquee } from "@/lib/data";
 
-function Track({ ariaHidden = false }) {
-  return (
-    <ul aria-hidden={ariaHidden} className="flex shrink-0 items-center gap-px bg-(--border)">
-      {STACK.map((tech, i) => (
-        <li
-          key={`${tech}-${i}`}
-          className="flex items-center bg-(--surface) px-8 py-5 font-mono text-sm uppercase tracking-wider text-(--text-muted)"
-        >
-          {tech}
+/**
+ * Two counter-scrolling rails. Pure CSS — the track is rendered twice and
+ * translated -50%, so the loop is seamless without JS and without GSAP.
+ *
+ * The clone carries aria-hidden, otherwise a screen reader reads the whole
+ * stack twice. `prefers-reduced-motion` halts both rails (see globals.css).
+ */
+function Rail({ items, reverse = false, slow = false }) {
+  const track = (
+    <ul className="flex shrink-0 items-center">
+      {items.map((t) => (
+        <li key={t.name} className="flex items-center">
+          <span className="px-6 text-[1.05rem] tracking-[-0.015em] text-(--text-dim) md:px-8 md:text-[1.25rem]">
+            {t.name}
+          </span>
+          <span aria-hidden="true" className="text-(--line)">
+            /
+          </span>
         </li>
       ))}
     </ul>
   );
+
+  return (
+    <div className="mask-x flex overflow-hidden">
+      <div
+        className={`flex min-w-max ${slow ? "animate-marquee-slow" : "animate-marquee"}`}
+        style={reverse ? { animationDirection: "reverse" } : undefined}
+      >
+        {track}
+        <div aria-hidden="true" className="flex">
+          {track}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function TechMarquee() {
-  return (
-    <section className="border-b border-(--border)">
-      <div className="mx-auto max-w-6xl px-6 pt-16">
-        <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-(--text-muted)">
-          <span className="h-px w-8 bg-accent" />
-          03 // Stack &amp; Capabilities
-        </div>
-      </div>
+  const rowOne = techMarquee.filter((t) => t.group === 1);
+  const rowTwo = techMarquee.filter((t) => t.group === 2);
 
-      {/* Full-bleed marquee band */}
-      <div className="mask-x group mt-8 flex overflow-hidden border-y border-(--border)">
-        {/* `w-max shrink-0` is load-bearing: translateX(-50%) is measured against
-            this element's own width, so it must size to its content (both
-            tracks) rather than being shrunk to the viewport. The `gap-px` between
-            tracks is balanced by `pr-px`, which keeps -50% landing exactly on the
-            clone's first item. */}
-        <div className="flex w-max shrink-0 animate-marquee gap-px pr-px group-hover:[animation-play-state:paused]">
-          <Track />
-          <Track ariaHidden />
+  return (
+    <section aria-label="Technology we build with" className="border-b border-(--line)">
+      <div className="py-14 md:py-16">
+        <p className="label-mono shell mb-8 text-(--text-mute)">
+          The stack we actually maintain in production
+        </p>
+        <div className="space-y-5">
+          <Rail items={rowOne} />
+          <Rail items={rowTwo} reverse slow />
         </div>
       </div>
     </section>

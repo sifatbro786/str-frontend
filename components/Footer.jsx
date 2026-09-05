@@ -1,104 +1,145 @@
+import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
+import { site } from "@/lib/site";
 
-const COLUMNS = [
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Projects", href: "/projects" },
-      { label: "Blog", href: "/blog" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
-  {
-    title: "Services",
-    links: [
-      { label: "Web Development", href: "/services/web-development" },
-      { label: "Software Development", href: "/services/software-development" },
-      { label: "Data Science & Analytics", href: "/services/data-science" },
-      { label: "Digital Marketing", href: "/services/digital-marketing" },
-    ],
-  },
+/* Explicit spans, index-aligned with site.footerColumns. Written out rather
+   than computed so Tailwind's static extractor actually emits the classes. */
+const COLUMN_SPANS = ["lg:col-span-3", "lg:col-span-2", "lg:col-span-3"];
+
+const SOCIALS = [
+  { key: "linkedin", label: "LinkedIn" },
+  { key: "facebook", label: "Facebook" },
+  { key: "github", label: "GitHub" },
+  { key: "behance", label: "Behance" },
+  { key: "x", label: "X" },
 ];
 
-const SOCIAL = [
-  { label: "Facebook", href: "https://www.facebook.com/share/1J9gnWA3Q9" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/str-solutions-ltd" },
-  { label: "WhatsApp", href: "https://wa.me/message/5NTM5FEI27IBH1" },
-];
-
+/**
+ * Four columns: identity rail, then the three link stacks from site.js.
+ * Below that the SSLCommerz payment strip, then an oversized wordmark that is
+ * intentionally clipped by the viewport — the mark is furniture at that size,
+ * so it is aria-hidden and the accessible name lives in the copyright line.
+ */
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-(--border) bg-(--surface)">
-      <div className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
-          {/* Brand block */}
-          <div>
-            <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight">
-              <span className="grid h-7 w-7 place-items-center bg-primary text-xs font-bold text-white">
-                S
-              </span>
-              <span className="text-(--text)">
-                STR<span className="text-accent">.</span>
-              </span>
-            </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-(--text-muted)">
-              Enterprise-grade software, data science, and digital products
-              engineered for scale.
+    <footer className="border-t border-(--line) bg-(--canvas)">
+      <div className="shell pt-20 md:pt-28">
+        <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-12">
+          {/* ── Identity rail ─────────────────────────────────── */}
+          <div className="lg:col-span-4 lg:pr-10">
+            <Logo height={30} />
+
+            <p className="mt-7 max-w-xs text-[0.9375rem] leading-relaxed text-(--text-mute)">
+              {site.description}
             </p>
-            <address className="mt-5 not-italic text-sm text-(--text-muted)">
-              Dhaka 1216, Bangladesh
-              <br />
-              <a href="mailto:info@strsltd.com" className="hover:text-(--text)">
-                info@strsltd.com
-              </a>
-              <br />
-              <a href="tel:+8801332802026" className="hover:text-(--text)">
-                +880 1332 802026
-              </a>
+
+            <address className="mt-8 not-italic">
+              <span className="label-mono block text-(--text-mute)">Studio</span>
+              <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-(--text-dim)">
+                {site.address.line1}
+                <br />
+                {site.address.line2}
+                <br />
+                {site.address.country}
+              </p>
             </address>
+
+            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
+              {SOCIALS.filter((s) => site.social[s.key]).map((s) => (
+                <li key={s.key}>
+                  <a
+                    href={site.social[s.key]}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="label-mono text-(--text-mute) transition-colors hover:text-signal"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Link columns */}
-          {COLUMNS.map((col) => (
-            <div key={col.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-(--text)">
-                {col.title}
-              </h3>
-              <ul className="mt-4 space-y-3">
-                {col.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-(--text-muted) transition-colors hover:text-(--text)"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+          {/* ── Link stacks ───────────────────────────────────── */}
+          {site.footerColumns.map((col, i) => (
+            <nav key={col.title} aria-label={col.title} className={COLUMN_SPANS[i]}>
+              <h2 className="label-mono text-(--text-mute)">{col.title}</h2>
+              <ul className="mt-5 space-y-3">
+                {col.links.map((link) => {
+                  const external = /^(https?:|mailto:|tel:)/.test(link.href);
+                  return (
+                    <li key={link.href}>
+                      {external ? (
+                        <a
+                          href={link.href}
+                          target={link.href.startsWith("http") ? "_blank" : undefined}
+                          rel="noreferrer noopener"
+                          className="text-[0.9375rem] text-(--text-dim) transition-colors hover:text-signal"
+                        >
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          className="text-[0.9375rem] text-(--text-dim) transition-colors hover:text-signal"
+                        >
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
-            </div>
+            </nav>
           ))}
+
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-(--border) pt-6 sm:flex-row sm:items-center">
-          <p className="text-xs text-(--text-muted)">
-            © {year} STR Solutions Ltd. All rights reserved.
+        {/* ── Payment strip (SSLCommerz gateway coverage) ─────── */}
+        <section aria-label="Accepted payment methods" className="mt-16 border-t border-(--line) pt-8">
+          <div className="overflow-x-auto">
+            {/* The artwork is authored on white; it sits on its own plate in both
+                themes rather than being inverted, because bank marks must not be
+                recoloured. */}
+            <div className="min-w-[720px] bg-white px-4 py-3">
+              <Image
+                src={site.brand.paymentStrip}
+                alt="Accepted payment methods — Visa, Mastercard, American Express, bKash, Nagad, Rocket, Upay and Bangladeshi bank cards, processed via SSLCommerz"
+                width={5011}
+                height={587}
+                sizes="(max-width: 768px) 720px, 1200px"
+                className="h-auto w-full"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ── Oversized wordmark ──────────────────────────────── */}
+      <div aria-hidden="true" className="mt-16 overflow-hidden select-none">
+        <p className="shell whitespace-nowrap font-semibold leading-[0.78] tracking-[-0.05em] text-(--text) opacity-[0.06] text-[clamp(4rem,17vw,16rem)]">
+          STR SOLUTIONS
+        </p>
+      </div>
+
+      {/* ── Legal row ───────────────────────────────────────── */}
+      <div className="border-t border-(--line)">
+        <div className="shell flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between">
+          <p className="label-mono text-(--text-mute)">
+            © {year} {site.legalName} · Reg. Bangladesh
           </p>
-          <ul className="flex items-center gap-5">
-            {SOCIAL.map((s) => (
-              <li key={s.label}>
-                <a
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium text-(--text-muted) transition-colors hover:text-(--text)"
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+            {site.legalLinks.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className="label-mono text-(--text-mute) transition-colors hover:text-signal"
                 >
-                  {s.label}
-                </a>
+                  {l.label}
+                </Link>
               </li>
             ))}
           </ul>

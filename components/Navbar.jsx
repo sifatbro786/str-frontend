@@ -3,152 +3,168 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import Logo from "@/components/ui/Logo";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import { site } from "@/lib/site";
+import { cn, pad } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { label: "Services", href: "/services" },
-  { label: "Projects", href: "/projects" },
-  { label: "About", href: "/about" },
-  { label: "Insights", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-];
-
-/* Wordmark in currentColor — adapts to theme automatically, no image swap,
-   no flash. Swap for a <Image> pair (logo-dark/logo-light) later if needed. */
-function Logo() {
-  return (
-    <Link
-      href="/"
-      aria-label="STR Solutions — home"
-      className="group inline-flex items-center gap-2.5"
-    >
-      <span className="grid h-8 w-8 place-items-center bg-primary text-sm font-bold leading-none text-white">
-        S
-      </span>
-      <span className="text-[15px] font-extrabold tracking-tight text-(--text)">
-        STR&nbsp;SOLUTIONS<span className="text-accent">.</span>
-      </span>
-    </Link>
-  );
-}
-
-function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Theme is only known on the client — render a stable placeholder on the
-  // server pass to avoid a hydration mismatch.
-  useEffect(() => setMounted(true), []);
-
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <button
-      type="button"
-      aria-label={mounted ? `Switch to ${isDark ? "light" : "dark"} theme` : "Toggle theme"}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="grid h-9 w-9 place-items-center border border-(--border) text-(--text) transition-colors hover:border-primary hover:text-primary"
-    >
-      {mounted && isDark ? (
-        // Sun
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
-        </svg>
-      ) : (
-        // Moon
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-        </svg>
-      )}
-    </button>
-  );
-}
-
+/**
+ * Sticky header.
+ *
+ * Active state is a signal-orange rule drawn *under* the label rather than a
+ * filled pill — the pill is the generated-UI tell we are avoiding everywhere.
+ * The rule is a pseudo-free absolutely positioned span so it can animate width
+ * later (Phase 5) without re-layout.
+ *
+ * The header is not translucent at scrollTop 0: a blurred bar over a hero is a
+ * cliché and it costs a composite layer on every scroll frame for nothing.
+ */
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const isActive = (href) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close the sheet on route change, and lock the body while it is open.
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const isActive = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-(--border) bg-(--surface)/80 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Logo />
+    <>
+      <header
+        className={cn(
+          "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300",
+          scrolled
+            ? "border-(--line) bg-(--overlay) backdrop-blur-xl backdrop-saturate-150"
+            : "border-transparent bg-transparent"
+        )}
+      >
+        <div className="shell flex h-[68px] items-center justify-between gap-6 md:h-[76px]">
+          <Logo priority height={28} />
 
-        {/* Desktop links appear at lg, not md: five links + wordmark + CTA
-            need ~800px, which overflows the 768-820px range. */}
-        <ul className="hidden items-center gap-8 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                aria-current={isActive(link.href) ? "page" : undefined}
-                className={`text-sm font-medium transition-colors hover:text-(--text) ${
-                  isActive(link.href) ? "text-(--text)" : "text-(--text-muted)"
-                }`}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link
-            href="/contact"
-            className="hidden items-center gap-2 bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover lg:inline-flex"
-          >
-            Start a Project
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </Link>
-
-          {/* Mobile trigger */}
-          <button
-            type="button"
-            aria-label="Toggle menu"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            className="grid h-9 w-9 place-items-center border border-(--border) text-(--text) lg:hidden"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile drawer */}
-      {open && (
-        <div className="border-t border-(--border) bg-(--surface) lg:hidden">
-          <ul className="mx-auto flex max-w-6xl flex-col px-6 py-2">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
+          {/* Desktop nav */}
+          <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+            {site.nav.map((item, i) => {
+              const active = isActive(item.href);
+              return (
                 <Link
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                  className="block border-b border-(--border) py-3 text-sm font-medium text-(--text)"
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "group relative px-4 py-2 text-[0.9375rem] transition-colors",
+                    active ? "text-(--text)" : "text-(--text-mute) hover:text-(--text)"
+                  )}
                 >
-                  {link.label}
+                  <span className="label-mono mr-2 text-signal opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    {pad(i + 1)}
+                  </span>
+                  {item.label}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute inset-x-4 -bottom-px h-px origin-left bg-signal transition-transform duration-300",
+                      active ? "scale-x-100" : "scale-x-0"
+                    )}
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
+
+            <Link
+              href="/contact"
+              className="hidden bg-(--text) px-5 py-2.5 text-[0.8125rem] font-medium text-(--canvas) transition-colors hover:bg-signal hover:text-white sm:inline-flex"
+            >
+              Start a project
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="inline-flex h-9 w-9 items-center justify-center border border-(--line) text-(--text) lg:hidden"
+            >
+              <span className="relative block h-3 w-4">
+                <span
+                  className={cn(
+                    "absolute left-0 block h-px w-full bg-current transition-transform duration-300",
+                    open ? "top-1.5 rotate-45" : "top-0"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "absolute left-0 top-1.5 block h-px w-full bg-current transition-opacity duration-200",
+                    open && "opacity-0"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "absolute left-0 block h-px w-full bg-current transition-transform duration-300",
+                    open ? "top-1.5 -rotate-45" : "top-3"
+                  )}
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile sheet — full canvas, indexed list, no slide-in drawer. */}
+      <div
+        id="mobile-nav"
+        hidden={!open}
+        className="fixed inset-0 z-40 bg-(--canvas) pt-[68px] lg:hidden"
+      >
+        <nav aria-label="Mobile" className="shell flex h-full flex-col">
+          <ul className="divide-y divide-(--line) border-b border-t border-(--line)">
+            {site.nav.map((item, i) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-baseline gap-5 py-5 text-[1.75rem] tracking-[-0.03em] transition-colors",
+                    isActive(item.href) ? "text-signal" : "text-(--text)"
+                  )}
+                >
+                  <span className="label-mono text-(--text-mute)">{pad(i + 1)}</span>
+                  {item.label}
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href="/contact"
-                onClick={() => setOpen(false)}
-                className="mt-3 block bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
-              >
-                Start a Project
-              </Link>
-            </li>
           </ul>
-        </div>
-      )}
-    </header>
+
+          <div className="mt-auto pb-10 pt-8">
+            <Link
+              href="/contact"
+              className="flex w-full items-center justify-center bg-brand px-6 py-4 text-sm font-medium text-white"
+            >
+              Start a project
+            </Link>
+            <p className="label-mono mt-6 text-(--text-mute)">
+              {site.contact.email} · {site.address.line2}
+            </p>
+          </div>
+        </nav>
+      </div>
+    </>
   );
 }

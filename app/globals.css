@@ -1,111 +1,331 @@
+/* ─────────────────────────────────────────────────────────────
+   STR Solutions Ltd — Design System (Phase 3)
+   Dark-first. Warm-neutral, NOT slate-blue. Headings never exceed 600.
+   Font: General Sans (Fontshare CDN) + JetBrains Mono for indices.
+
+   PRODUCTION NOTE: self-host General Sans with next/font/local once the
+   .woff2 files are in /public/fonts — the CDN @import is a render-blocking
+   request and costs ~120ms of LCP. Wired via CDN here so Phase 3 runs today.
+   ───────────────────────────────────────────────────────────── */
+@import url("https://api.fontshare.com/v2/css?f%5B%5D=general-sans@400,500,600,700&display=swap");
 @import "tailwindcss";
 
-/*
-  next-themes toggles the `dark` class on <html> (attribute="class").
-  Tailwind v4 defaults `dark:` to the prefers-color-scheme media query, so we
-  redefine the variant to be driven by the class instead.
-*/
+/* next-themes writes class="dark" on <html>; Tailwind v4 defaults `dark:` to
+   the prefers-color-scheme media query, so the variant is redefined here. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Brand surfaces */
-  --color-bg-dark: #0b0f17;
-  --color-bg-light: #f8fafc;
+  /* ── Brand, sampled from public/logo.png ──────────────────── */
+  --color-brand: #1476be; /* STR blue  */
+  --color-brand-hi: #1e8ad9; /* hover / focus */
+  --color-signal: #ef5a28; /* STR orange — indices, rules, accents */
+  --color-leaf: #57b04a; /* STR green  — sparingly, growth metrics */
 
-  /* Brand palette */
-  --color-primary: #007bff;
-  --color-primary-hover: #0069d9;
-  --color-accent: #e85a2a;
-  --color-accent-hover: #d24d20;
+  /* ── Warm neutral ramp. Deliberately NOT Tailwind slate. ──── */
+  --color-ink-950: #09090a;
+  --color-ink-900: #101012;
+  --color-ink-850: #17171a;
+  --color-ink-800: #1d1d21;
+  --color-ink-500: #8a8a85;
+  --color-ink-300: #b6b3ac;
+  --color-paper-50: #f4f2ee;
+  --color-paper-100: #edeae4;
+  --color-paper-200: #dcd8d0;
+  --color-paper-600: #6b665e;
+  --color-paper-950: #17171a;
 
-  /* Neutral scale tuned for the two surfaces */
-  --color-ink: #0b0f17;
-  --color-ink-soft: #334155;
-  --color-ink-muted: #64748b;
-  --color-line: #e2e8f0;
-  --color-line-dark: #1e2634;
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-sans: "General Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
 
-  /* Typography */
-  --font-sans: var(--font-jakarta), "Inter", ui-sans-serif, system-ui, sans-serif;
-
-  /* Layout */
-  --spacing-gutter: 1.5rem;
+  /* ── Motion ───────────────────────────────────────────────── */
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-marquee-slow: marquee 68s linear infinite;
 }
 
-/* Semantic tokens that flip with the theme. Consumed as bg-[--surface] etc.
-   or via the base rules below. */
-:root {
-  --surface: var(--color-bg-light);
-  --surface-elevated: #ffffff;
-  --text: var(--color-ink);
-  --text-muted: var(--color-ink-muted);
-  --border: var(--color-line);
-}
-
+/* ─────────────────────────────────────────────────────────────
+   Semantic tokens. Every component reads these, never the ramp
+   directly — that is what makes the light/dark flip a one-file change.
+   ───────────────────────────────────────────────────────────── */
+:root,
 .dark {
-  --surface: var(--color-bg-dark);
-  --surface-elevated: #111725;
-  --text: #e6ebf2;
-  --text-muted: #8b97a8;
-  --border: var(--color-line-dark);
+  --canvas: var(--color-ink-950);
+  --raised: var(--color-ink-900);
+  --raised-2: var(--color-ink-850);
+  --line: var(--color-ink-800);
+  --line-soft: #141416;
+  --text: #f2f2f0;
+  --text-dim: var(--color-ink-300);
+  --text-mute: var(--color-ink-500);
+  --on-brand: #ffffff;
+  --overlay: rgb(9 9 10 / 0.72);
+}
+
+:root:not(.dark) {
+  --canvas: var(--color-paper-50);
+  --raised: #ffffff;
+  --raised-2: var(--color-paper-100);
+  --line: var(--color-paper-200);
+  --line-soft: #e7e4dd;
+  --text: var(--color-paper-950);
+  --text-dim: #45423c;
+  --text-mute: var(--color-paper-600);
+  --on-brand: #ffffff;
+  --overlay: rgb(244 242 238 / 0.72);
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+  html:not(.dark) {
+    color-scheme: light;
   }
 
   body {
-    background-color: var(--surface);
+    background-color: var(--canvas);
     color: var(--text);
     font-family: var(--font-sans);
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01" 1;
   }
 
-  /* Avoid the flash between theme resolution and paint. */
+  /* THE anti-AI rule: display type maxes out at 600, never 800, and the
+     optical tracking tightens as the size grows instead of a blanket
+     `tracking-tighter` on everything. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    line-height: 1.06;
+    text-wrap: balance;
+  }
+  h1 {
+    letter-spacing: -0.038em;
+  }
+  h5,
+  h6 {
+    font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
   ::selection {
-    background-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
+    background-color: var(--color-signal);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-hi);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 }
-/* ── Phase 3: motion + structural utilities (pure CSS) ────────── */
 
-@theme {
-  /* Registers the `animate-marquee` utility. */
-  --animate-marquee: marquee 38s linear infinite;
+/* ─────────────────────────────────────────────────────────────
+   Utilities
+   ───────────────────────────────────────────────────────────── */
+
+/* Fluid display sizes. Used instead of the text-5xl→sm:text-7xl→lg:text-8xl
+   staircase, which is another dead giveaway of generated markup. */
+@utility text-display {
+  font-size: clamp(2.6rem, 1.35rem + 5.4vw, 6.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.042em;
+  font-weight: 600;
+}
+@utility text-heading {
+  font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.032em;
+  font-weight: 600;
+}
+@utility text-subheading {
+  font-size: clamp(1.35rem, 1.05rem + 1.1vw, 1.9rem);
+  line-height: 1.18;
+  letter-spacing: -0.024em;
+  font-weight: 600;
 }
 
-/* The marquee track is rendered twice, so -50% lands the clone exactly where
-   the original started → seamless loop. */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+/* Small uppercase mono label — replaces the pill eyebrow badge everywhere. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-/* Faint structural graph-paper grid; lines follow the theme border colour. */
+/* Faint structural graph-paper grid. */
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 64px 64px;
+    linear-gradient(to right, var(--line-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-soft) 1px, transparent 1px);
+  background-size: 72px 72px;
 }
 
-/* Aligned figures so stat counters don't jitter. */
+/* Diagonal hatch — used for empty bento cells and section terminators. */
+@utility bg-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--line) 0,
+    var(--line) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+}
+
 @utility nums {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
-/* Edge fade for marquees / overflow rows. */
 @utility mask-x {
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
 }
 
-/* Respect users who ask for less motion. */
+/* Page gutter — one utility, so every route lines up on the same rails. */
+@utility shell {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 84rem;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .shell {
+    padding-inline: 2.5rem;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
+  .animate-marquee,
+  .animate-marquee-slow {
     animation: none !important;
   }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   .prose-str — rich text for /blogs/[slug] and service overviews.
+   Scoped, token-driven, no @tailwindcss/typography dependency.
+   ───────────────────────────────────────────────────────────── */
+.prose-str {
+  color: var(--text-dim);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 68ch;
+}
+.prose-str > * + * {
+  margin-top: 1.4em;
+}
+.prose-str h2 {
+  margin-top: 2.6em;
+  font-size: 1.65rem;
+  color: var(--text);
+}
+.prose-str h3 {
+  margin-top: 2em;
+  font-size: 1.25rem;
+  color: var(--text);
+}
+.prose-str h2 + *,
+.prose-str h3 + * {
+  margin-top: 0.9em;
+}
+.prose-str strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.prose-str a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-signal);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.prose-str a:hover {
+  color: var(--color-signal);
+}
+.prose-str ul,
+.prose-str ol {
+  padding-left: 1.15rem;
+}
+.prose-str li {
+  margin-top: 0.5em;
+}
+.prose-str ul > li {
+  list-style: none;
+  position: relative;
+}
+.prose-str ul > li::before {
+  content: "";
+  position: absolute;
+  left: -1.15rem;
+  top: 0.72em;
+  width: 6px;
+  height: 1px;
+  background: var(--color-signal);
+}
+.prose-str ol {
+  list-style: decimal;
+}
+.prose-str blockquote {
+  border-left: 2px solid var(--color-signal);
+  padding-left: 1.5rem;
+  font-size: 1.3rem;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.prose-str code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--raised-2);
+  border: 1px solid var(--line);
+  padding: 0.12em 0.4em;
+}
+.prose-str pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  padding: 1.25rem;
+  overflow-x: auto;
+}
+.prose-str pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.prose-str img,
+.prose-str figure {
+  margin-block: 2.4em;
+}
+.prose-str hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-block: 3em;
 }

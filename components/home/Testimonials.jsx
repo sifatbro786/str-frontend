@@ -1,88 +1,90 @@
-"use client";
+import Link from "next/link";
+import SectionIndex from "@/components/ui/SectionIndex";
+import { getTestimonials, getProjects } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
-import { useState } from "react";
-
-const QUOTES = [
-  {
-    quote:
-      "STR rebuilt our booking core in eight weeks. It has handled every peak since without a single incident.",
-    name: "Farhan Ahmed",
-    role: "CTO, Aurora Travels",
-  },
-  {
-    quote:
-      "The team treated our data model like their own product. The dashboards they shipped are still our source of truth.",
-    name: "Nadia Rahman",
-    role: "Head of Ops, Helix Logistics",
-  },
-  {
-    quote:
-      "Clear communication, sharp engineering, zero drama. Rare combination — we've kept them on retainer.",
-    name: "Imran Chowdhury",
-    role: "Founder, FinTrack",
-  },
-];
-
+/**
+ * Static quote wall — no carousel.
+ *
+ * A carousel here would hide three of the four quotes behind an interaction
+ * nobody performs, and it would drag a client bundle into an otherwise fully
+ * server-rendered page. The lead quote is set large; the rest sit in a hairline
+ * grid. Every quote links to the case study it came from, which is what makes
+ * a testimonial checkable rather than decorative.
+ */
 export default function Testimonials() {
-  const [i, setI] = useState(0);
-  const total = QUOTES.length;
-  const go = (dir) => setI((prev) => (prev + dir + total) % total);
-  const active = QUOTES[i];
+  const items = getTestimonials({ featuredOnly: true }).slice(0, 4);
+  const projectsById = Object.fromEntries(getProjects().map((p) => [p._id, p]));
+  const [lead, ...rest] = items;
+
+  if (!lead) return null;
+
+  const initials = (name) =>
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("");
+
+  const Attribution = ({ t, size = "sm" }) => {
+    const project = t.projectRef ? projectsById[t.projectRef] : null;
+    return (
+      <footer className="mt-7 flex items-center gap-3.5">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "label-mono flex items-center justify-center border border-(--line) text-(--text-mute)",
+            size === "lg" ? "h-11 w-11" : "h-9 w-9"
+          )}
+        >
+          {initials(t.clientName)}
+        </span>
+        <div>
+          <p className="text-[0.9375rem] font-medium text-(--text)">{t.clientName}</p>
+          <p className="label-mono mt-1 text-(--text-mute)">
+            {t.clientDesignation} · {t.companyName}
+          </p>
+        </div>
+        {project && (
+          <Link
+            href={`/projects/${project.slug}`}
+            className="label-mono ml-auto shrink-0 text-(--text-mute) transition-colors hover:text-signal"
+          >
+            Case ↗
+          </Link>
+        )}
+      </footer>
+    );
+  };
 
   return (
-    <section className="border-b border-(--border)">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-(--text-muted)">
-          <span className="h-px w-8 bg-accent" />
-          05 // Clients
-        </div>
+    <section className="border-b border-(--line)">
+      <div className="shell py-20 md:py-28">
+        <SectionIndex index="04" label="What clients say afterwards" />
 
-        <figure className="mt-10 border-t border-(--border) pt-10">
-          {/* aria-live so arrow presses are announced, not silently swapped */}
-          <blockquote
-            aria-live="polite"
-            className="max-w-4xl text-balance text-2xl font-semibold leading-snug tracking-tight text-(--text) sm:text-4xl"
-          >
-            <span className="text-accent">&ldquo;</span>
-            {active.quote}
-            <span className="text-accent">&rdquo;</span>
+        <div className="mt-12 grid gap-x-12 gap-y-12 lg:grid-cols-12">
+          {/* Lead quote */}
+          <blockquote className="lg:col-span-6">
+            <span aria-hidden="true" className="block h-px w-14 bg-signal" />
+            <p className="mt-8 text-[clamp(1.4rem,1.1rem+1.1vw,2rem)] font-medium leading-[1.32] tracking-[-0.028em] text-(--text)">
+              “{lead.reviewText}”
+            </p>
+            <Attribution t={lead} size="lg" />
           </blockquote>
 
-          <figcaption className="mt-8 flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="font-semibold text-(--text)">{active.name}</div>
-              <div className="text-sm text-(--text-muted)">{active.role}</div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span className="nums font-mono text-xs tracking-widest text-(--text-muted)">
-                {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-              </span>
-              <div className="flex">
-                <button
-                  type="button"
-                  aria-label="Previous testimonial"
-                  onClick={() => go(-1)}
-                  className="grid h-10 w-10 place-items-center border border-(--border) text-(--text) transition-colors hover:border-primary hover:text-primary"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M19 12H5M11 18l-6-6 6-6" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next testimonial"
-                  onClick={() => go(1)}
-                  className="-ml-px grid h-10 w-10 place-items-center border border-(--border) text-(--text) transition-colors hover:border-primary hover:text-primary"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </figcaption>
-        </figure>
+          {/* Remaining quotes, hairline grid */}
+          <div className="grid gap-px bg-(--line) lg:col-span-5 lg:col-start-8">
+            {rest.map((t) => (
+              <blockquote key={t._id} className="bg-(--canvas) py-8 first:pt-0 lg:pl-8">
+                <p className="text-[0.9375rem] leading-relaxed text-(--text-dim)">
+                  “{t.reviewText}”
+                </p>
+                <Attribution t={t} />
+              </blockquote>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

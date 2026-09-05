@@ -1,117 +1,86 @@
+import Image from "next/image";
 import Link from "next/link";
+import SectionIndex from "@/components/ui/SectionIndex";
+import ArrowLink from "@/components/ui/ArrowLink";
+import Tag from "@/components/ui/Tag";
+import { getFeaturedProjects, SERVICE_LABELS } from "@/lib/data";
+import { cn, pad } from "@/lib/utils";
 
-const PROJECTS = [
-  {
-    title: "Aurora Travel Platform",
-    slug: "aurora-travel-platform",
-    tag: "Web Development",
-    blurb: "A multi-tenant booking platform handling 40k+ monthly itineraries.",
-    accent: "#E85A2A",
-    large: true,
-  },
-  {
-    title: "FinTrack Mobile",
-    slug: "fintrack-mobile",
-    tag: "Mobile App",
-    blurb: "Personal finance app with offline sync.",
-    accent: "#007BFF",
-  },
-  {
-    title: "Helix Ops Console",
-    slug: "helix-ops-console",
-    tag: "Custom Software",
-    blurb: "Internal operations dashboard and automation.",
-    accent: "#0EA5E9",
-  },
+/**
+ * Offset editorial rail, not a uniform card grid.
+ *
+ * Cells alternate 7/5 columns and the narrow ones are pushed down a full
+ * rhythm unit, so the eye travels diagonally instead of scanning rows. The
+ * vertical offset is the whole point — remove it and this becomes the grid
+ * every generated portfolio ships with.
+ */
+const LAYOUT = [
+  "lg:col-span-7",
+  "lg:col-span-5 lg:mt-28",
+  "lg:col-span-5",
+  "lg:col-span-7 lg:mt-28",
 ];
 
-function ProjectCard({ title, slug, tag, blurb, accent, large }) {
-  return (
-    <Link
-      href={`/projects/${slug}`}
-      className={`group flex flex-col border border-(--border) bg-(--surface) transition-colors hover:border-(--text) ${
-        large ? "lg:row-span-2" : ""
-      }`}
-    >
-      {/* Media block — swap the inner div for next/image once covers exist */}
-      <div
-        className={`relative overflow-hidden border-b border-(--border) ${
-          /* The lead card is stretched by row-span-2; let its media absorb the
-             extra height instead of leaving a void above the footer link. */
-          large ? "aspect-[16/10] lg:aspect-auto lg:flex-1" : "aspect-[16/9]"
-        }`}
-      >
-        <div className="absolute inset-0 bg-(--surface-elevated) transition-transform duration-500 ease-out group-hover:scale-105" />
-        {/* Corner accent tick */}
-        <span className="absolute left-0 top-0 h-8 w-0.5" style={{ backgroundColor: accent }} />
-        <span className="absolute left-0 top-0 h-0.5 w-8" style={{ backgroundColor: accent }} />
-        <span className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.2em] text-(--text-muted)">
-          {slug}.str
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col justify-between p-6">
-        <div>
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-(--text-muted)">
-            {tag}
-          </span>
-          <h3
-            className={`mt-3 font-bold tracking-tight text-(--text) ${
-              large ? "text-2xl" : "text-lg"
-            }`}
-          >
-            {title}
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-(--text-muted)">{blurb}</p>
-        </div>
-        <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-(--text) transition-colors group-hover:text-primary">
-          View project
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            className="transition-transform group-hover:translate-x-0.5"
-          >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </span>
-      </div>
-    </Link>
-  );
-}
-
 export default function FeaturedProjects() {
-  const [lead, ...rest] = PROJECTS;
+  const items = getFeaturedProjects(4);
 
   return (
-    <section className="border-b border-(--border)">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <header className="flex flex-wrap items-end justify-between gap-4">
+    <section className="border-b border-(--line)">
+      <div className="shell py-20 md:py-28">
+        <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-(--text-muted)">
-              <span className="h-px w-8 bg-accent" />
-              02 // Selected Work
-            </div>
-            <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tighter text-(--text) sm:text-5xl">
-              Recent projects
+            <SectionIndex index="02" label="Selected work" />
+            <h2 className="text-heading mt-6 max-w-[17ch]">
+              Four projects{" "}
+              <span className="text-(--text-mute)">worth explaining properly.</span>
             </h2>
           </div>
-          <Link
-            href="/projects"
-            className="text-sm font-medium text-(--text-muted) transition-colors hover:text-(--text)"
-          >
-            All projects →
-          </Link>
-        </header>
+          <ArrowLink href="/projects" className="pb-2">
+            All {items.length > 0 ? "case studies" : "work"}
+          </ArrowLink>
+        </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2 lg:grid-rows-2">
-          <ProjectCard {...lead} />
-          {rest.map((p) => (
-            <ProjectCard key={p.slug} {...p} />
+        <div className="mt-16 grid gap-x-10 gap-y-16 lg:grid-cols-12">
+          {items.map((p, i) => (
+            <article key={p._id} className={cn("group", LAYOUT[i])}>
+              <Link href={`/projects/${p.slug}`} className="block">
+                <div className="relative overflow-hidden border border-(--line)">
+                  <div className={cn("relative", i % 3 === 0 ? "aspect-[16/10]" : "aspect-[4/3]")}>
+                    <Image
+                      src={p.coverImage}
+                      alt={p.title}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 55vw"
+                      className="object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.035]"
+                    />
+                  </div>
+
+                  {/* Index plate, flush to the corner — no floating badge */}
+                  <span className="label-mono absolute left-0 top-0 bg-(--canvas) px-3 py-2 text-(--text-mute)">
+                    {pad(i + 1)}
+                  </span>
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                  <h3 className="text-subheading text-(--text) transition-colors group-hover:text-signal">
+                    {p.title}
+                  </h3>
+                  <span className="label-mono text-(--text-mute)">{p.clientName}</span>
+                </div>
+
+                <p className="mt-4 max-w-prose text-[0.9375rem] leading-relaxed text-(--text-mute)">
+                  {p.shortDescription}
+                </p>
+
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  {p.serviceTypes.map((s, si) => (
+                    <Tag key={s} variant={si === 0 ? "outline" : "ghost"}>
+                      {SERVICE_LABELS[s]}
+                    </Tag>
+                  ))}
+                </div>
+              </Link>
+            </article>
           ))}
         </div>
       </div>

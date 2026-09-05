@@ -1,61 +1,112 @@
+import Image from "next/image";
 import Link from "next/link";
+import Button from "@/components/ui/Button";
+import { site } from "@/lib/site";
+import { getFeaturedProjects, SERVICE_LABELS } from "@/lib/data";
 
+/**
+ * Left-weighted editorial hero. Three deliberate choices:
+ *
+ *  1. The headline carries a second clause in muted colour inside the same
+ *     sentence. Human copywriters break emphasis mid-sentence; generated
+ *     headlines put the whole line at one weight and gradient the keyword.
+ *  2. The lede and the actions sit in a right rail aligned to the *baseline*
+ *     of the headline, not centred beneath it.
+ *  3. Real work appears above the fold as a cropped three-frame strip, so the
+ *     first screen carries evidence rather than an abstract illustration.
+ */
 export default function HeroSection() {
+  const strip = getFeaturedProjects(3);
+
   return (
-    <section className="relative overflow-hidden border-b border-(--border)">
-      {/* Faint structural grid, faded out toward the bottom */}
+    <section className="relative overflow-hidden border-b border-(--line)">
       <div
         aria-hidden="true"
-        className="bg-grid pointer-events-none absolute inset-0 opacity-[0.5] [mask-image:linear-gradient(to_bottom,#000,transparent_75%)]"
-      />
-      {/* Thin vertical rule marking an asymmetric left column */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-6 hidden w-px bg-(--border) md:block lg:left-[max(1.5rem,calc((100%-72rem)/2))]"
+        className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(120%_80%_at_15%_0%,#000_20%,transparent_75%)]"
       />
 
-      <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-20 md:pb-28 md:pt-28">
-        {/* Mono index label — replaces the pill eyebrow */}
-        <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-(--text-muted)">
-          <span className="h-px w-8 bg-accent" />
-          <span className="font-mono">STR Solutions Ltd — Dhaka, BD</span>
+      <div className="shell relative pt-32 md:pt-44">
+        {/* Locator strip — replaces the pill eyebrow */}
+        <div className="label-mono flex flex-wrap items-center gap-x-4 gap-y-2 text-(--text-mute)">
+          <span aria-hidden="true" className="h-px w-8 bg-signal" />
+          <span>{site.address.city}, {site.address.country}</span>
+          <span aria-hidden="true" className="text-(--line)">//</span>
+          <span>Est. {site.foundedYear}</span>
+          <span aria-hidden="true" className="text-(--line)">//</span>
+          <span>Engineering &amp; Visual Production</span>
         </div>
 
-        <h1 className="mt-8 max-w-4xl text-balance text-5xl font-extrabold leading-[0.98] tracking-tighter text-(--text) sm:text-7xl lg:text-8xl">
-          Digital products,
-          <br className="hidden sm:block" />{" "}
-          engineered for <span className="text-primary">scale</span>.
-        </h1>
+        <div className="mt-10 grid gap-x-12 gap-y-10 lg:grid-cols-12 lg:items-end">
+          <h1 className="text-display lg:col-span-8">
+            Software that survives{" "}
+            <span className="text-(--text-mute)">the year after launch.</span>
+          </h1>
 
-        <p className="mt-7 max-w-xl text-lg leading-relaxed text-(--text-muted)">
-          We design and build software, data, and web platforms for teams that
-          need systems to hold up in production — not just look good in a pitch.
-        </p>
+          <div className="lg:col-span-4 lg:pb-3">
+            <p className="max-w-md text-[1.0625rem] leading-relaxed text-(--text-dim)">
+              We are a Dhaka engineering and production studio. Web platforms, custom
+              software, mobile products, and the visual work that sells them — built to
+              be handed over, not held hostage.
+            </p>
 
-        <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Button href="/contact" size="lg" variant="invert" withArrow>
+                Start a project
+              </Button>
+              <Button href="/projects" size="lg" variant="outline">
+                Selected work
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Capability run — a plain comma-free list, set in mono */}
+        <ul className="label-mono mt-16 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-(--line) pt-6 text-(--text-mute)">
+          {Object.values(SERVICE_LABELS).map((label, i) => (
+            <li key={label} className="flex items-center gap-6">
+              {i > 0 && (
+                <span aria-hidden="true" className="text-(--line)">
+                  /
+                </span>
+              )}
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Evidence strip. Cropped tall on purpose — a full screenshot at this
+          size reads as a template preview; a crop reads as art direction. */}
+      <div className="shell mt-14 grid gap-px border-t border-(--line) bg-(--line) md:mt-20 md:grid-cols-3">
+        {strip.map((p, i) => (
           <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 bg-primary px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+            key={p._id}
+            href={`/projects/${p.slug}`}
+            className="group relative block overflow-hidden bg-(--canvas)"
           >
-            Start a Project
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </Link>
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 border border-(--border) px-6 py-3.5 text-sm font-semibold text-(--text) transition-colors hover:border-primary hover:text-primary"
-          >
-            View our work
-          </Link>
-        </div>
+            <div className="relative aspect-[16/10] overflow-hidden md:aspect-[4/5] lg:aspect-[16/11]">
+              <Image
+                src={p.coverImage}
+                alt={p.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority={i === 0}
+                className="object-cover object-top grayscale transition-all duration-700 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-(--canvas)/45 transition-opacity duration-500 group-hover:opacity-0"
+              />
+            </div>
 
-        {/* Structural coordinate strip */}
-        <div className="mt-16 grid max-w-2xl grid-cols-3 border-t border-(--border) pt-6 font-mono text-xs uppercase tracking-wider text-(--text-muted)">
-          <span>Est. 2017</span>
-          <span className="text-center">120+ Projects</span>
-          <span className="text-right">Web · Mobile · Cloud</span>
-        </div>
+            <div className="flex items-baseline justify-between gap-4 px-1 py-4">
+              <span className="text-[0.9375rem] font-medium text-(--text)">{p.clientName}</span>
+              <span className="label-mono text-(--text-mute)">
+                {SERVICE_LABELS[p.serviceTypes[0]]}
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );

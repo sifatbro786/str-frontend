@@ -1,105 +1,117 @@
+import Image from "next/image";
 import Link from "next/link";
+import SectionIndex from "@/components/ui/SectionIndex";
+import ArrowLink from "@/components/ui/ArrowLink";
+import { getServices, SERVICE_MEDIA } from "@/lib/data";
+import { cn, pad } from "@/lib/utils";
 
-const SERVICES = [
-  {
-    no: "01",
-    title: "Web Applications",
-    body: "High-performance web platforms with server-rendered Next.js front-ends and hardened APIs.",
-    span: "md:col-span-3 md:row-span-2",
-    href: "/services/web-development",
-  },
-  {
-    no: "02",
-    title: "Mobile Solutions",
-    body: "Cross-platform apps with native-grade UX and offline-first data.",
-    span: "md:col-span-3",
-    href: "/services/mobile-app",
-  },
-  {
-    no: "03",
-    title: "Custom Software",
-    body: "Bespoke internal tools, dashboards, and automation built to your workflow.",
-    span: "md:col-span-3",
-    href: "/services/custom-software",
-  },
-  {
-    no: "04",
-    title: "Cloud Infrastructure",
-    body: "CI/CD, containerization, observability, and cost-aware scaling on AWS/GCP.",
-    span: "md:col-span-2",
-    href: "/services/cloud-devops",
-  },
-  {
-    no: "05",
-    title: "Data & Analytics",
-    body: "Pipelines, modeling, and dashboards that turn raw data into decisions.",
-    span: "md:col-span-4",
-    href: "/services/data-science",
-  },
+/**
+ * Asymmetric bento, built as a 12-column grid with a 1px gap over a --line
+ * background. The gap IS the border, so every rule in the block is exactly one
+ * hairline wide and perfectly continuous — something you cannot get from
+ * per-card `border` without doubling up at every seam.
+ *
+ * Spans are written out (not computed) so Tailwind's static extractor emits them.
+ * Reading order top-left → bottom-right matches Service.order, so the visual
+ * hierarchy and the data hierarchy do not disagree.
+ */
+const SPANS = [
+  "lg:col-span-7 lg:row-span-2", // 01 — hero cell, carries artwork
+  "lg:col-span-5",               // 02
+  "lg:col-span-5",               // 03
+  "lg:col-span-4",               // 04
+  "lg:col-span-4",               // 05
+  "lg:col-span-4",               // 06
+  "lg:col-span-12",              // 07 — full-width closer
 ];
 
-function ServiceCard({ no, title, body, span, href }) {
-  return (
-    <Link
-      href={href}
-      className={`group relative flex flex-col justify-between bg-(--surface) p-7 transition-colors hover:bg-(--surface-elevated) ${span}`}
-    >
-      <div className="flex items-start justify-between">
-        <span className="font-mono text-xs tracking-[0.2em] text-(--text-muted)">
-          {no} //
-        </span>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          className="text-(--text-muted) transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent"
-        >
-          <path d="M7 17L17 7M9 7h8v8" />
-        </svg>
-      </div>
-      <div className="mt-10">
-        <h3 className="text-xl font-bold tracking-tight text-(--text)">{title}</h3>
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-(--text-muted)">
-          {body}
-        </p>
-      </div>
-      {/* Bottom accent rule wipes in on hover */}
-      <span className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100" />
-    </Link>
-  );
-}
-
 export default function ServicesBento() {
+  const services = getServices();
+
   return (
-    <section className="border-b border-(--border)">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-(--text-muted)">
-              <span className="h-px w-8 bg-accent" />
-              01 // Services
-            </div>
-            <h2 className="mt-4 max-w-2xl text-balance text-3xl font-extrabold tracking-tighter text-(--text) sm:text-5xl">
-              What we engineer
+    <section className="border-b border-(--line)">
+      <div className="shell py-20 md:py-28">
+        <div className="grid gap-x-12 gap-y-6 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <SectionIndex index="01" label="What we do" />
+            <h2 className="text-heading mt-6 max-w-[19ch]">
+              Seven disciplines,{" "}
+              <span className="text-(--text-mute)">one delivery team.</span>
             </h2>
           </div>
-          <Link
-            href="/services"
-            className="text-sm font-medium text-(--text-muted) transition-colors hover:text-(--text)"
-          >
-            All services →
-          </Link>
-        </header>
+          <p className="max-w-md text-[1.0625rem] leading-relaxed text-(--text-dim) lg:col-span-4 lg:col-start-9">
+            Engineering and visual production under the same roof, which is why a
+            case study, its renders and its landing page ship in the same week
+            instead of across three vendors.
+          </p>
+        </div>
 
-        {/* gap-px over a border-coloured background = hairline dividers */}
-        <div className="mt-12 grid grid-cols-1 gap-px border border-(--border) bg-(--border) md:grid-cols-6">
-          {SERVICES.map((s) => (
-            <ServiceCard key={s.no} {...s} />
-          ))}
+        <div className="mt-14 grid gap-px border border-(--line) bg-(--line) lg:grid-cols-12">
+          {services.map((s, i) => {
+            const hero = i === 0;
+            return (
+              <Link
+                key={s._id}
+                href={`/services/${s.slug}`}
+                className={cn(
+                  "group relative flex flex-col bg-(--canvas) p-7 transition-colors duration-300 hover:bg-(--raised) md:p-9",
+                  SPANS[i]
+                )}
+              >
+                {/* Signal rule wipes in on hover — replaces the glow/shadow lift */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-signal transition-transform duration-500 ease-out group-hover:scale-x-100"
+                />
+
+                <div className="flex items-start justify-between gap-6">
+                  <h3
+                    className={cn(
+                      "max-w-[15ch] font-semibold tracking-[-0.028em] text-(--text)",
+                      hero ? "text-[clamp(1.6rem,1.1rem+1.7vw,2.4rem)]" : "text-[1.375rem]"
+                    )}
+                  >
+                    {s.title}
+                  </h3>
+                  <span className="label-mono shrink-0 pt-1.5 text-(--text-mute) transition-colors group-hover:text-signal">
+                    {pad(i + 1)}
+                  </span>
+                </div>
+
+                <p
+                  className={cn(
+                    "mt-5 leading-relaxed text-(--text-mute)",
+                    hero ? "max-w-lg text-[1rem]" : "text-[0.9375rem]"
+                  )}
+                >
+                  {s.shortDescription}
+                </p>
+
+                {hero && (
+                  <div className="relative mt-8 aspect-[16/9] overflow-hidden border border-(--line)">
+                    <Image
+                      src={SERVICE_MEDIA[s.slug]}
+                      alt=""
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 55vw"
+                      className="object-cover object-top opacity-80 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    />
+                  </div>
+                )}
+
+                <div className="mt-auto flex items-end justify-between gap-6 pt-8">
+                  <span className="label-mono text-(--text-mute)">{s.deliverableTimeline}</span>
+                  <span className="text-sm font-medium text-(--text) transition-colors group-hover:text-signal">
+                    Read more ↗
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 flex justify-end">
+          <ArrowLink href="/services">All services and how they are scoped</ArrowLink>
         </div>
       </div>
     </section>
