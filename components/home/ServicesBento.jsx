@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import SectionIndex from "@/components/ui/SectionIndex";
 import ArrowLink from "@/components/ui/ArrowLink";
-import { getServices, SERVICE_MEDIA } from "@/lib/data";
+import { getServices } from "@/lib/api";
+import { SERVICE_MEDIA } from "@/lib/taxonomy";
 import { cn, pad } from "@/lib/utils";
 
 /**
@@ -25,8 +26,8 @@ const SPANS = [
   "lg:col-span-12",              // 07 — full-width closer
 ];
 
-export default function ServicesBento() {
-  const services = getServices();
+export default async function ServicesBento() {
+  const services = await getServices();
 
   return (
     <section className="border-b border-(--line)">

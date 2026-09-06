@@ -8,18 +8,23 @@ import {
   getProjectBySlug,
   getProjectNeighbours,
   getTestimonials,
-  SERVICE_LABELS,
-} from "@/lib/data";
+} from "@/lib/api";
+import { SERVICE_LABELS } from "@/lib/taxonomy";
 import { site } from "@/lib/site";
 import { cn, formatDate, pad } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return getProjects().map((p) => ({ slug: p.slug }));
+/* dynamicParams: a record published after the build renders on demand instead
+   of 404ing until the next deploy. */
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const projects = await getProjects({ limit: 200 });
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const p = getProjectBySlug(slug);
+  const p = await getProjectBySlug(slug);
   if (!p) return { title: "Case study not found" };
   return {
     title: p.metaTitle || p.title,
@@ -55,11 +60,17 @@ const EXTERNAL_LINKS = [
 
 export default async function CaseStudyPage({ params }) {
   const { slug } = await params;
-  const p = getProjectBySlug(slug);
+  const p = await getProjectBySlug(slug);
   if (!p) notFound();
 
-  const { prev, next } = getProjectNeighbours(p.slug);
-  const quote = getTestimonials().find((t) => t.projectRef === p._id) ?? null;
+  const [{ prev, next }, testimonials] = await Promise.all([
+    getProjectNeighbours(p.slug),
+    getTestimonials(),
+  ]);
+  // projectRef is populated ({_id,title,slug}) by the API and a bare id in the
+  // static fallback, so match on both shapes.
+  const quote =
+    testimonials.find((t) => (t.projectRef?._id ?? t.projectRef) === p._id) ?? null;
   const links = EXTERNAL_LINKS.filter((l) => p[l.key]);
 
   /* accentColor is authored per project in the model. It drives the rules and

@@ -1,7 +1,8 @@
 import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import ProjectRail from "@/components/projects/ProjectRail";
-import { getProjects, SERVICE_TYPES } from "@/lib/data";
+import { getProjects } from "@/lib/api";
+import { SERVICE_TYPES } from "@/lib/taxonomy";
 
 export const metadata = {
   title: "Selected Work",
@@ -15,8 +16,8 @@ export const metadata = {
  * Passing the array down beats a client-side fetch: it is already in the HTML
  * payload, and the first paint is filtered-correct with JS disabled.
  */
-export default function ProjectsPage() {
-  const projects = getProjects();
+export default async function ProjectsPage() {
+  const projects = await getProjects();
 
   return (
     <>

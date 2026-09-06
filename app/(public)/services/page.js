@@ -3,7 +3,8 @@ import Link from "next/link";
 import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import ProcessSection from "@/components/home/ProcessSection";
-import { getServices, SERVICE_MEDIA } from "@/lib/data";
+import { getServices } from "@/lib/api";
+import { SERVICE_MEDIA } from "@/lib/taxonomy";
 import { site } from "@/lib/site";
 import { cn, pad } from "@/lib/utils";
 
@@ -19,8 +20,8 @@ export const metadata = {
  * card in a 3×3 grid: the rows let the short description breathe at a readable
  * measure, and alternation gives the page a rhythm a uniform grid cannot.
  */
-export default function ServicesPage() {
-  const services = getServices();
+export default async function ServicesPage() {
+  const services = await getServices();
 
   return (
     <>

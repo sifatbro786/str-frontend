@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { getTestimonials, getProjects } from "@/lib/data";
+import { getTestimonials, getProjects } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,9 +12,13 @@ import { cn } from "@/lib/utils";
  * grid. Every quote links to the case study it came from, which is what makes
  * a testimonial checkable rather than decorative.
  */
-export default function Testimonials() {
-  const items = getTestimonials({ featuredOnly: true }).slice(0, 4);
-  const projectsById = Object.fromEntries(getProjects().map((p) => [p._id, p]));
+export default async function Testimonials() {
+  const [featured, projects] = await Promise.all([
+    getTestimonials({ featuredOnly: true }),
+    getProjects(),
+  ]);
+  const items = featured.slice(0, 4);
+  const projectsById = Object.fromEntries(projects.map((p) => [p._id, p]));
   const [lead, ...rest] = items;
 
   if (!lead) return null;

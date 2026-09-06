@@ -1,7 +1,5 @@
 import { JetBrains_Mono } from "next/font/google";
 import ThemeProvider from "@/components/theme-provider";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -52,17 +50,11 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-dvh antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-white"
-          >
-            Skip to content
-          </a>
-          <Navbar />
-          <main id="main">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        {/* Public chrome (skip link, Navbar, <main>, Footer) lives in
+            app/(public)/layout.js so /admin and /login inherit this shell —
+            fonts, theme, tokens — without the marketing header and its
+            client bundle. */}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

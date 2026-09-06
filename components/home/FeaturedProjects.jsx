@@ -3,7 +3,8 @@ import Link from "next/link";
 import SectionIndex from "@/components/ui/SectionIndex";
 import ArrowLink from "@/components/ui/ArrowLink";
 import Tag from "@/components/ui/Tag";
-import { getFeaturedProjects, SERVICE_LABELS } from "@/lib/data";
+import { getFeaturedProjects } from "@/lib/api";
+import { SERVICE_LABELS } from "@/lib/taxonomy";
 import { cn, pad } from "@/lib/utils";
 
 /**
@@ -21,8 +22,8 @@ const LAYOUT = [
   "lg:col-span-7 lg:mt-28",
 ];
 
-export default function FeaturedProjects() {
-  const items = getFeaturedProjects(4);
+export default async function FeaturedProjects() {
+  const items = await getFeaturedProjects(4);
 
   return (
     <section className="border-b border-(--line)">

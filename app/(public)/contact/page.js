@@ -1,7 +1,8 @@
 import PageMasthead from "@/components/ui/PageMasthead";
 import InquiryForm from "@/components/contact/InquiryForm";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { getServices, faqs } from "@/lib/data";
+import { getServices } from "@/lib/api";
+import { faqs } from "@/lib/data";
 import { site } from "@/lib/site";
 import { pad } from "@/lib/utils";
 
@@ -18,8 +19,8 @@ const DIRECT = [
   { label: "Phone", value: site.contact.phone, href: site.contact.phoneHref },
 ];
 
-export default function ContactPage() {
-  const services = getServices();
+export default async function ContactPage() {
+  const services = await getServices();
 
   const jsonLd = {
     "@context": "https://schema.org",

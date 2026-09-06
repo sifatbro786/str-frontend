@@ -3,17 +3,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CTABand from "@/components/ui/CTABand";
 import Tag from "@/components/ui/Tag";
-import { getBlogs, getBlogBySlug, getRelatedBlogs } from "@/lib/data";
+import { getBlogs, getBlogBySlug, getRelatedBlogs } from "@/lib/api";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return getBlogs().map((b) => ({ slug: b.slug }));
+/* dynamicParams: a record published after the build renders on demand instead
+   of 404ing until the next deploy. */
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const posts = await getBlogs({ limit: 200 });
+  return posts.map((b) => ({ slug: b.slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const post = getBlogBySlug(slug);
+  const post = await getBlogBySlug(slug);
   if (!post) return { title: "Article not found" };
   return {
     title: post.metaTitle || post.title,
@@ -35,10 +40,10 @@ export async function generateMetadata({ params }) {
 
 export default async function ArticlePage({ params }) {
   const { slug } = await params;
-  const post = getBlogBySlug(slug);
+  const post = await getBlogBySlug(slug);
   if (!post) notFound();
 
-  const related = getRelatedBlogs(post.slug, 3);
+  const related = await getRelatedBlogs(post.slug, 3);
 
   /* Article JSON-LD. Emitted from the same object the page renders, so the
      structured data cannot drift from the visible content. */

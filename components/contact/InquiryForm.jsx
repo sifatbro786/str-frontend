@@ -52,16 +52,37 @@ export default function InquiryForm({ services }) {
     if (Object.keys(found).length > 0) return;
 
     setState("submitting");
-    // PHASE 4 — replace this block with the real POST:
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiries`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(data),
-    //   });
-    //   if (!res.ok) { setState("error"); return; }
-    await new Promise((r) => setTimeout(r, 700));
-    setState("sent");
-    e.target.reset();
+
+    // Posts browser → Express directly. This endpoint is public and rate
+    // limited per IP; routing it through the BFF would collapse every
+    // visitor onto one rate-limit bucket. Not the same case as /admin.
+    delete data.company; // honeypot, never sent
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          setErrors({ form: "Too many submissions from this connection. Try again shortly." });
+        } else if (res.status === 400 && Array.isArray(payload.details)) {
+          // Server rules win. Map them onto the same error state the client
+          // validator uses so the two never render differently.
+          setErrors(Object.fromEntries(payload.details.map((d) => [d.field, d.message])));
+        }
+        setState("error");
+        return;
+      }
+
+      setState("sent");
+      e.target.reset();
+    } catch {
+      setState("error");
+    }
   }
 
   if (state === "sent") {
@@ -222,7 +243,8 @@ export default function InquiryForm({ services }) {
 
       {state === "error" && (
         <p role="alert" className="label-mono text-signal">
-          Something went wrong sending that. Email {site.contact.email} instead.
+          {errors.form ??
+            `Something went wrong sending that. Email ${site.contact.email} instead.`}
         </p>
       )}
     </form>

@@ -4,7 +4,8 @@ import CTABand from "@/components/ui/CTABand";
 import SectionIndex from "@/components/ui/SectionIndex";
 import MetricsSection from "@/components/home/MetricsSection";
 import PartnersBand from "@/components/home/PartnersBand";
-import { getTeam, capabilities } from "@/lib/data";
+import { getTeam } from "@/lib/api";
+import { capabilities } from "@/lib/data";
 import { site } from "@/lib/site";
 import { pad } from "@/lib/utils";
 
@@ -15,8 +16,8 @@ export const metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default function AboutPage() {
-  const team = getTeam();
+export default async function AboutPage() {
+  const team = await getTeam();
 
   return (
     <>

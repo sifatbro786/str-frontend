@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { site } from "@/lib/site";
-import { getFeaturedProjects, SERVICE_LABELS } from "@/lib/data";
+import { getFeaturedProjects } from "@/lib/api";
+import { SERVICE_LABELS } from "@/lib/taxonomy";
 
 /**
  * Left-weighted editorial hero. Three deliberate choices:
@@ -15,8 +16,8 @@ import { getFeaturedProjects, SERVICE_LABELS } from "@/lib/data";
  *  3. Real work appears above the fold as a cropped three-frame strip, so the
  *     first screen carries evidence rather than an abstract illustration.
  */
-export default function HeroSection() {
-  const strip = getFeaturedProjects(3);
+export default async function HeroSection() {
+  const strip = await getFeaturedProjects(3);
 
   return (
     <section className="relative overflow-hidden border-b border-(--line)">

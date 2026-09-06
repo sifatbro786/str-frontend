@@ -1,7 +1,7 @@
 import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import BlogArchive from "@/components/blogs/BlogArchive";
-import { getBlogs, getBlogCategories } from "@/lib/data";
+import { getBlogs, getBlogCategories } from "@/lib/api";
 
 export const metadata = {
   title: "Insights",
@@ -10,9 +10,8 @@ export const metadata = {
   alternates: { canonical: "/blogs" },
 };
 
-export default function BlogsPage() {
-  const posts = getBlogs();
-  const categories = getBlogCategories();
+export default async function BlogsPage() {
+  const [posts, categories] = await Promise.all([getBlogs(), getBlogCategories()]);
 
   return (
     <>

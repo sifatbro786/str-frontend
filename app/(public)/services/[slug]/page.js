@@ -5,27 +5,27 @@ import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import Tag from "@/components/ui/Tag";
 import ArrowLink from "@/components/ui/ArrowLink";
-import {
-  getServices,
-  getServiceBySlug,
-  getProjects,
-  SERVICE_MEDIA,
-  SERVICE_LABELS,
-} from "@/lib/data";
+import { getServices, getServiceBySlug, getProjects } from "@/lib/api";
+import { SERVICE_MEDIA, SERVICE_LABELS } from "@/lib/taxonomy";
 import { site } from "@/lib/site";
 import { pad } from "@/lib/utils";
 
 /* Fully static: seven known slugs, no runtime lookup. Phase 4 keeps this and
    adds `revalidate` — the shape of the function does not change. */
-export function generateStaticParams() {
-  return getServices().map((s) => ({ slug: s.slug }));
+/* dynamicParams: a record published after the build renders on demand instead
+   of 404ing until the next deploy. */
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const services = await getServices();
+  return services.map((s) => ({ slug: s.slug }));
 }
 
 /* Next 15: `params` is a Promise in both generateMetadata and the page.
    Awaiting it here is what keeps this forward-compatible with Next 16. */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) return { title: "Service not found" };
   return {
     title: service.title,
@@ -44,12 +44,15 @@ export async function generateMetadata({ params }) {
 
 export default async function ServiceDetailPage({ params }) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
-  const index = getServices().findIndex((s) => s.slug === service.slug);
-  const related = getProjects({ service: service.slug, limit: 3 });
-  const others = getServices().filter((s) => s.slug !== service.slug);
+  const [services, related] = await Promise.all([
+    getServices(),
+    getProjects({ service: service.slug, limit: 3 }),
+  ]);
+  const index = services.findIndex((s) => s.slug === service.slug);
+  const others = services.filter((s) => s.slug !== service.slug);
 
   return (
     <>
