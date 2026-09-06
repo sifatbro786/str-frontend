@@ -1,17 +1,19 @@
+import Marquee from "@/components/motion/Marquee";
 import { techMarquee } from "@/lib/data";
 
 /**
- * Two counter-scrolling rails. Pure CSS — the track is rendered twice and
- * translated -50%, so the loop is seamless without JS and without GSAP.
+ * Two counter-scrolling rails.
  *
- * The clone carries aria-hidden, otherwise a screen reader reads the whole
- * stack twice. `prefers-reduced-motion` halts both rails (see globals.css).
+ * Phase 5 moved these from the CSS keyframe loop to the shared GSAP <Marquee>,
+ * so both bands on the page share one implementation, one hover behaviour and
+ * one reduced-motion branch. The seam is handled by a wrap modifier rather than
+ * a repeating tween — see components/motion/Marquee.jsx.
  */
-function Rail({ items, reverse = false, slow = false }) {
-  const track = (
+function Row({ items }) {
+  return (
     <ul className="flex shrink-0 items-center">
       {items.map((t) => (
-        <li key={t.name} className="flex items-center">
+        <li key={t.name} className="flex shrink-0 items-center">
           <span className="px-6 text-[1.05rem] tracking-[-0.015em] text-(--text-dim) md:px-8 md:text-[1.25rem]">
             {t.name}
           </span>
@@ -21,20 +23,6 @@ function Rail({ items, reverse = false, slow = false }) {
         </li>
       ))}
     </ul>
-  );
-
-  return (
-    <div className="mask-x flex overflow-hidden">
-      <div
-        className={`flex min-w-max ${slow ? "animate-marquee-slow" : "animate-marquee"}`}
-        style={reverse ? { animationDirection: "reverse" } : undefined}
-      >
-        {track}
-        <div aria-hidden="true" className="flex">
-          {track}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -49,8 +37,12 @@ export default function TechMarquee() {
           The stack we actually maintain in production
         </p>
         <div className="space-y-5">
-          <Rail items={rowOne} />
-          <Rail items={rowTwo} reverse slow />
+          <Marquee speed={38} interactive>
+            <Row items={rowOne} />
+          </Marquee>
+          <Marquee speed={52} reverse interactive>
+            <Row items={rowTwo} />
+          </Marquee>
         </div>
       </div>
     </section>

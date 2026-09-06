@@ -1,16 +1,26 @@
+import dynamic from "next/dynamic";
 import { metrics } from "@/lib/data";
 
 /**
- * Inverted full-bleed band. Static figures for Phase 3 — the count-up lands in
- * Phase 5, which is why the values are already split into `value` and `suffix`
- * in lib/data.js: the animator only ever needs to touch the number node.
+ * Inverted full-bleed band. Values are split into `value` and `suffix` in
+ * lib/data.js so the count-up only ever touches the number node, and `nums`
+ * gives tabular figures so a running count cannot reflow the row.
  *
- * `nums` gives tabular figures so a future count-up cannot reflow the row.
+ * Shared with /about, which passes nothing and therefore renders as plain static
+ * figures — both motion children are reached through next/dynamic so that route
+ * never loads the GSAP chunk. Phase 5 is homepage-only.
  */
-export default function MetricsSection() {
+const MetricsGlow = dynamic(() => import("./MetricsGlow"));
+const MetricsCounter = dynamic(() => import("./MetricsCounter"));
+
+export default function MetricsSection({ interactive = false }) {
   return (
-    <section aria-label="Studio at a glance" className="bg-(--text) text-(--canvas)">
-      <div className="shell py-16 md:py-20">
+    <section
+      aria-label="Studio at a glance"
+      className="relative overflow-hidden bg-(--text) text-(--canvas)"
+    >
+      {interactive && <MetricsGlow />}
+      <div className="shell relative py-16 md:py-20">
         <dl className="grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4">
           {metrics.map((m, i) => (
             <div
@@ -22,7 +32,7 @@ export default function MetricsSection() {
               }
             >
               <dd className="nums text-[clamp(2.75rem,2rem+3.4vw,4.75rem)] font-semibold leading-none tracking-[-0.045em]">
-                {m.value}
+                {interactive ? <MetricsCounter value={m.value} /> : m.value}
                 <span className="text-signal">{m.suffix}</span>
               </dd>
               <dt className="mt-4 text-[0.9375rem] font-medium">{m.label}</dt>

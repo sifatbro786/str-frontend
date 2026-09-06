@@ -1,16 +1,20 @@
 import Link from "next/link";
 import SectionIndex from "@/components/ui/SectionIndex";
+import TestimonialSlider from "./TestimonialSlider";
 import { getTestimonials, getProjects } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Static quote wall — no carousel.
+ * Lead quote plus a rail of supporting quotes.
  *
- * A carousel here would hide three of the four quotes behind an interaction
- * nobody performs, and it would drag a client bundle into an otherwise fully
- * server-rendered page. The lead quote is set large; the rest sit in a hairline
- * grid. Every quote links to the case study it came from, which is what makes
- * a testimonial checkable rather than decorative.
+ * The lead is set large and stays put — a uniform carousel would flatten the
+ * one quote that has been given weight, and would hide the others behind an
+ * interaction nobody performs. Only the supporting quotes are draggable, and
+ * only when they actually overflow (see TestimonialSlider). On lg they still
+ * stack as the original hairline column.
+ *
+ * Every quote links to the case study it came from, which is what makes a
+ * testimonial checkable rather than decorative.
  */
 export default async function Testimonials() {
   const [featured, projects] = await Promise.all([
@@ -77,17 +81,8 @@ export default async function Testimonials() {
             <Attribution t={lead} size="lg" />
           </blockquote>
 
-          {/* Remaining quotes, hairline grid */}
-          <div className="grid gap-px bg-(--line) lg:col-span-5 lg:col-start-8">
-            {rest.map((t) => (
-              <blockquote key={t._id} className="bg-(--canvas) py-8 first:pt-0 lg:pl-8">
-                <p className="text-[0.9375rem] leading-relaxed text-(--text-dim)">
-                  “{t.reviewText}”
-                </p>
-                <Attribution t={t} />
-              </blockquote>
-            ))}
-          </div>
+          {/* Supporting quotes — draggable rail below lg, hairline column on lg */}
+          <TestimonialSlider items={rest} projectsById={projectsById} />
         </div>
       </div>
     </section>

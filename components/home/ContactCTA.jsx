@@ -11,6 +11,7 @@ export default function ContactCTA() {
       body="Not the feature list — the constraint. The legacy system nobody wants to touch, the deadline that moved, the catalogue drop that has to go out Friday. That is the conversation worth having first."
       primary={{ label: "Start a project", href: "/contact" }}
       secondary={{ label: "Read a case study", href: "/projects" }}
+      interactive
     />
   );
 }

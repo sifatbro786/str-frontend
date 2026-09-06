@@ -38,9 +38,6 @@
   --font-sans: "General Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
 
-  /* ── Motion ───────────────────────────────────────────────── */
-  --animate-marquee: marquee 42s linear infinite;
-  --animate-marquee-slow: marquee 68s linear infinite;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -208,20 +205,7 @@
   }
 }
 
-@keyframes marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee,
-  .animate-marquee-slow {
-    animation: none !important;
-  }
   html {
     scroll-behavior: auto;
   }
@@ -328,4 +312,61 @@
   border: 0;
   border-top: 1px solid var(--line);
   margin-block: 3em;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Phase 5 — motion engine support.
+   Structural only; every actual animation lives in a component.
+   ───────────────────────────────────────────────────────────── */
+
+/* CSS smooth scrolling and ScrollSmoother both animate the same scroll
+   position, so an anchor jump gets animated twice and lands short. GSAP owns
+   scrolling on this site now; under reduced motion instant jumps are wanted
+   anyway. Overrides the `scroll-behavior: smooth` in @layer base above. */
+html {
+  scroll-behavior: auto;
+}
+
+/* ScrollSmoother sets these itself, but declaring them prevents a one-frame
+   jump between hydration and smoother creation. */
+#smooth-wrapper {
+  overflow: hidden;
+}
+#smooth-content {
+  will-change: transform;
+}
+
+/* SplitText line masking. `mask: "lines"` wraps each line in a clipping div;
+   this is what stops descenders being sheared off during a y-reveal. */
+.split-line {
+  overflow: hidden;
+}
+.split-line-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* Custom cursor. The native cursor is hidden only where a real pointer exists,
+   and never over text-entry controls — replacing an I-beam with a dot makes a
+   field feel broken. */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+  input,
+  textarea,
+  select,
+  [contenteditable] {
+    cursor: auto;
+  }
+}
+
+/* Reduced motion: hand the native cursor back and drop the smoothing hint. */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    cursor: auto;
+  }
+  #smooth-content {
+    will-change: auto;
+  }
 }

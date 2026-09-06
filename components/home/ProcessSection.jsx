@@ -1,12 +1,20 @@
 import SectionIndex from "@/components/ui/SectionIndex";
+import dynamic from "next/dynamic";
 import { processSteps } from "@/lib/data";
 
 /**
  * The process, set as a specification table rather than four icon cards with a
  * connecting dotted line. Each step declares what you actually receive at the
  * end of it — that column is the reason this section earns its space.
+ *
+ * Shared with /services, which passes nothing and therefore renders without the
+ * connector. That is a purely decorative aria-hidden spine, and reaching it
+ * through next/dynamic keeps the GSAP chunk off that route. Phase 5 is
+ * homepage-only.
  */
-export default function ProcessSection() {
+const ProcessConnector = dynamic(() => import("./ProcessConnector"));
+
+export default function ProcessSection({ interactive = false }) {
   return (
     <section className="border-b border-(--line)">
       <div className="shell py-20 md:py-28">
@@ -25,7 +33,8 @@ export default function ProcessSection() {
           </p>
         </div>
 
-        <ol className="mt-16 border-t border-(--line)">
+        <ol className="relative mt-16 border-t border-(--line)">
+          {interactive && <ProcessConnector count={processSteps.length} />}
           {processSteps.map((step) => (
             <li
               key={step.index}

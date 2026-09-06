@@ -6,8 +6,10 @@ import ProcessSection from "@/components/home/ProcessSection";
 import MetricsSection from "@/components/home/MetricsSection";
 import TechMarquee from "@/components/home/TechMarquee";
 import Testimonials from "@/components/home/Testimonials";
+import FAQSection from "@/components/home/FAQSection";
 import ContactCTA from "@/components/home/ContactCTA";
 import { site } from "@/lib/site";
+import { faqs } from "@/lib/data";
 
 export const metadata = {
   // layout.js's `title.template` only applies to *child* route segments, and
@@ -46,6 +48,7 @@ export const metadata = {
  *   Metrics         inverted band — resets the eye mid-page
  *   Stack           low-attention texture between two dense sections
  *   Testimonials    what clients said after                 (index 04)
+ *   FAQ             the objections, answered                (index 05)
  *   CTA             inverted closer
  *
  * Every section owns its own <section> and border, so reordering is a matter of
@@ -55,13 +58,14 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <PartnersBand />
+      <PartnersBand interactive />
       <ServicesBento />
       <FeaturedProjects />
-      <ProcessSection />
-      <MetricsSection />
+      <ProcessSection interactive />
+      <MetricsSection interactive />
       <TechMarquee />
       <Testimonials />
+      <FAQSection faqs={faqs} />
       <ContactCTA />
     </>
   );

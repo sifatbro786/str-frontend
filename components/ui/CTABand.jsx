@@ -1,7 +1,17 @@
 import Link from "next/link";
 import Button from "./Button";
+import dynamic from "next/dynamic";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
+
+/**
+ * Loaded lazily so the motion layer — and the GSAP runtime behind it — lands in
+ * its own chunk. A static import would put it in the client graph of every route
+ * that renders this band regardless of the `interactive` guard below, because
+ * that guard controls rendering, not bundling. Only the homepage opts in, so the
+ * inner routes must not pay for it.
+ */
+const CTABandMotion = dynamic(() => import("./CTABandMotion"));
 
 /**
  * Full-bleed inverted band that closes every route. Inverted rather than
@@ -14,9 +24,13 @@ export default function CTABand({
   primary = { label: "Start a project", href: "/contact" },
   secondary = { label: "See selected work", href: "/projects" },
   className,
+  interactive = false,
 }) {
   return (
     <section className={cn("relative overflow-hidden bg-(--text) text-(--canvas)", className)}>
+      {/* Must stay the FIRST child — CTABandMotion reads parentElement. */}
+      {interactive && <CTABandMotion />}
+
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/3 opacity-[0.07] md:block"
@@ -29,7 +43,9 @@ export default function CTABand({
       <div className="shell relative grid gap-10 py-20 md:py-28 lg:grid-cols-12 lg:items-end">
         <div className="lg:col-span-7">
           <span className="label-mono text-signal">Next step</span>
-          <h2 className="text-heading mt-5 max-w-[16ch]">{title}</h2>
+          <h2 data-cta-title className="text-heading mt-5 max-w-[16ch]">
+            {title}
+          </h2>
         </div>
 
         <div className="lg:col-span-5">

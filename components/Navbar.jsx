@@ -19,6 +19,28 @@ import { cn, pad } from "@/lib/utils";
  * The header is not translucent at scrollTop 0: a blurred bar over a hero is a
  * cliché and it costs a composite layer on every scroll frame for nothing.
  */
+/**
+ * Rolling label. The item's text is rendered twice inside a 1em-tall clipped
+ * box; hovering translates the pair up by exactly one line, so the second copy
+ * lands where the first was.
+ *
+ * Pure CSS on purpose — a JS-driven roll on a nav item can desync if the
+ * pointer leaves mid-tween, and this cannot. The clone is aria-hidden so the
+ * accessible name is not duplicated.
+ */
+function RollingLabel({ children }) {
+  return (
+    <span className="relative block h-[1em] overflow-hidden">
+      <span className="block transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:-translate-y-full">
+        {children}
+      </span>
+      <span aria-hidden="true" className="block text-signal">
+        {children}
+      </span>
+    </span>
+  );
+}
+
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -65,14 +87,14 @@ export default function Navbar() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "group relative px-4 py-2 text-[0.9375rem] transition-colors",
+                    "group relative inline-flex items-center px-4 py-2 text-[0.9375rem] transition-colors",
                     active ? "text-(--text)" : "text-(--text-mute) hover:text-(--text)"
                   )}
                 >
                   <span className="label-mono mr-2 text-signal opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     {pad(i + 1)}
                   </span>
-                  {item.label}
+                  <RollingLabel>{item.label}</RollingLabel>
                   <span
                     aria-hidden="true"
                     className={cn(

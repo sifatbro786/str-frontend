@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 import { site } from "@/lib/site";
+import FooterCurve from "./FooterCurve";
 
 /* Explicit spans, index-aligned with site.footerColumns. Written out rather
    than computed so Tailwind's static extractor actually emits the classes. */
@@ -17,16 +18,20 @@ const SOCIALS = [
 
 /**
  * Four columns: identity rail, then the three link stacks from site.js.
- * Below that the SSLCommerz payment strip, then an oversized wordmark that is
- * intentionally clipped by the viewport — the mark is furniture at that size,
- * so it is aria-hidden and the accessible name lives in the copyright line.
+ * Below that the SSLCommerz payment strip, then an oversized wordmark set to
+ * the container width — the mark is furniture at that size, so it is
+ * aria-hidden and the accessible name lives in the copyright line.
  */
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-(--line) bg-(--canvas)">
-      <div className="shell pt-20 md:pt-28">
+    <footer className="relative border-t border-(--line) bg-(--canvas)">
+      <FooterCurve />
+
+      {/* data-speed is a ScrollSmoother effect: the content drifts very slightly
+          against the arc above it. No-ops when the smoother is off. */}
+      <div data-speed="0.95" className="shell pt-20 md:pt-28">
         <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-12">
           {/* ── Identity rail ─────────────────────────────────── */}
           <div className="lg:col-span-4 lg:pr-10">
@@ -119,10 +124,29 @@ export default function Footer() {
       </div>
 
       {/* ── Oversized wordmark ──────────────────────────────── */}
-      <div aria-hidden="true" className="mt-16 overflow-hidden select-none">
-        <p className="shell whitespace-nowrap font-semibold leading-[0.78] tracking-[-0.05em] text-(--text) opacity-[0.06] text-[clamp(4rem,17vw,16rem)]">
-          STR SOLUTIONS
-        </p>
+      <div aria-hidden="true" className="shell mt-16 select-none">
+        {/* Set as SVG rather than a clipped <p>. textLength pins the mark to
+            exactly the container width at every breakpoint, so it lines up with
+            the grid above instead of bleeding past it — and it stays pinned in
+            the moment before General Sans arrives from the CDN, when the
+            fallback stack is wider and a font-size-driven mark would overflow.
+            Reads the legal name so this and the copyright line cannot drift. */}
+        <svg
+          viewBox="0 0 1000 84"
+          preserveAspectRatio="xMidYMid meet"
+          className="block h-auto w-full overflow-visible fill-(--text) opacity-[0.06]"
+        >
+          <text
+            x="0"
+            y="78"
+            textLength="1000"
+            lengthAdjust="spacingAndGlyphs"
+            fontSize="100"
+            fontWeight="600"
+          >
+            {site.legalName.toUpperCase()}
+          </text>
+        </svg>
       </div>
 
       {/* ── Legal row ───────────────────────────────────────── */}
