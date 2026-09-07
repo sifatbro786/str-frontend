@@ -37,7 +37,7 @@ import { gsap } from "@/lib/gsap";
  *  · additive compositing, so overlapping falloffs *sum* into new shapes
  *    rather than stacking as discs;
  *  · a shouldered falloff (see makeSprite) — a single linear ramp reads as a
- *    flat disc with a soft edge, which is exactly the 2019 look we are leaving;
+ *    flat disc with a soft edge, which is exactly the 2024 look we are leaving;
  *  · every blob on its own Lissajous frequency plus a second harmonic. A
  *    shared frequency makes all seven turn in unison and the eye reads a loop
  *    inside about four seconds.
