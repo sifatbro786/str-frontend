@@ -42,7 +42,10 @@ export default function MarqueeMotion({ speed = 40, reverse = false }) {
           ease: "none",
           duration: speed,
           repeat: -1,
-          modifiers: { xPercent: (x) => `${wrap(parseFloat(x))}%` },
+          // Bare number, never a "%" string — xPercent is unitless, and a
+          // suffixed string makes the transform setter silently write nothing
+          // at all, so the rail never moves. Same fix as PartnersRailMotion.
+          modifiers: { xPercent: (x) => wrap(parseFloat(x)) },
         });
 
         // Hover slows rather than stops: a hard pause makes the band feel

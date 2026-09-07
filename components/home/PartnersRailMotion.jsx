@@ -89,7 +89,12 @@ export default function PartnersRailMotion({ speed = 45 }) {
           ease: "none",
           duration: speed,
           repeat: -1,
-          modifiers: { xPercent: (x) => `${wrap(parseFloat(x))}%` },
+          // MUST return a bare number. xPercent is a unitless transform
+          // component — the % is implied — so returning "-12.5%" makes the
+          // transform setter reject the value and write NOTHING, silently, for
+          // the life of the tween. No console warning, no thrown error: the
+          // rail simply never moves. Verified against gsap 3.15 headlessly.
+          modifiers: { xPercent: (x) => wrap(parseFloat(x)) },
         });
         tween.totalTime(speed * HEADROOM);
 
