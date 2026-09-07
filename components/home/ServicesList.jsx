@@ -421,7 +421,13 @@ export default function ServicesList({ services }) {
                   data-cursor="view"
                   data-cursor-image={SERVICE_MEDIA[s.slug]}
                   data-cursor-label={s.title}
-                  className="group relative block overflow-hidden border-t border-(--line) py-8 md:py-10"
+                  // No border-t. The row clips (for the tint), and a border sits
+                  // OUTSIDE the padding box — so a sweep drawn on the border
+                  // line at -top-px is clipped away entirely and nothing ever
+                  // appears. The hairline is drawn as a child instead, which
+                  // puts it inside the clip where the sweep can sit exactly on
+                  // top of it rather than 1px under it.
+                  className="group relative block overflow-hidden py-8 md:py-10"
                 >
                   {/* Brand wash tracking the cursor along the row. A gradient,
                       not a blurred box: `blur` here is a full-surface filter
@@ -436,13 +442,18 @@ export default function ServicesList({ services }) {
                     }}
                   />
 
-                  {/* Sits ON the row's own hairline rather than beside it, so
-                      the rule appears to catch light rather than gaining a
-                      second line underneath it. */}
+                  {/* The row's hairline, and the signal rule that wipes across
+                      it. Same position, painted in source order — so the rule
+                      appears to catch light along the existing line rather than
+                      gaining a second line underneath it. */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-px bg-(--line)"
+                  />
                   <span
                     data-row-sweep
                     aria-hidden="true"
-                    className="bg-signal absolute -top-px right-0 left-0 h-px origin-left"
+                    className="bg-signal absolute inset-x-0 top-0 h-px origin-left"
                   />
 
                   <div className="relative flex items-start justify-between gap-6 md:gap-10">

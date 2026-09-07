@@ -9,9 +9,10 @@ import { useMagnetic } from "@/components/motion/useMagnetic";
 import { useLiquidFill } from "@/components/motion/useLiquidFill";
 import { usePointerField } from "@/components/motion/usePointerField";
 import HeroCanvas from "./HeroCanvas";
+import HeroPanel from "./HeroPanel";
 import { site } from "@/lib/site";
 import { SERVICE_TYPES, SERVICE_LABELS, SERVICE_MEDIA } from "@/lib/taxonomy";
-import { cn, pad } from "@/lib/utils";
+import { pad } from "@/lib/utils";
 
 /**
  * Editorial hero over an organic mesh-glow field.
@@ -74,14 +75,10 @@ const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, "");
 
-/* Staggered baselines are what make the metric cards read as floating rather
-   than as a toolbar. Index-aligned with `metrics` below. */
-const METRIC_POS = ["lg:mt-0", "lg:mt-10", "lg:mt-4"];
-
 export default function HeroIntro({ strip }) {
     const root = useRef(null);
     const stripRef = useRef(null);
-    const cardsRef = useRef(null);
+    const panelRef = useRef(null);
     const flipRef = useRef(null);
     const capsRef = useRef(null);
 
@@ -90,15 +87,15 @@ export default function HeroIntro({ strip }) {
     useMagnetic(root, { pull: 0.34, cap: 12 });
     useLiquidFill(root);
 
-    /* Every value traces to lib/site.js or the taxonomy. A hero metric with no
-       source is a number someone invented, and it will be wrong within a year.
-       Depths alternate sign so the group separates under parallax instead of
-       sliding as one plane. */
-    const metrics = [
-        { k: String(site.foundedYear), v: "In production since", depth: 1 },
-        { k: pad(SERVICE_TYPES.length), v: "Disciplines, one team", depth: -0.74 },
-        { k: "< 1 day", v: "Median first reply", depth: 0.5 },
-    ];
+    /* The console features the newest project and the evidence strip shows the
+       next three, so the same case study never appears twice on one screen —
+       which is what would happen if both read from the top of the same list.
+       HeroSection fetches four for exactly this reason. The fallback is
+       deliberate though: if the CMS has fewer than four featured projects, a
+       repeat is better than an evidence strip with a hole in it. */
+    const featured = strip ?? [];
+    const spotlight = featured[0] ?? null;
+    const evidence = featured.length >= 4 ? featured.slice(1, 4) : featured.slice(0, 3);
 
     /* ── Entrance + headline ────────────────────────────────────────────── */
     useGSAP(
@@ -266,9 +263,9 @@ export default function HeroIntro({ strip }) {
                             0.5,
                         )
                         .from(
-                            "[data-hero-metric]",
-                            { y: 26, autoAlpha: 0, stagger: 0.09, duration: 0.7 },
-                            0.62,
+                            "[data-hero-console]",
+                            { y: 34, autoAlpha: 0, duration: 0.9 },
+                            0.5,
                         )
                         .from(
                             "[data-hero-caps] li",
@@ -580,25 +577,41 @@ export default function HeroIntro({ strip }) {
         { scope: root, dependencies: [] },
     );
 
-    /* ── Floating metrics: counter-parallax ─────────────────────────────── */
+    /* ── Console: counter-parallax + edge tilt ──────────────────────────── */
+    /**
+     * Inherited from the metric cards this replaced, but it has to do more with
+     * less. Three chips separated under parallax because they moved at
+     * different depths *relative to each other*; one panel has no internal
+     * relationship to exploit, so the depth has to come from the panel's own
+     * geometry — it translates against the cursor AND tips a couple of degrees
+     * on its long axis, which is what keeps it reading as an object standing in
+     * the mesh rather than a rectangle sliding across it.
+     *
+     * Deliberately smaller numbers than the cards used (38/24px). The panel is
+     * ~34vw of the fold; the same travel that read as float on a 180px chip
+     * reads as drift on something this size.
+     */
     useGSAP(
         () => {
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-            const cards = gsap.utils.toArray("[data-hero-metric]", cardsRef.current);
-            if (!cards.length) return;
+            const panel = panelRef.current;
+            if (!panel) return;
 
-            const setters = cards.map((c) => gsap.quickSetter(c, "css"));
-            const depths = cards.map((c) => Number(c.dataset.depth) || 0);
-
+            gsap.set(panel, { transformPerspective: 1200, transformOrigin: "50% 50%" });
             // quickSetter, not quickTo: the field is already smoothed, so a second
             // easing layer would only add lag on top of lag.
+            const set = gsap.quickSetter(panel, "css");
+
             const sub = (f) => {
                 const ox = f.x - 0.5;
                 const oy = f.y - 0.5;
-                for (let i = 0; i < cards.length; i++) {
-                    setters[i]({ x: ox * depths[i] * 38, y: oy * depths[i] * 24 });
-                }
+                set({
+                    x: ox * -26,
+                    y: oy * -16,
+                    rotateY: ox * 3.4,
+                    rotateX: oy * -2.2,
+                });
             };
 
             const bus = field.current;
@@ -839,16 +852,21 @@ export default function HeroIntro({ strip }) {
                                     ))}
                                 </span>
                             </span>{" "}
-                            <span data-hero-words className="text-(--text-mute)">
+                            {/* `block`, so the second clause takes its own line
+                    under the rotator. A two-tone headline that wraps
+                    wherever the measure happens to break reads as one
+                    long sentence; forced onto its own line it reads as
+                    a claim and a qualifier — two beats, not one. */}
+                            <span data-hero-words className="mt-1 block text-(--text-mute)">
                                 that survives the year after launch.
                             </span>
                         </span>
                     </h1>
 
-                    <div className="lg:col-span-4 lg:pb-3">
+                    <div className="mt-9">
                         <p
                             data-hero-lede
-                            className="max-w-md text-[1.0625rem] leading-relaxed text-(--text-dim)"
+                            className="max-w-xl text-[1.0625rem] leading-relaxed text-(--text-dim)"
                         >
                             We are a Dhaka engineering and production studio. Web platforms, custom
                             software, mobile products, and the visual work that sells them — built
@@ -916,38 +934,20 @@ export default function HeroIntro({ strip }) {
                                 </span>
                             </Link>
                         </div>
-                    </div>
-                </div>
-
-                {/* ── Floating metric cards ──────────────────────────────────
-            In flow at every breakpoint, with staggered top margins and
-            opposing parallax depths. Absolute positioning would put them
-            over the lede rail on exactly the viewports where that rail is
-            widest. */}
-                <div
-                    ref={cardsRef}
-                    className="mt-14 flex flex-wrap items-start gap-3 md:gap-4 lg:mt-20 lg:items-end"
-                >
-                    {metrics.map((m, i) => (
-                        <div
-                            key={m.k}
-                            data-hero-metric
-                            data-depth={m.depth}
-                            className={cn(
-                                // bg-(--overlay) + blur is the glass. The hairline is
-                                // what keeps it from reading as a generic frosted
-                                // rectangle.
-                                "rounded-2xl border border-(--line) bg-(--overlay) px-5 py-4 backdrop-blur-xl backdrop-saturate-150",
-                                "shadow-[0_1px_0_0_rgb(255_255_255/0.05)_inset,0_20px_46px_-30px_rgb(0_0_0/0.6)]",
-                                METRIC_POS[i],
-                            )}
-                        >
-                            <p className="nums text-[1.5rem] leading-none tracking-[-0.03em] text-(--text)">
-                                {m.k}
-                            </p>
-                            <p className="label-mono mt-2.5 text-(--text-mute)">{m.v}</p>
                         </div>
-                    ))}
+                    </div>
+
+                    {/* ── Studio console ─────────────────────────────────────
+              Replaces the three floating metric cards. They said the same
+              things — founded, disciplines, reply time — as three
+              disconnected chips that had to be read one at a time; the
+              panel says them as one object, adds a live clock and the
+              newest shipped project, and gives the right column something
+              to BE. The counter-parallax the cards had moves onto the
+              panel as a whole, so the depth survives the consolidation. */}
+                    <div ref={panelRef} data-hero-console className="lg:col-span-5">
+                        <HeroPanel project={spotlight} />
+                    </div>
                 </div>
 
                 {/* ── Capability run, now a navigation surface ────────────────
@@ -1033,7 +1033,7 @@ export default function HeroIntro({ strip }) {
                 data-hero-strip
                 className="shell relative mt-14 grid gap-px border-t border-(--line) bg-(--line) md:mt-20 md:grid-cols-3"
             >
-                {(strip ?? []).map((p, i) => (
+                {evidence.map((p, i) => (
                     <Link
                         key={p._id}
                         href={`/projects/${p.slug}`}

@@ -9,7 +9,9 @@ import HeroIntro from "./HeroIntro";
  * live in HeroIntro, which receives plain serialisable data.
  */
 export default async function HeroSection() {
-    const strip = await getFeaturedProjects(3);
+    // Four, not three: the hero console features the newest and the evidence
+    // strip shows the next three, so nothing appears twice on the first screen.
+    const strip = await getFeaturedProjects(4);
 
     return <HeroIntro strip={strip} />;
 }
