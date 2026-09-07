@@ -1,6 +1,8 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import CookieConsent from "@/components/providers/CookieConsent";
 import CustomCursor from "@/components/providers/CustomCursor";
+import IntroLoader from "@/components/providers/IntroLoader";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
 /**
@@ -25,8 +27,18 @@ export default function PublicLayout({ children }) {
             >
                 Skip to content
             </a>
+            {/* IntroLoader and CookieConsent are fixed overlays, so they belong
+          out here with the Navbar for exactly the same reason: a transformed
+          ancestor becomes the containing block for position:fixed, and both
+          would scroll away with the page from inside #smooth-content.
+
+          Loader first in source order so it stacks above the banner without
+          either of them needing a z-index fight — the loader's z-200 already
+          wins, and source order settles anything that later ties. */}
+            <IntroLoader />
             <Navbar />
             <CustomCursor />
+            <CookieConsent />
 
             <SmoothScrollProvider>
                 <main id="main">{children}</main>

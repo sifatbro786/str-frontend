@@ -109,9 +109,21 @@ export default function SmoothScrollProvider({ children }) {
           smoother = ScrollSmoother.create({
             wrapper: wrapper.current,
             content: content.current,
-            // 1.2 is the ceiling before the page feels detached from the wheel.
-            // Anything at 2+ reads as "portfolio site" rather than "studio site".
-            smooth: 1.2,
+            /* Back up to 1.15 after a detour through 0.7.
+
+               The 0.7 pass was solving the wrong problem. The page did not feel
+               rough because the glide was too long; it felt rough because
+               ScrollTrigger.refresh() was firing seven times on the font swap
+               and once per accordion click, and each of those is a full
+               document re-measure that lands as a dropped frame mid-scroll.
+               Shortening the glide only made the stutter easier to see.
+
+               With lib/scrollRefresh coalescing those, the glide is what
+               carries the feel: a light flick keeps travelling for roughly a
+               second and settles. Above ~1.3 it stops reading as momentum and
+               starts reading as lag, because the content is still moving long
+               after the user has decided they are done. */
+            smooth: 1.15,
             // 0.1s on touch — enough to take the edge off an abrupt finger-lift
             // stop without replacing the platform's momentum curve. Above ~0.2
             // a flick starts to feel steered rather than thrown.

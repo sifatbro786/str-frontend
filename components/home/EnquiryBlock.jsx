@@ -1,39 +1,37 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
-import { refreshScroll } from "@/lib/scrollRefresh";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import SectionIndex from "@/components/ui/SectionIndex";
 import useSplitReveal from "@/components/motion/useSplitReveal";
+import InquiryForm from "@/components/contact/InquiryForm";
 import { cn, pad } from "@/lib/utils";
 import { site } from "@/lib/site";
 
 /**
- * 07 // FAQ — the closing section.
+ * 06 // CONTACT — the form and the objections, side by side.
  *
- * ── WHY THERE IS NO FORM HERE ANY MORE ───────────────────────────────────
- * This section carried a full copy of InquiryForm. That put the same form on
- * two routes, which is two sets of field state, two honeypots and two things
- * to keep in sync with the backend validators. It is always the copy that
- * drifts. /contact owns the form; the homepage's job is to answer the
- * objection that stops someone going there, and then send them.
+ * ── WHY THE FAQ SITS NEXT TO THE FORM AND NOT ABOVE IT ───────────────────
+ * The FAQ exists to answer the question that stops someone submitting. Putting
+ * it in its own section above means the reader has already scrolled past the
+ * answer by the time they hit the doubt. Beside the form, the answer is one
+ * glance away from the cursor.
+ *
+ * ── WHY InquiryForm IS REUSED, NOT REBUILT ───────────────────────────────
+ * Its field names map 1:1 onto the Inquiry model and it owns the honeypot, the
+ * validation mirror and the 429 handling. A second, simpler form on the
+ * homepage would be a second thing to keep in sync with the backend
+ * validators — and it is always the copy that drifts.
  *
  * ── WHY THE ACCORDION IS <details>-FREE ──────────────────────────────────
  * Native <details> cannot be animated open: the content has no box until the
  * element is open, so there is nothing to measure a height tween against, and
- * content-visibility transitions are still not reliable across the browsers
- * this site has to serve. Button plus aria-expanded plus a measured height
- * tween is the same semantics with an animation that actually runs.
- *
- * ── WHY height AND NOT max-height ────────────────────────────────────────
- * The CSS trick is `max-height: 0 → 600px`, which gives every answer the same
- * duration regardless of length: short ones finish early and then sit still
- * while the transition runs out. GSAP's `height: "auto"` measures the real
- * target, so the duration matches the distance.
+ * `content-visibility` transitions are still not reliable across the browsers
+ * this site has to serve. Button + aria-expanded + a measured height tween is
+ * the same semantics with an animation that actually runs.
  */
-export default function FaqSection({ faqs }) {
+export default function EnquiryBlock({ faqs, services }) {
     const root = useRef(null);
     const panels = useRef([]);
     const [open, setOpen] = useState(null);
@@ -59,12 +57,8 @@ export default function FaqSection({ faqs }) {
                     duration: 0.45,
                     ease: "power3.inOut",
                     overwrite: "auto",
-                    // Opening a row changes document height and invalidates every
-                    // trigger below. Debounced through lib/scrollRefresh: calling
-                    // ScrollTrigger.refresh() directly here re-measured the whole
-                    // document once per click, on the frame right after a layout
-                    // animation had finished dirtying layout.
-                    onComplete: refreshScroll,
+                    // Every trigger below this point moves when a row opens.
+                    onComplete: () => ScrollTrigger.refresh(),
                 });
             });
         },
@@ -72,56 +66,36 @@ export default function FaqSection({ faqs }) {
     );
 
     return (
-        <section id="faq" ref={root} className="border-b border-(--line)">
+        <section id="contact" ref={root} className="border-b border-(--line)">
             <div className="shell py-24 md:py-32">
-                <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-12">
-                    <div className="lg:col-span-4">
-                        <SectionIndex index="07" label="Questions answered" />
+                <div className="grid grid-cols-1 gap-x-12 gap-y-16 lg:grid-cols-12">
+                    {/* ── Form ────────────────────────────────────────────── */}
+                    <div className="lg:col-span-6">
+                        <SectionIndex index="06" label="Start a project" />
                         <h2 ref={heading} className="text-heading mt-6">
-                            The things people ask before they email.
+                            Tell us what you are trying to build.
                         </h2>
-                        <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-(--text-dim)">
+                        <p className="mt-8 max-w-md text-[1.0625rem] leading-relaxed text-(--text-dim)">
                             {site.contact.responseTime} If it is not a fit, we will say so and point
                             you somewhere that is.
                         </p>
 
-                        <Link
-                            href="/contact"
-                            className="group/cta mt-10 inline-flex items-center gap-2.5 rounded-full bg-(--text) px-7 py-3.5 text-[0.9375rem] font-medium text-(--canvas) transition-colors duration-200 hover:bg-brand hover:text-white"
-                        >
-                            Start a project
-                            <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 16 16"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.7"
-                                aria-hidden="true"
-                                className="transition-transform duration-300 ease-out group-hover/cta:translate-x-1"
-                            >
-                                <path
-                                    d="M2.5 8h11M9.5 4l4 4-4 4"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </Link>
+                        <div className="mt-10 border-t border-(--line) pt-10">
+                            <InquiryForm services={services} />
+                        </div>
 
-                        <dl className="mt-12 space-y-4">
+                        <dl className="mt-12 grid grid-cols-1 gap-px border border-(--line) bg-(--line) sm:grid-cols-3">
                             {[
                                 ["Email", site.contact.email, `mailto:${site.contact.email}`],
                                 ["Dhaka", site.contact.phone, site.contact.phoneHref],
                                 ["Europe", site.contact.phoneEu, site.contact.phoneEuHref],
                             ].map(([k, v, href]) => (
-                                <div key={k} className="flex items-baseline gap-4">
-                                    <dt className="label-mono w-16 shrink-0 text-(--text-mute)">
-                                        {k}
-                                    </dt>
-                                    <dd>
+                                <div key={k} className="bg-(--canvas) px-5 py-5">
+                                    <dt className="label-mono text-(--text-mute)">{k}</dt>
+                                    <dd className="mt-2">
                                         <a
                                             href={href}
-                                            className="text-[0.9375rem] text-(--text-dim) transition-colors hover:text-brand"
+                                            className="text-[0.875rem] text-(--text-dim) transition-colors hover:text-brand"
                                         >
                                             {v}
                                         </a>
@@ -131,8 +105,11 @@ export default function FaqSection({ faqs }) {
                         </dl>
                     </div>
 
-                    <div className="lg:col-span-7 lg:col-start-6">
-                        <div className="border-t border-(--line)">
+                    {/* ── FAQ ─────────────────────────────────────────────── */}
+                    <div className="lg:col-span-5 lg:col-start-8">
+                        <SectionIndex index="07" label="Questions answered" />
+
+                        <div className="mt-8 border-t border-(--line)">
                             {faqs.map((f, i) => {
                                 const isOpen = i === open;
                                 const id = `faq-panel-${i}`;
@@ -146,14 +123,14 @@ export default function FaqSection({ faqs }) {
                                                 }
                                                 aria-expanded={isOpen}
                                                 aria-controls={id}
-                                                className="flex w-full items-start gap-5 py-6 text-left"
+                                                className="flex w-full items-start gap-4 py-6 text-left"
                                             >
-                                                <span className="label-mono mt-1 shrink-0 tabular-nums text-(--text-mute)">
+                                                <span className="label-mono mt-1.5 shrink-0 text-(--text-mute)">
                                                     {pad(i + 1)}
                                                 </span>
                                                 <span
                                                     className={cn(
-                                                        "flex-1 text-[1.125rem] leading-snug font-medium transition-colors duration-300",
+                                                        "flex-1 text-[1.0625rem] leading-snug font-medium transition-colors duration-300",
                                                         isOpen
                                                             ? "text-(--text)"
                                                             : "text-(--text-dim) group-hover/faq:text-(--text)",
@@ -161,9 +138,6 @@ export default function FaqSection({ faqs }) {
                                                 >
                                                     {f.q}
                                                 </span>
-                                                {/* Two crossing rules, one of which rotates
-                            away. A chevron flipping 180 degrees is the
-                            same information with more ink. */}
                                                 <span
                                                     aria-hidden="true"
                                                     className="relative mt-2 block size-3.5 shrink-0"
@@ -179,9 +153,6 @@ export default function FaqSection({ faqs }) {
                                             </button>
                                         </h3>
 
-                                        {/* overflow-hidden is on the animated element
-                        itself; the height tween has nothing to clip
-                        otherwise. */}
                                         <div
                                             id={id}
                                             ref={(el) => {
@@ -190,7 +161,7 @@ export default function FaqSection({ faqs }) {
                                             className="overflow-hidden"
                                             style={{ height: 0 }}
                                         >
-                                            <p className="max-w-2xl pb-7 pl-11 text-[0.9375rem] leading-relaxed text-(--text-mute)">
+                                            <p className="pb-7 pl-12 text-[0.9375rem] leading-relaxed text-(--text-mute)">
                                                 {f.a}
                                             </p>
                                         </div>
@@ -198,6 +169,10 @@ export default function FaqSection({ faqs }) {
                                 );
                             })}
                         </div>
+
+                        <p className="label-mono mt-8 text-(--text-mute)">
+                            {site.contact.hours}
+                        </p>
                     </div>
                 </div>
             </div>

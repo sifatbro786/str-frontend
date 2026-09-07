@@ -1,33 +1,33 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The eyebrow replacement. Renders `01 // SERVICES` as a mono index with a
- * signal rule — never a rounded pill badge.
+ * The eyebrow replacement. Renders a section's number and name as quiet type.
  *
- * @param {string} index   Zero-padded section number, e.g. "02".
- * @param {string} label   Uppercased by CSS; pass normal-case text.
+ * ── WHAT CHANGED, AND WHY ────────────────────────────────────────────────
+ * This used to render `01 // SERVICES` in wide-tracked uppercase mono with a
+ * coloured slash. Three separate decorations on four characters of content.
+ * Stacked above every section on the page it stopped reading as structure and
+ * started reading as a template, which is exactly the look we were trying to
+ * avoid by not using a pill badge in the first place.
+ *
+ * It is now the number, then the name, in normal sentence case. The number
+ * carries the brand colour and nothing else is styled at all.
+ *
+ * @param {string} index  Zero-padded section number, e.g. "02". Optional.
+ * @param {string} label  Rendered as written. Sentence case, please.
  * @param {"left"|"right"} align
  */
 export default function SectionIndex({ index, label, align = "left", className }) {
-  return (
-    <div
-      className={cn(
-        "label-mono flex items-center gap-3 text-(--text-mute)",
-        align === "right" && "justify-end",
-        className
-      )}
-    >
-      {index ? (
-        <>
-          <span className="text-signal">{index}</span>
-          <span aria-hidden="true" className="select-none text-(--line)">
-            //
-          </span>
-        </>
-      ) : (
-        <span aria-hidden="true" className="h-px w-7 bg-signal" />
-      )}
-      <span>{label}</span>
-    </div>
-  );
+    return (
+        <p
+            className={cn(
+                "label-mono flex items-center gap-2.5 text-(--text-mute)",
+                align === "right" && "justify-end",
+                className,
+            )}
+        >
+            {index ? <span className="text-brand tabular-nums">{index}</span> : null}
+            <span>{label}</span>
+        </p>
+    );
 }

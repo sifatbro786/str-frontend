@@ -46,11 +46,25 @@ const MAGNET_INNER = 0.42; // extra travel for [data-magnetic-inner]
 const PULL_EASE = "elastic.out(1, 0.62)"; // damped enough to track, springy on release
 const PULL_TIME = 0.8;
 
-/* Explicit intent always wins; this is the automatic fallback that inverts the
-   cursor over display type and any section that asks for it. One line to trim
-   if headings ever start to feel too eager. */
+/* Explicit intent only.
+ *
+ * ── WHY h1/h2/.text-display/.text-heading CAME OUT ───────────────────────
+ * Two costs, one of them severe.
+ *
+ * The severe one: mix-blend-mode: difference forces the browser to composite
+ * the cursor against everything painted beneath it, which means the blended
+ * region cannot be cached and is re-composited on every frame the cursor
+ * moves. With the fallback matching every heading on the page, that fired on
+ * a large fraction of pointer travel.
+ *
+ * The other: it also inverted over the hero headline, which on a white canvas
+ * turns the cursor black-on-white — visually identical to the default state,
+ * so the whole effect was paying full price for no visible difference.
+ *
+ * A section that genuinely wants it can still ask, with
+ * data-cursor-blend="difference". */
 const BLEND_SELECTOR =
-  '[data-cursor="difference"],[data-cursor="invert"],[data-cursor-blend="difference"],h1,h2,.text-display,.text-heading';
+  '[data-cursor="difference"],[data-cursor="invert"],[data-cursor-blend="difference"]';
 const CURSOR_SELECTOR = "[data-cursor],[data-cursor-text],[data-cursor-image]";
 const MAGNET_SELECTOR = '[data-magnetic]:not([data-magnetic="false"])';
 
@@ -117,6 +131,25 @@ export default function CustomCursor() {
       still.removeEventListener("change", sync);
     };
   }, []);
+
+  /* Hiding the native cursor is THIS component's decision to make, so it owns
+     the flag rather than globals.css guessing from a media query.
+
+     The guess was wrong in one specific way that mattered: the old CSS hid the
+     pointer on `body` under (hover:hover) and (pointer:fine), everywhere in the
+     app. This component only mounts under app/(public), so /admin and /login
+     hid the native cursor and drew nothing in its place. Tying the rule to a
+     flag set by the running component makes the two impossible to disagree —
+     including on the paths a media query cannot observe, such as `enabled`
+     flipping to false when Reduce Motion is switched on mid-session. */
+  useEffect(() => {
+    const html = document.documentElement;
+    if (!enabled) return;
+    html.dataset.customCursor = "on";
+    return () => {
+      delete html.dataset.customCursor;
+    };
+  }, [enabled]);
 
   useGSAP(
     () => {
@@ -461,13 +494,25 @@ export default function CustomCursor() {
         scrollAt = performance.now();
       };
 
-      // Magnets that arrive with a later render — a filtered grid, slider
-      // clones, a route transition — register themselves. Debounced to one
-      // scan per frame so a chatty subtree cannot thrash it.
+      /* Magnets that arrive with a later render — a filtered grid, slider
+         clones, a route transition — register themselves.
+       *
+       * ── WHY THIS IS ON A TIMEOUT AND NOT rAF ──────────────────────────
+       * The observer watches childList across the whole body subtree, so it
+       * fires for every DOM mutation on the page: each accordion toggle, each
+       * testimonial card entering, every React commit. Re-scanning on the next
+       * animation frame meant a full document.querySelectorAll for magnets
+       * landing inside the same frame budget as whatever caused the mutation,
+       * which is precisely the frame that could least afford it.
+       *
+       * A 250ms trailing debounce collapses a burst of commits into one scan
+       * and moves it off the critical frame. Magnets appearing a quarter
+       * second late is imperceptible: the pointer has to travel to them first.
+       */
       let rescan = 0;
       const mo = new MutationObserver(() => {
-        cancelAnimationFrame(rescan);
-        rescan = requestAnimationFrame(scan);
+        clearTimeout(rescan);
+        rescan = setTimeout(scan, 250);
       });
 
       scan();
@@ -483,7 +528,7 @@ export default function CustomCursor() {
 
       return () => {
         gsap.ticker.remove(tick);
-        cancelAnimationFrame(rescan);
+        clearTimeout(rescan);
         mo.disconnect();
         io.disconnect();
         // Tweens started from event handlers live outside the useGSAP context,
@@ -503,7 +548,8 @@ export default function CustomCursor() {
   );
 
   // Coarse pointers and reduced-motion users get no nodes at all, not hidden
-  // ones — globals.css hands the native cursor back under the same conditions.
+  // ones. The effect above clears the flag in the same pass, so the native
+  // cursor comes back with them.
   if (!enabled) return null;
 
   return (

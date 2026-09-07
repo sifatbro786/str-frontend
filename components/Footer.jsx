@@ -27,8 +27,21 @@ import StudioStatus from "./footer/StudioStatus";
  */
 
 /* Explicit spans, index-aligned with site.footerColumns. Written out rather
-   than computed so Tailwind's static extractor actually emits the classes. */
-const COLUMN_SPANS = ["lg:col-span-3", "lg:col-span-2", "lg:col-span-3"];
+   than computed so Tailwind's static extractor actually emits the classes.
+ *
+ * ── WHY THERE IS A GAP COLUMN ────────────────────────────────────────────
+ * These used to be 3/2/3 against an identity block of 4, which sums to
+ * exactly 12 with no breathing room. The identity column then carried a
+ * max-w-xs description inside a 33%-wide box, so its text stopped well short
+ * of its own column edge while the link stacks started immediately after it.
+ * The result read as everything crushed against the left with a dead strip
+ * down the middle of the page.
+ *
+ * Now: identity 3, column five left empty as a real gutter, then 3/2/3
+ * starting at column 5. The identity block is narrower but its measure fills
+ * it, which is what makes it look deliberate rather than squeezed.
+ */
+const COLUMN_SPANS = ["lg:col-span-3 lg:col-start-5", "lg:col-span-2", "lg:col-span-3"];
 
 const SOCIALS = [
     { key: "linkedin", label: "LinkedIn" },
@@ -65,31 +78,20 @@ export default function Footer() {
 
             <footer className="relative bg-(--raised)">
                 <div className="shell pt-4 md:pt-8">
-                    <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-12">
-                        {/* ── Identity rail ─────────────────────────────────── */}
-                        <div className="lg:col-span-4 lg:pr-10">
+                    <div className="grid gap-x-10 gap-y-14 md:grid-cols-2 lg:grid-cols-12">
+                        {/* ── Identity rail ───────────────────────────────────
+                    No max-w and no pr on the description any more. Both were
+                    holding the text inside an already-narrow column, so the
+                    block sat left with a strip of nothing beside it. The
+                    column itself is the measure now. */}
+                        <div className="lg:col-span-3">
                             <Logo height={35} />
 
-                            <p className="mt-7 max-w-xs text-[0.9375rem] leading-relaxed text-(--text-mute)">
+                            <p className="mt-7 text-[0.9375rem] leading-relaxed text-(--text-mute)">
                                 {site.description}
                             </p>
 
                             <StudioStatus />
-
-                            {addressLines.length > 0 && (
-                                <address className="mt-8 not-italic">
-                                    <span className="label-mono block text-(--text-mute)">
-                                        Studio
-                                    </span>
-                                    <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-(--text-dim)">
-                                        {addressLines.map((line) => (
-                                            <span key={line} className="block">
-                                                {line}
-                                            </span>
-                                        ))}
-                                    </p>
-                                </address>
-                            )}
 
                             <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2">
                                 {SOCIALS.filter((s) => site.social[s.key]).map((s) => (
@@ -154,9 +156,6 @@ export default function Footer() {
                         className="mt-16 border-t border-(--line) pt-8"
                     >
                         <div className="overflow-x-auto">
-                            {/* The artwork is authored on white; it sits on its own plate in
-                  both themes rather than being inverted, because bank marks
-                  must not be recoloured. */}
                             <div className="min-w-180 bg-white px-4 py-3">
                                 <Image
                                     src={site.brand.paymentStrip}

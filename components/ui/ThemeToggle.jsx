@@ -18,7 +18,7 @@ export default function ThemeToggle({ className = "" }) {
 
   const isDark = resolvedTheme === "dark";
   const base =
-    "inline-flex h-9 w-9 items-center justify-center border border-(--line) text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text)";
+    "inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--line) text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text)";
 
   if (!mounted) {
     return <span aria-hidden="true" className={`${base} ${className}`} />;

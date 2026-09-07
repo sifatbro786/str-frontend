@@ -69,12 +69,14 @@ export default function FooterCurve() {
             mm.add("(prefers-reduced-motion: reduce)", () => write(0));
 
             mm.add("(prefers-reduced-motion: no-preference)", () => {
-                /* Trigger off the reveal window, not off this element. This band sits
-           inside FooterReveal's counter-translated inner, and ScrollTrigger
-           measures with getBoundingClientRect — so triggering on `root` would
-           bake in whatever the reveal happened to be translated by at refresh
-           time. The mask is the last untransformed ancestor, and at rest its
-           top edge and this band's top edge are the same line anyway. */
+                /* Trigger off the footer wrapper, not off this element.
+           Historically this mattered because FooterReveal counter-translated
+           everything inside it and ScrollTrigger measures with
+           getBoundingClientRect, so a trigger on `root` baked in whatever the
+           reveal was translated by at refresh time. That transform is gone, so
+           the two boxes now share a top edge and either would work — the
+           anchor is kept because it is still the more stable of the two: it
+           survives anyone reintroducing a transform on the footer shell. */
                 const anchor = root.current.closest("[data-footer-mask]") ?? root.current;
 
                 const force = { base: BASE_MAX, kick: 0 };

@@ -17,21 +17,23 @@ import { cn, pad } from "@/lib/utils";
 
    1. SCROLL STATE IS NOT REACT STATE.
       ScrollSmoother translates #smooth-content, so window.scrollY trails the
-      *visual* position by up to `smooth` seconds. The condense/expand morph is
-      therefore driven by a ScrollTrigger — which reads the active (smoothed)
-      scroller — toggling a paused timeline. Zero re-renders on scroll.
+      *visual* position by up to `smooth` seconds. The plate is therefore driven
+      by a ScrollTrigger — which reads the active (smoothed) scroller —
+      toggling a paused timeline. Zero re-renders on scroll.
 
-   2. THE MORPH TWEENS LAYOUT ON PURPOSE.
-      maxWidth/height/padding are laid out, not composited. Deliberate trade:
-      the composited alternative (scaleX on a plate) shears the border-radius
-      and the 1px hairline. The tween runs ~0.7s twice per scroll session over
-      ~12 nodes — well inside frame budget — and the expensive part (blur,
-      hairline, shadow) lives on a single out-of-flow node that never reflows.
+   2. THE BAR DOES NOT RESIZE.
+      An earlier version condensed into a floating capsule past the fold by
+      tweening maxWidth, height, margin and padding. See the comment on the
+      first useGSAP below for why that is gone. The rule now: nothing in this
+      header animates a layout property, and no nav link ever changes position
+      in response to scrolling.
 
-   3. backdrop-filter IS TOGGLED, NOT FADED.
-      autoAlpha drives visibility:hidden at 0, which drops the blur layer from
-      the compositor entirely at scrollTop 0. A blur(0px) layer still costs a
-      full-viewport readback every frame; visibility:hidden costs nothing.
+   3. THE PLATE IS OPAQUE, NOT BLURRED.
+      It used to carry backdrop-filter. See the comment on the timeline below:
+      a blur on a full-width fixed bar is a per-frame full-viewport readback,
+      and under ScrollSmoother the page is moving on nearly every frame.
+      autoAlpha still drives visibility:hidden at scrollTop 0, which drops the
+      layer from the compositor entirely rather than leaving a transparent one.
 
    4. EVERY POINTER HANDLER IS contextSafe().
       useGSAP's scope reverts tweens on unmount, but tweens created inside
@@ -71,8 +73,7 @@ export default function Navbar() {
     const [open, setOpen] = useState(false);
 
     const root = useRef(null);
-    const head = useRef(null); // fixed rail; owns the capsule's side gutter
-    const bar = useRef(null); // flex row that becomes the capsule
+    const bar = useRef(null); // the header row itself; fixed geometry
     const plate = useRef(null); // out-of-flow background: blur + hairline + shadow
     const navList = useRef(null);
     const indicator = useRef(null);
@@ -94,76 +95,65 @@ export default function Navbar() {
         [pathname],
     );
 
-    /* ── 1 · Capsule morph ────────────────────────────────────────────────── */
+    /* ── 1 · Background plate ─────────────────────────────────────────────── */
     useGSAP(
         () => {
             const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            const mm = gsap.matchMedia();
 
-            mm.add({ isDesktop: "(min-width: 1024px)", isMobile: "(max-width: 1023px)" }, (ctx) => {
-                const { isDesktop } = ctx.conditions;
+            /* ── THE CAPSULE MORPH WAS REMOVED ────────────────────────────────
+               This used to shrink the bar past the fold: maxWidth, height,
+               margin and padding all tweened down into a floating capsule.
 
-                const tl = gsap
-                    .timeline({ paused: true, defaults: { duration: 0.7, ease: "power3.inOut" } })
-                    // Side gutter goes on the header, not the bar. The bar centres with
-                    // margin-inline:auto, and a fixed left/right margin there would
-                    // left-align it the moment the viewport exceeds maxWidth.
-                    .to(head.current, { paddingLeft: 16, paddingRight: 16 }, 0)
-                    .to(
-                        bar.current,
-                        {
-                            maxWidth: isDesktop ? 1040 : 620,
-                            height: isDesktop ? 60 : 56,
-                            marginTop: isDesktop ? 14 : 10,
-                            paddingLeft: isDesktop ? 22 : 14,
-                            paddingRight: isDesktop ? 14 : 8,
-                        },
-                        0,
-                    )
-                    .to(
-                        plate.current,
-                        {
-                            autoAlpha: 1,
-                            borderRadius: 999,
-                            backdropFilter: "blur(18px) saturate(160%)",
-                            WebkitBackdropFilter: "blur(18px) saturate(160%)",
-                            duration: 0.5,
-                        },
-                        0,
-                    )
-                    // The plate settles a beat after the row: it arrives slightly wider
-                    // and taller and relaxes into place. That overshoot is the whole
-                    // difference between "a div got rounded" and "it condensed".
-                    .fromTo(
-                        plate.current,
-                        { scaleX: 1.045, scaleY: 1.2 },
-                        { scaleX: 1, scaleY: 1, duration: 0.75, ease: "power4.out" },
-                        0,
-                    );
+               It was the wrong call regardless of how it looked. Those are
+               layout properties, so every scroll session paid two reflows of
+               the header subtree, and worse, the nav links physically moved
+               under the pointer. A link you were about to click slides 40px
+               left and 8px up while you are reaching for it. The magnetic pill
+               indicator then had to re-measure mid-flight, which is why it had
+               a ResizeObserver whose only job was to give up and hide.
 
-                const st = ScrollTrigger.create({
-                    start: 50,
-                    end: "max",
-                    onToggle: (self) => {
-                        if (reduced) {
-                            tl.progress(self.isActive ? 1 : 0).pause();
-                            return;
-                        }
-                        self.isActive ? tl.play() : tl.reverse();
-                    },
-                });
+               What is left is the part that was actually doing work: the bar
+               gains a background once content is passing behind it, and loses
+               it at the top of the page. Nothing moves, nothing reflows, and
+               the only animated properties are opacity and backdrop-filter. */
+            /* ── backdrop-filter IS GONE, AND THAT IS THE PERFORMANCE FIX ────
+               A blur on a full-width fixed bar forces the compositor to read
+               back the pixels behind it and re-blur them EVERY FRAME the page
+               scrolls. Under ScrollSmoother the page is moving on almost every
+               frame, so that readback ran continuously, and it is the single
+               most expensive thing that was on this page. On an integrated GPU
+               it alone can cost several milliseconds a frame.
 
-                // Seed the state for a reload at a browser-restored scroll offset.
-                const y = ScrollSmoother.get()?.scrollTop() ?? window.scrollY;
-                if (y > 50) tl.progress(1).pause();
-
-                return () => {
-                    st.kill();
-                    tl.kill();
-                };
+               An opaque plate costs nothing: it is one solid rectangle the
+               compositor draws once and reuses. The design is a white canvas
+               with hairline structure, so there was never anything interesting
+               showing through the blur to justify the bill. */
+            const tl = gsap.timeline({ paused: true }).to(plate.current, {
+                autoAlpha: 1,
+                duration: 0.3,
+                ease: "power2.out",
             });
 
-            return () => mm.revert();
+            const st = ScrollTrigger.create({
+                start: 40,
+                end: "max",
+                onToggle: (self) => {
+                    if (reduced) {
+                        tl.progress(self.isActive ? 1 : 0).pause();
+                        return;
+                    }
+                    self.isActive ? tl.play() : tl.reverse();
+                },
+            });
+
+            // Seed the state for a reload at a browser-restored scroll offset.
+            const y = ScrollSmoother.get()?.scrollTop() ?? window.scrollY;
+            if (y > 40) tl.progress(1).pause();
+
+            return () => {
+                st.kill();
+                tl.kill();
+            };
         },
         { scope: root },
     );
@@ -522,20 +512,25 @@ export default function Navbar() {
         <div ref={root}>
             {/* No horizontal padding on the header: the bar carries the shell gutter
           itself (1.25rem / 2.5rem) so the logo lines up on the same rails as
-          page content at rest, and GSAP owns those two values during the morph. */}
-            <header ref={head} className="pointer-events-none fixed inset-x-0 top-0 z-50">
+          page content. Both values are static now. */}
+            <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
                 <div
                     ref={bar}
                     style={{ maxWidth: 1344, height: 68 }}
                     className="pointer-events-auto relative mx-auto flex items-center justify-between gap-6 px-5 md:px-10"
                 >
-                    {/* Out-of-flow plate. Everything expensive — backdrop blur, hairline,
-              inner highlight, drop shadow — lives here, so the flex row above
-              can reflow during the morph without repainting any of it. */}
+                    {/* Out-of-flow plate. The backdrop blur and the hairline live here
+              rather than on the flex row so nothing expensive is attached to
+              a box that contains laid-out children.
+
+              A bottom hairline only, and no shadow. A full box outline on a
+              bar that already spans the viewport draws three edges that have
+              nothing on the other side of them, and the drop shadow it used
+              to carry was doing the same job twice. */}
                     <span
                         ref={plate}
                         aria-hidden="true"
-                        className="invisible absolute inset-0 -z-10 border border-(--line) bg-(--overlay) opacity-0 shadow-[0_1px_0_0_rgb(255_255_255/0.05)_inset,0_18px_50px_-24px_rgb(0_0_0/0.55)]"
+                        className="invisible absolute inset-0 -z-10 border-b border-(--line) bg-(--canvas) opacity-0"
                     />
 
                     <Logo priority height={35} />
