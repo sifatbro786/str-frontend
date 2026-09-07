@@ -1,6 +1,6 @@
 import HeroSection from "@/components/home/HeroSection";
 import PartnersBand from "@/components/home/PartnersBand";
-import ServicesBento from "@/components/home/ServicesBento";
+import ServicesSection from "@/components/home/ServicesSection";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
 import ProcessSection from "@/components/home/ProcessSection";
 import MetricsSection from "@/components/home/MetricsSection";
@@ -59,7 +59,7 @@ export default function HomePage() {
         <>
             <HeroSection />
             <PartnersBand interactive={true} />
-            <ServicesBento />
+            <ServicesSection />
             <FeaturedProjects />
             <ProcessSection interactive />
             <MetricsSection interactive />

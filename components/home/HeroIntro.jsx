@@ -752,12 +752,18 @@ export default function HeroIntro({ strip }) {
                     <span>Engineering &amp; Visual Production</span>
                 </div>
 
-                <div className="mt-10 grid gap-x-12 gap-y-10 lg:grid-cols-12 lg:items-end">
-                    {/* The rotator would otherwise make this h1 a live region that
-              re-announces itself every 2.9s. One static sentence for
-              assistive tech, one kinetic composition for everyone else —
-              same meaning, and the accessible name never changes. */}
-                    <h1 data-hero-headline className="text-display lg:col-span-8">
+                {/* Copy left, console right, aligned to the TOP rather than the
+            baseline. items-end was right when the right rail was two
+            paragraphs of text that wanted to sit on the headline's last
+            line; it is wrong for an object, which has to start where the
+            headline starts or it reads as having slipped down the page. */}
+                <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-12 lg:items-start">
+                    <div className="lg:col-span-7">
+                        {/* The rotator would otherwise make this h1 a live region that
+                  re-announces itself every 2.9s. One static sentence for
+                  assistive tech, one kinetic composition for everyone else —
+                  same meaning, and the accessible name never changes. */}
+                        <h1 data-hero-headline className="text-display">
                         <span className="sr-only">
                             Engineering web platforms, custom software, mobile products, product
                             design and visual production that survives the year after launch.
