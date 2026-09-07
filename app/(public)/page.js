@@ -58,7 +58,7 @@ export default function HomePage() {
     return (
         <>
             <HeroSection />
-            <PartnersBand interactive />
+            <PartnersBand interactive={true} />
             <ServicesBento />
             <FeaturedProjects />
             <ProcessSection interactive />
