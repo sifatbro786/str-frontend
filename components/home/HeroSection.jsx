@@ -9,7 +9,7 @@ import HeroIntro from "./HeroIntro";
  * live in HeroIntro, which receives plain serialisable data.
  */
 export default async function HeroSection() {
-  const strip = await getFeaturedProjects(3);
+    const strip = await getFeaturedProjects(3);
 
-  return <HeroIntro strip={strip} />;
+    return <HeroIntro strip={strip} />;
 }

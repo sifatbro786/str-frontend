@@ -12,29 +12,29 @@ import { site } from "@/lib/site";
 import { faqs } from "@/lib/data";
 
 export const metadata = {
-  // layout.js's `title.template` only applies to *child* route segments, and
-  // app/page.js shares layout.js's segment — so the brand suffix has to be
-  // spelled out here with `absolute`.
-  title: { absolute: `Software, Data & Visual Production | ${site.legalName}` },
-  description: site.description,
-  alternates: { canonical: "/" },
-  openGraph: {
-    // A page-level `openGraph` replaces the parent's wholesale rather than
-    // merging, so siteName/locale from layout.js are restated.
-    siteName: site.legalName,
-    locale: "en_US",
-    url: "/",
-    type: "website",
-    title: `${site.legalName} — software that survives the year after launch`,
+    // layout.js's `title.template` only applies to *child* route segments, and
+    // app/page.js shares layout.js's segment — so the brand suffix has to be
+    // spelled out here with `absolute`.
+    title: { absolute: `Software, Data & Visual Production | ${site.legalName}` },
     description: site.description,
-    images: [{ url: "/logo.png", width: 1200, height: 630, alt: site.legalName }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${site.legalName} — software that survives the year after launch`,
-    description: site.description,
-    images: ["/logo.png"],
-  },
+    alternates: { canonical: "/" },
+    openGraph: {
+        // A page-level `openGraph` replaces the parent's wholesale rather than
+        // merging, so siteName/locale from layout.js are restated.
+        siteName: site.legalName,
+        locale: "en_US",
+        url: "/",
+        type: "website",
+        title: `${site.legalName} — software that survives the year after launch`,
+        description: site.description,
+        images: [{ url: "/logo.png", width: 1200, height: 630, alt: site.legalName }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: `${site.legalName} — software that survives the year after launch`,
+        description: site.description,
+        images: ["/logo.png"],
+    },
 };
 
 /**
@@ -55,18 +55,18 @@ export const metadata = {
  * moving one line here — no spacing lives in this file.
  */
 export default function HomePage() {
-  return (
-    <>
-      <HeroSection />
-      <PartnersBand interactive />
-      <ServicesBento />
-      <FeaturedProjects />
-      <ProcessSection interactive />
-      <MetricsSection interactive />
-      <TechMarquee />
-      <Testimonials />
-      <FAQSection faqs={faqs} />
-      <ContactCTA />
-    </>
-  );
+    return (
+        <>
+            <HeroSection />
+            <PartnersBand interactive />
+            <ServicesBento />
+            <FeaturedProjects />
+            <ProcessSection interactive />
+            <MetricsSection interactive />
+            <TechMarquee />
+            <Testimonials />
+            <FAQSection faqs={faqs} />
+            <ContactCTA />
+        </>
+    );
 }

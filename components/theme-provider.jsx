@@ -14,16 +14,16 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
  *                      than the empty-class default; :root:not(.dark) needs it.
  */
 export default function ThemeProvider({ children }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-      value={{ light: "light", dark: "dark" }}
-      storageKey="str-theme"
-    >
-      {children}
-    </NextThemesProvider>
-  );
+    return (
+        <NextThemesProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+            value={{ light: "light", dark: "dark" }}
+            storageKey="str-theme"
+        >
+            {children}
+        </NextThemesProvider>
+    );
 }
