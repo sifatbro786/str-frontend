@@ -87,7 +87,7 @@ export default function SelectedWork({ projects }) {
                         >
                             <Link
                                 href={`/projects/${p.slug}`}
-                                className="relative block aspect-[16/10] overflow-hidden border border-(--line)"
+                                className="relative block aspect-16/10 overflow-hidden border border-(--line)"
                             >
                                 <Image
                                     src={p.thumbnailImage || p.coverImage}

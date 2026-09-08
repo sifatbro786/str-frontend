@@ -68,148 +68,149 @@ const POINTER_SMOOTH = 0.14; // how fast the pointer channel tracks its own velo
 const HEADROOM = 200; // loops of backwards runway seeded into the tween
 
 export default function PartnersRailMotion({ speed = 45 }) {
-  const marker = useRef(null);
+    const marker = useRef(null);
 
-  useGSAP(
-    () => {
-      // Rendered as the rail's LAST child, so parentElement is the clipping root.
-      const root = marker.current?.parentElement;
-      const track = root?.querySelector("[data-track]");
-      if (!root || !track) return;
+    useGSAP(
+        () => {
+            // Rendered as the rail's LAST child, so parentElement is the clipping root.
+            const root = marker.current?.parentElement;
+            const track = root?.querySelector("[data-track]");
+            if (!root || !track) return;
 
-      const mm = gsap.matchMedia();
+            const mm = gsap.matchMedia();
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // The track holds two copies, so -50% and 0% are visually identical and
-        // wrapping between them is invisible. Wrapping beats repeat:-1 alone —
-        // it removes the one-frame stutter at the loop boundary.
-        const wrap = gsap.utils.wrap(-50, 0);
-        const tween = gsap.to(track, {
-          xPercent: -50,
-          ease: "none",
-          duration: speed,
-          repeat: -1,
-          // MUST return a bare number. xPercent is a unitless transform
-          // component — the % is implied — so returning "-12.5%" makes the
-          // transform setter reject the value and write NOTHING, silently, for
-          // the life of the tween. No console warning, no thrown error: the
-          // rail simply never moves. Verified against gsap 3.15 headlessly.
-          modifiers: { xPercent: (x) => wrap(parseFloat(x)) },
-        });
-        tween.totalTime(speed * HEADROOM);
+            mm.add("(prefers-reduced-motion: no-preference)", () => {
+                // The track holds two copies, so -50% and 0% are visually identical and
+                // wrapping between them is invisible. Wrapping beats repeat:-1 alone —
+                // it removes the one-frame stutter at the loop boundary.
+                const wrap = gsap.utils.wrap(-50, 0);
+                const tween = gsap.to(track, {
+                    xPercent: -50,
+                    ease: "none",
+                    duration: speed,
+                    repeat: -1,
+                    // MUST return a bare number. xPercent is a unitless transform
+                    // component — the % is implied — so returning "-12.5%" makes the
+                    // transform setter reject the value and write NOTHING, silently, for
+                    // the life of the tween. No console warning, no thrown error: the
+                    // rail simply never moves. Verified against gsap 3.15 headlessly.
+                    modifiers: { xPercent: (x) => wrap(parseFloat(x)) },
+                });
+                tween.totalTime(speed * HEADROOM);
 
-        const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+                const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-        let hover = 1;
-        let direction = 1;
-        let current = 1;
-        let pointerDelta = 0; // px travelled since the last frame
-        let pointerSpeed = 0; // smoothed px/sec
-        let lastX = null;
-        let visible = true;
+                let hover = 1;
+                let direction = 1;
+                let current = 1;
+                let pointerDelta = 0; // px travelled since the last frame
+                let pointerSpeed = 0; // smoothed px/sec
+                let lastX = null;
+                let visible = true;
 
-        /* ── Scroll channel ──────────────────────────────────────────────
+                /* ── Scroll channel ──────────────────────────────────────────────
            The trigger exists to be measured and to gate the ticker; it drives
            nothing itself. Off-screen the whole rail stops costing frames. */
-        const st = ScrollTrigger.create({
-          trigger: root,
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) => {
-            visible = self.isActive;
-            if (visible) tween.resume();
-            else tween.pause();
-          },
-        });
-        visible = st.isActive;
+                const st = ScrollTrigger.create({
+                    trigger: root,
+                    start: "top bottom",
+                    end: "bottom top",
+                    onToggle: (self) => {
+                        visible = self.isActive;
+                        if (visible) tween.resume();
+                        else tween.pause();
+                    },
+                });
+                visible = st.isActive;
 
-        /* ── Pointer channel ─────────────────────────────────────────────
+                /* ── Pointer channel ─────────────────────────────────────────────
            Records only. Velocity is differentiated once per frame in the ticker,
            so a 1000Hz mouse costs exactly what a 125Hz one does. */
-        const onPointerMove = (e) => {
-          if (lastX !== null) pointerDelta += Math.abs(e.clientX - lastX);
-          lastX = e.clientX;
-        };
+                const onPointerMove = (e) => {
+                    if (lastX !== null) pointerDelta += Math.abs(e.clientX - lastX);
+                    lastX = e.clientX;
+                };
 
-        const onPointerOver = (e) => {
-          hover = e.target.closest?.("[data-logo]") ? HOVER_LOGO : HOVER_BAND;
-        };
+                const onPointerOver = (e) => {
+                    hover = e.target.closest?.("[data-logo]") ? HOVER_LOGO : HOVER_BAND;
+                };
 
-        const onPointerLeave = () => {
-          hover = 1;
-          lastX = null;
-        };
+                const onPointerLeave = () => {
+                    hover = 1;
+                    lastX = null;
+                };
 
-        if (fine) {
-          root.addEventListener("pointermove", onPointerMove, { passive: true });
-          root.addEventListener("pointerover", onPointerOver);
-          root.addEventListener("pointerleave", onPointerLeave);
-          root.addEventListener("pointercancel", onPointerLeave);
-        }
+                if (fine) {
+                    root.addEventListener("pointermove", onPointerMove, { passive: true });
+                    root.addEventListener("pointerover", onPointerOver);
+                    root.addEventListener("pointerleave", onPointerLeave);
+                    root.addEventListener("pointercancel", onPointerLeave);
+                }
 
-        /* ── One clock ───────────────────────────────────────────────────
+                /* ── One clock ───────────────────────────────────────────────────
            gsap.ticker rather than a private rAF, so the rail advances on the
            same frame boundary as the cursor, the hero mesh and every tween. */
-        const tick = (time, deltaTime) => {
-          if (!visible) return;
+                const tick = (time, deltaTime) => {
+                    if (!visible) return;
 
-          const ms = Math.min(deltaTime, 50);
-          const frames = ms / 16.6667;
+                    const ms = Math.min(deltaTime, 50);
+                    const frames = ms / 16.6667;
 
-          // Exponential forms, not `v * 0.9` — a constant per-frame factor
-          // converges twice as fast on a 120Hz panel as on a 60Hz one, which is
-          // how the same code ends up feeling snappy on a laptop and sluggish on
-          // an external monitor.
-          const k = 1 - Math.pow(1 - APPROACH, frames);
+                    // Exponential forms, not `v * 0.9` — a constant per-frame factor
+                    // converges twice as fast on a 120Hz panel as on a 60Hz one, which is
+                    // how the same code ends up feeling snappy on a laptop and sluggish on
+                    // an external monitor.
+                    const k = 1 - Math.pow(1 - APPROACH, frames);
 
-          // Differentiate the pointer once per frame, THEN smooth. Accumulating
-          // raw deltas and decaying the total instead is the tempting one-liner
-          // and it is wrong: the accumulator settles at delta/(1 - decay), so it
-          // reports ~10x the real speed and pins the boost at its ceiling on the
-          // smallest nudge. `instant` falls to 0 the moment the pointer stops,
-          // so this decays on its own with no separate falloff constant.
-          const instant = (pointerDelta / ms) * 1000;
-          pointerDelta = 0;
-          pointerSpeed += (instant - pointerSpeed) * (1 - Math.pow(1 - POINTER_SMOOTH, frames));
+                    // Differentiate the pointer once per frame, THEN smooth. Accumulating
+                    // raw deltas and decaying the total instead is the tempting one-liner
+                    // and it is wrong: the accumulator settles at delta/(1 - decay), so it
+                    // reports ~10x the real speed and pins the boost at its ceiling on the
+                    // smallest nudge. `instant` falls to 0 the moment the pointer stops,
+                    // so this decays on its own with no separate falloff constant.
+                    const instant = (pointerDelta / ms) * 1000;
+                    pointerDelta = 0;
+                    pointerSpeed +=
+                        (instant - pointerSpeed) * (1 - Math.pow(1 - POINTER_SMOOTH, frames));
 
-          const scrollV = st.getVelocity();
-          if (scrollV > FLIP_AT) direction = 1;
-          else if (scrollV < -FLIP_AT) direction = -1;
+                    const scrollV = st.getVelocity();
+                    if (scrollV > FLIP_AT) direction = 1;
+                    else if (scrollV < -FLIP_AT) direction = -1;
 
-          const boost = gsap.utils.clamp(
-            0,
-            BOOST_MAX,
-            Math.abs(scrollV) / SCROLL_REF + pointerSpeed / POINTER_REF
-          );
+                    const boost = gsap.utils.clamp(
+                        0,
+                        BOOST_MAX,
+                        Math.abs(scrollV) / SCROLL_REF + pointerSpeed / POINTER_REF,
+                    );
 
-          const target = direction * hover * (1 + boost);
-          current += (target - current) * k;
-          tween.timeScale(current);
+                    const target = direction * hover * (1 + boost);
+                    current += (target - current) * k;
+                    tween.timeScale(current);
 
-          // Top the backwards runway back up long before it runs out. A whole
-          // number of loops, so nothing moves.
-          if (tween.totalTime() < speed * 4) {
-            tween.totalTime(tween.totalTime() + speed * HEADROOM);
-          }
-        };
+                    // Top the backwards runway back up long before it runs out. A whole
+                    // number of loops, so nothing moves.
+                    if (tween.totalTime() < speed * 4) {
+                        tween.totalTime(tween.totalTime() + speed * HEADROOM);
+                    }
+                };
 
-        gsap.ticker.add(tick);
+                gsap.ticker.add(tick);
 
-        return () => {
-          gsap.ticker.remove(tick);
-          root.removeEventListener("pointermove", onPointerMove);
-          root.removeEventListener("pointerover", onPointerOver);
-          root.removeEventListener("pointerleave", onPointerLeave);
-          root.removeEventListener("pointercancel", onPointerLeave);
-          st.kill();
-          tween.kill();
-        };
-      });
+                return () => {
+                    gsap.ticker.remove(tick);
+                    root.removeEventListener("pointermove", onPointerMove);
+                    root.removeEventListener("pointerover", onPointerOver);
+                    root.removeEventListener("pointerleave", onPointerLeave);
+                    root.removeEventListener("pointercancel", onPointerLeave);
+                    st.kill();
+                    tween.kill();
+                };
+            });
 
-      return () => mm.revert();
-    },
-    { dependencies: [speed] }
-  );
+            return () => mm.revert();
+        },
+        { dependencies: [speed] },
+    );
 
-  return <span ref={marker} aria-hidden="true" className="hidden" />;
+    return <span ref={marker} aria-hidden="true" className="hidden" />;
 }

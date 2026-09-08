@@ -18,23 +18,23 @@ import { cn } from "@/lib/utils";
 const MarqueeMotion = dynamic(() => import("./MarqueeMotion"));
 
 export default function Marquee({
-  children,
-  speed = 40,
-  reverse = false,
-  className,
-  interactive = false,
+    children,
+    speed = 40,
+    reverse = false,
+    className,
+    interactive = false,
 }) {
-  return (
-    <div className={cn("mask-x flex overflow-hidden", className)}>
-      <div className="flex min-w-max will-change-transform">
-        {children}
-        <div aria-hidden="true" className="flex">
-          {children}
-        </div>
-      </div>
-      {/* Must stay LAST — MarqueeMotion walks up to this div and expects the
+    return (
+        <div className={cn("mask-x flex overflow-hidden", className)}>
+            <div className="flex min-w-max will-change-transform">
+                {children}
+                <div aria-hidden="true" className="flex">
+                    {children}
+                </div>
+            </div>
+            {/* Must stay LAST — MarqueeMotion walks up to this div and expects the
           track to still be firstElementChild. */}
-      {interactive && <MarqueeMotion speed={speed} reverse={reverse} />}
-    </div>
-  );
+            {interactive && <MarqueeMotion speed={speed} reverse={reverse} />}
+        </div>
+    );
 }

@@ -71,16 +71,10 @@ export default function EcosystemBand() {
             invisible while one copy of the track is at least as wide as the
             viewport; eight logos at 224px is 1,792px, which leaves a gap on a
             2K display. Twice through covers everything we ship to. */}
-                {/* reactive={false} on this one. LoopMarquee's velocity coupling
-            installs a global Observer on wheel, touch and scroll; two rails
-            on one page means two of them reading and writing on every scroll
-            event. The hero band is the one where the coupling reads as
-            deliberate, so it keeps it and this one does not. */}
                 <LoopMarquee
                     items={[...partners, ...partners]}
                     speed={46}
-                    reactive={false}
-                    className="mask-x"
+                    fade="var(--canvas)"
                     renderItem={(p, i) => (
                         <span
                             key={`${p.name}-${i}`}

@@ -30,13 +30,21 @@ import { cn } from "@/lib/utils";
  * @param {number}   speed       Seconds for one full copy to pass. Higher = slower.
  * @param {1|-1}     direction   1 travels left, -1 travels right.
  * @param {boolean}  reactive    Scroll velocity nudges speed and direction.
+ *                               Defaults OFF: it installs a global Observer on
+ *                               wheel, touch and scroll, and two rails on one
+ *                               page means two of them reading and writing on
+ *                               every scroll event. Opt in where the coupling
+ *                               is the point.
+ * @param {string}   fade        CSS colour the edges fade into, e.g.
+ *                               "var(--canvas)". Omit for hard edges.
  */
 export default function LoopMarquee({
     items,
     renderItem,
     speed = 28,
     direction = 1,
-    reactive = true,
+    reactive = false,
+    fade,
     className,
     trackClassName,
 }) {
@@ -128,10 +136,41 @@ export default function LoopMarquee({
         </div>
     );
 
+    /* ── EDGE FADE IS TWO GRADIENTS, NOT mask-image ──────────────────────
+       Callers used to pass `mask-x`, a CSS mask-image on this container. A
+       mask forces the browser to rasterise the masked layer and re-composite
+       it against the mask on every frame the content moves — and this content
+       moves on every frame, forever, by definition. Two full-width masked
+       layers on one page was a permanent compositing tax.
+
+       Two absolutely-positioned gradient spans over the top produce the same
+       picture and are static: the compositor paints them once and reuses them
+       while the track scrolls underneath. They need the container's own
+       background colour to fade into, which is why the colour is a prop
+       rather than a hardcoded token. */
     return (
-        <div ref={root} className={cn("flex w-full overflow-hidden", className)}>
+        <div ref={root} className={cn("relative flex w-full overflow-hidden", className)}>
             {copy(false)}
             {copy(true)}
+
+            {fade ? (
+                <>
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-28"
+                        style={{
+                            backgroundImage: `linear-gradient(to right, ${fade}, transparent)`,
+                        }}
+                    />
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 right-0 w-16 md:w-28"
+                        style={{
+                            backgroundImage: `linear-gradient(to left, ${fade}, transparent)`,
+                        }}
+                    />
+                </>
+            ) : null}
         </div>
     );
 }

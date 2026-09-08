@@ -72,8 +72,8 @@ export default function FaqSection({ faqs }) {
     );
 
     return (
-        <section id="faq" ref={root} className="border-b border-(--line)">
-            <div className="shell py-24 md:py-32">
+        <section id="faq" ref={root}>
+            <div className="shell pt-24 md:pt-32 pb-10">
                 <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-12">
                     <div className="lg:col-span-4">
                         <SectionIndex index="07" label="Questions answered" />
@@ -107,28 +107,6 @@ export default function FaqSection({ faqs }) {
                                 />
                             </svg>
                         </Link>
-
-                        <dl className="mt-12 space-y-4">
-                            {[
-                                ["Email", site.contact.email, `mailto:${site.contact.email}`],
-                                ["Dhaka", site.contact.phone, site.contact.phoneHref],
-                                ["Europe", site.contact.phoneEu, site.contact.phoneEuHref],
-                            ].map(([k, v, href]) => (
-                                <div key={k} className="flex items-baseline gap-4">
-                                    <dt className="label-mono w-16 shrink-0 text-(--text-mute)">
-                                        {k}
-                                    </dt>
-                                    <dd>
-                                        <a
-                                            href={href}
-                                            className="text-[0.9375rem] text-(--text-dim) transition-colors hover:text-brand"
-                                        >
-                                            {v}
-                                        </a>
-                                    </dd>
-                                </div>
-                            ))}
-                        </dl>
                     </div>
 
                     <div className="lg:col-span-7 lg:col-start-6">

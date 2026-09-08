@@ -21,45 +21,45 @@ import { gsap } from "@/lib/gsap";
  * because it is not a shader and a name that lies costs more than it saves.
  */
 export default function MetricsGlow() {
-  const el = useRef(null);
+    const el = useRef(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
+    useGSAP(
+        () => {
+            const mm = gsap.matchMedia();
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.fromTo(
-          el.current,
-          { "--glow-x": "18%", opacity: 0.05 },
-          {
-            "--glow-x": "82%",
-            opacity: 0.16,
-            ease: "none",
-            scrollTrigger: {
-              trigger: el.current.parentElement,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          }
-        );
-      });
+            mm.add("(prefers-reduced-motion: no-preference)", () => {
+                gsap.fromTo(
+                    el.current,
+                    { "--glow-x": "18%", opacity: 0.05 },
+                    {
+                        "--glow-x": "82%",
+                        opacity: 0.16,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: el.current.parentElement,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: true,
+                        },
+                    },
+                );
+            });
 
-      return () => mm.revert();
-    },
-    { scope: el }
-  );
+            return () => mm.revert();
+        },
+        { scope: el },
+    );
 
-  return (
-    <div
-      ref={el}
-      aria-hidden="true"
-      style={{
-        "--glow-x": "18%",
-        backgroundImage:
-          "radial-gradient(60% 120% at var(--glow-x) 50%, var(--color-signal) 0%, transparent 70%)",
-      }}
-      className="pointer-events-none absolute inset-0 opacity-[0.05]"
-    />
-  );
+    return (
+        <div
+            ref={el}
+            aria-hidden="true"
+            style={{
+                "--glow-x": "18%",
+                backgroundImage:
+                    "radial-gradient(60% 120% at var(--glow-x) 50%, var(--color-signal) 0%, transparent 70%)",
+            }}
+            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        />
+    );
 }

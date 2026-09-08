@@ -6,35 +6,27 @@ import SelectedWork from "@/components/home/SelectedWork";
 import EcosystemBand from "@/components/home/EcosystemBand";
 import TestimonialRail from "@/components/home/TestimonialRail";
 import FaqSection from "@/components/home/FaqSection";
+import JsonLd from "@/components/seo/JsonLd";
 import { site } from "@/lib/site";
 import { getFeaturedProjects, getServices, getTestimonials } from "@/lib/api";
+import { buildMetadata, faqSchema } from "@/lib/seo";
 import { faqs, metrics, processSteps } from "@/lib/data";
 
-export const metadata = {
-    // layout.js's `title.template` only applies to *child* route segments, and
-    // app/page.js shares layout.js's segment — so the brand suffix has to be
-    // spelled out here with `absolute`.
-    title: { absolute: `Software, Data & Visual Production | ${site.legalName}` },
-    description: site.description,
-    alternates: { canonical: "/" },
-    openGraph: {
-        // A page-level `openGraph` replaces the parent's wholesale rather than
-        // merging, so siteName/locale from layout.js are restated.
-        siteName: site.legalName,
-        locale: "en_US",
-        url: "/",
-        type: "website",
-        title: `${site.legalName} — software that survives the year after launch`,
+/**
+ * generateMetadata, not a static `metadata` export, because the title and
+ * description now come from the PageMeta row the marketer edits in
+ * /admin/page-meta. The values below are the fallback when that row is empty
+ * or the API is unreachable; see lib/seo.js for the precedence rules.
+ */
+export async function generateMetadata() {
+    return buildMetadata({
+        identifier: "home",
+        path: "/",
+        title: "Software, data and visual production",
         description: site.description,
-        images: [{ url: "/logo.png", width: 1200, height: 630, alt: site.legalName }],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: `${site.legalName} — software that survives the year after launch`,
-        description: site.description,
-        images: ["/logo.png"],
-    },
-};
+        image: "/logo.png",
+    });
+}
 
 /**
  * ── DATA COMES FROM THE API, NOT FROM lib/data ───────────────────────────
@@ -119,6 +111,12 @@ export default async function HomePage() {
 
     return (
         <>
+            {/* The FAQ block is the only page-level schema the homepage earns.
+          Organization and WebSite are emitted once in the layout, and
+          repeating them here would create competing entities rather than
+          reinforcing one. */}
+            <JsonLd data={faqSchema(faqs)} />
+
             <Hero />
             <AboutStatement metrics={metrics} />
             <CapabilityStack services={services} />

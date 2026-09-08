@@ -35,90 +35,90 @@ import { gsap } from "@/lib/gsap";
  *   dt        second argument, delta normalised to 60fps units
  */
 export function usePointerField(scope, { lerp = 0.09, restX = 0.5, restY = 0.4 } = {}) {
-  const ref = useRef(null);
+    const ref = useRef(null);
 
-  // Lazy init in render so the object exists before child effects run — child
-  // components subscribe in their own useGSAP, which fires before the parent's.
-  if (ref.current === null) {
-    ref.current = {
-      tx: restX,
-      ty: restY,
-      x: restX,
-      y: restY,
-      cx: 0,
-      cy: 0,
-      w: 1,
-      h: 1,
-      left: 0,
-      top: 0,
-      active: false,
-      moved: false,
-      fine: true,
-      subs: new Set(),
-    };
-  }
+    // Lazy init in render so the object exists before child effects run — child
+    // components subscribe in their own useGSAP, which fires before the parent's.
+    if (ref.current === null) {
+        ref.current = {
+            tx: restX,
+            ty: restY,
+            x: restX,
+            y: restY,
+            cx: 0,
+            cy: 0,
+            w: 1,
+            h: 1,
+            left: 0,
+            top: 0,
+            active: false,
+            moved: false,
+            fine: true,
+            subs: new Set(),
+        };
+    }
 
-  useGSAP(
-    () => {
-      const el = scope.current;
-      if (!el) return;
+    useGSAP(
+        () => {
+            const el = scope.current;
+            if (!el) return;
 
-      const f = ref.current;
-      f.fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+            const f = ref.current;
+            f.fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-      const onMove = (e) => {
-        // The only layout read in the system, taken in the pointer handler
-        // where the browser has already flushed style for hit-testing.
-        // ScrollSmoother translates this subtree, so the rect cannot be cached.
-        const r = el.getBoundingClientRect();
-        f.left = r.left;
-        f.top = r.top;
-        f.w = r.width || 1;
-        f.h = r.height || 1;
-        f.cx = e.clientX;
-        f.cy = e.clientY;
-        f.tx = gsap.utils.clamp(0, 1, (e.clientX - r.left) / f.w);
-        f.ty = gsap.utils.clamp(0, 1, (e.clientY - r.top) / f.h);
-        f.active = true;
-        f.moved = true;
-      };
+            const onMove = (e) => {
+                // The only layout read in the system, taken in the pointer handler
+                // where the browser has already flushed style for hit-testing.
+                // ScrollSmoother translates this subtree, so the rect cannot be cached.
+                const r = el.getBoundingClientRect();
+                f.left = r.left;
+                f.top = r.top;
+                f.w = r.width || 1;
+                f.h = r.height || 1;
+                f.cx = e.clientX;
+                f.cy = e.clientY;
+                f.tx = gsap.utils.clamp(0, 1, (e.clientX - r.left) / f.w);
+                f.ty = gsap.utils.clamp(0, 1, (e.clientY - r.top) / f.h);
+                f.active = true;
+                f.moved = true;
+            };
 
-      const onLeave = () => {
-        f.active = false;
-        f.moved = true;
-        // Drift back to the resting composition rather than freezing wherever
-        // the cursor happened to exit.
-        f.tx = restX;
-        f.ty = restY;
-      };
+            const onLeave = () => {
+                f.active = false;
+                f.moved = true;
+                // Drift back to the resting composition rather than freezing wherever
+                // the cursor happened to exit.
+                f.tx = restX;
+                f.ty = restY;
+            };
 
-      const tick = (time, deltaTime) => {
-        const ms = Math.min(deltaTime, 50);
-        const k = 1 - Math.pow(1 - lerp, ms / 16.6667);
-        f.x += (f.tx - f.x) * k;
-        f.y += (f.ty - f.y) * k;
+            const tick = (time, deltaTime) => {
+                const ms = Math.min(deltaTime, 50);
+                const k = 1 - Math.pow(1 - lerp, ms / 16.6667);
+                f.x += (f.tx - f.x) * k;
+                f.y += (f.ty - f.y) * k;
 
-        const dt = Math.min(deltaTime, 33.4) / 16.6667;
-        f.subs.forEach((fn) => fn(f, dt));
-        f.moved = false;
-      };
+                const dt = Math.min(deltaTime, 33.4) / 16.6667;
+                f.subs.forEach((fn) => fn(f, dt));
+                f.moved = false;
+            };
 
-      el.addEventListener("pointermove", onMove, { passive: true });
-      el.addEventListener("pointerleave", onLeave);
-      // gsap.ticker, not a private rAF: one clock for the whole page means the
-      // mesh, the cards and every tween advance on the same frame boundary.
-      gsap.ticker.add(tick);
+            el.addEventListener("pointermove", onMove, { passive: true });
+            el.addEventListener("pointerleave", onLeave);
+            // gsap.ticker, not a private rAF: one clock for the whole page means the
+            // mesh, the cards and every tween advance on the same frame boundary.
+            gsap.ticker.add(tick);
 
-      return () => {
-        el.removeEventListener("pointermove", onMove);
-        el.removeEventListener("pointerleave", onLeave);
-        gsap.ticker.remove(tick);
-      };
-    },
-    { scope, dependencies: [] }
-  );
+            return () => {
+                el.removeEventListener("pointermove", onMove);
+                el.removeEventListener("pointerleave", onLeave);
+                gsap.ticker.remove(tick);
+            };
+        },
+        { scope, dependencies: [] },
+    );
 
-  return ref;
+    return ref;
 }
 
 export default usePointerField;

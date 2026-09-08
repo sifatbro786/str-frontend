@@ -7,6 +7,7 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import useSplitReveal from "@/components/motion/useSplitReveal";
 import { cn } from "@/lib/utils";
 
+const newLocal = "relative -mt-[5px] block size-2.5 shrink-0";
 /**
  * 03 // PROCESS — a horizontal track, not a tab rail.
  *
@@ -41,7 +42,14 @@ import { cn } from "@/lib/utils";
  * plain headings. tabIndex is roving so Tab exits the group instead of
  * walking every node in it.
  */
-export default function ProcessTracker({ steps }) {
+/**
+ * `index` and `eyebrow` are props rather than constants because this section
+ * is shared between the homepage and /services. Hard-coding "03" meant either
+ * a wrong number on the services page or a second copy of the whole
+ * component — and a duplicated tablist is two keyboard implementations to
+ * keep correct.
+ */
+export default function ProcessTracker({ steps, index = "03", eyebrow = "Process" }) {
     const root = useRef(null);
     const panel = useRef(null);
     const fill = useRef(null);
@@ -162,7 +170,13 @@ export default function ProcessTracker({ steps }) {
                 tl.fromTo(
                     ghost,
                     { autoAlpha: 0, xPercent: -6 },
-                    { autoAlpha: 1, xPercent: 0, duration: 0.7, ease: "power3.out", overwrite: "auto" },
+                    {
+                        autoAlpha: 1,
+                        xPercent: 0,
+                        duration: 0.7,
+                        ease: "power3.out",
+                        overwrite: "auto",
+                    },
                     0,
                 );
             }
@@ -209,7 +223,7 @@ export default function ProcessTracker({ steps }) {
             <div className="shell py-24 md:py-32">
                 <div className="flex flex-wrap items-end justify-between gap-6">
                     <div className="max-w-xl">
-                        <SectionIndex index="03" label="Process" />
+                        <SectionIndex index={index} label={eyebrow} />
                         <h2 ref={heading} className="text-heading mt-6">
                             From idea to launch, with nothing invisible in between.
                         </h2>
@@ -261,7 +275,9 @@ export default function ProcessTracker({ steps }) {
 
                         <div
                             className="grid"
-                            style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+                            style={{
+                                gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`,
+                            }}
                         >
                             {steps.map((s, n) => {
                                 const on = n === i;
@@ -287,7 +303,7 @@ export default function ProcessTracker({ steps }) {
                         The ring is a sibling rather than a scaled
                         copy of the dot: scaling the dot would
                         thicken its 2px border as it grew. */}
-                                        <span className="relative -mt-[5px] block size-2.5 shrink-0">
+                                        <span className={newLocal}>
                                             <span
                                                 data-node-dot=""
                                                 aria-hidden="true"
@@ -350,7 +366,7 @@ export default function ProcessTracker({ steps }) {
                     <span
                         data-ghost=""
                         aria-hidden="true"
-                        className="pointer-events-none absolute -top-2 right-0 -z-10 hidden text-[11rem] leading-none font-medium tracking-[-0.05em] text-(--raised-2) select-none md:block"
+                        className="pointer-events-none absolute -top-2 right-0 -z-10 hidden text-[11rem] leading-none font-medium tracking-tighter text-(--raised-2) select-none md:block"
                     >
                         {step.index}
                     </span>

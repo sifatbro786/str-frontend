@@ -69,7 +69,11 @@ export default function AboutStatement({ metrics }) {
                 y: 40,
                 duration: 1,
                 ease: "power3.out",
-                scrollTrigger: { trigger: q("[data-about-panel]")[0], start: "top 85%", once: true },
+                scrollTrigger: {
+                    trigger: q("[data-about-panel]")[0],
+                    start: "top 85%",
+                    once: true,
+                },
             });
 
             /* Parallax on the panel image. data-speed on the smoother would be
@@ -134,7 +138,7 @@ export default function AboutStatement({ metrics }) {
                     <div data-about-panel="" className="lg:col-span-7">
                         {/* Fixed aspect + overflow-hidden so the parallax translate
                 has somewhere to travel without changing document height. */}
-                        <div className="relative aspect-[16/10] overflow-hidden border border-(--line)">
+                        <div className="relative aspect-16/10 overflow-hidden border border-(--line)">
                             <Image
                                 data-about-img=""
                                 src="/websites/paarel-website.png"

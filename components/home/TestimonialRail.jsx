@@ -284,7 +284,7 @@ export default function TestimonialRail({ testimonials }) {
                             key={t._id}
                             data-quote=""
                             tabIndex={0}
-                            className="flex w-[300px] shrink-0 flex-col justify-between rounded-2xl border border-(--line) bg-(--raised) p-7 outline-none transition-colors duration-300 focus-visible:border-brand md:w-[380px] md:p-9"
+                            className="flex w-75 shrink-0 flex-col justify-between rounded-2xl border border-(--line) bg-(--raised) p-7 outline-none transition-colors duration-300 focus-visible:border-brand md:w-95 md:p-9"
                         >
                             <blockquote className="text-[1.0625rem] leading-[1.6] text-(--text)">
                                 {t.reviewText}

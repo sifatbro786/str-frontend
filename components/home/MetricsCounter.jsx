@@ -18,26 +18,26 @@ import { gsap } from "@/lib/gsap";
  * trigger never fires, the correct number is already on screen.
  */
 export default function MetricsCounter({ value }) {
-  const el = useRef(null);
+    const el = useRef(null);
 
-  useGSAP(
-    () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    useGSAP(
+        () => {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      const obj = { n: 0 };
-      gsap.to(obj, {
-        n: value,
-        duration: 1.6,
-        ease: "power2.out",
-        snap: { n: 1 },
-        onUpdate: () => {
-          if (el.current) el.current.textContent = obj.n;
+            const obj = { n: 0 };
+            gsap.to(obj, {
+                n: value,
+                duration: 1.6,
+                ease: "power2.out",
+                snap: { n: 1 },
+                onUpdate: () => {
+                    if (el.current) el.current.textContent = obj.n;
+                },
+                scrollTrigger: { trigger: el.current, start: "top 85%", once: true },
+            });
         },
-        scrollTrigger: { trigger: el.current, start: "top 85%", once: true },
-      });
-    },
-    { scope: el, dependencies: [value] }
-  );
+        { scope: el, dependencies: [value] },
+    );
 
-  return <span ref={el}>{value}</span>;
+    return <span ref={el}>{value}</span>;
 }

@@ -6,7 +6,7 @@ import ProjectsRail from "./ProjectsRail";
  * All markup and motion live in ProjectsRail.
  */
 export default async function FeaturedProjects() {
-  const items = await getFeaturedProjects(4);
+    const items = await getFeaturedProjects(4);
 
-  return <ProjectsRail items={items} />;
+    return <ProjectsRail items={items} />;
 }

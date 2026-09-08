@@ -16,23 +16,23 @@ import { cn } from "@/lib/utils";
  * /public/logo-invert.png and replace the plate with a second <Image>.
  */
 export default function Logo({ className, priority = false, height = 30 }) {
-  return (
-    <Link
-      href="/"
-      aria-label={`${site.legalName} — home`}
-      className={cn("inline-flex shrink-0 items-center", className)}
-    >
-      <span className="inline-flex items-center dark:bg-white dark:px-2.5 dark:py-1.5">
-        <Image
-          src={site.brand.logo}
-          alt={site.legalName}
-          width={Math.round(height * 4.1)}
-          height={height}
-          priority={priority}
-          sizes="200px"
-          style={{ height, width: "auto" }}
-        />
-      </span>
-    </Link>
-  );
+    return (
+        <Link
+            href="/"
+            aria-label={`${site.legalName} — home`}
+            className={cn("inline-flex shrink-0 items-center", className)}
+        >
+            <span className="inline-flex items-center dark:bg-white dark:px-2.5 dark:py-1.5">
+                <Image
+                    src={site.brand.logo}
+                    alt={site.legalName}
+                    width={Math.round(height * 4.1)}
+                    height={height}
+                    priority={priority}
+                    sizes="200px"
+                    style={{ height, width: "auto" }}
+                />
+            </span>
+        </Link>
+    );
 }

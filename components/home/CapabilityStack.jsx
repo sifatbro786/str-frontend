@@ -194,7 +194,7 @@ export default function CapabilityStack({ services }) {
                                     className="overflow-hidden"
                                     style={{ height: i === 0 ? "auto" : 0 }}
                                 >
-                                    <div className="grid grid-cols-1 gap-8 px-4 pb-9 md:grid-cols-12 md:px-6 md:pl-[4.25rem]">
+                                    <div className="grid grid-cols-1 gap-8 px-4 pb-9 md:grid-cols-12 md:px-6 md:pl-17">
                                         <div className="md:col-span-5">
                                             <p className="max-w-md text-[0.9375rem] leading-relaxed text-(--text-dim)">
                                                 {s.shortDescription}

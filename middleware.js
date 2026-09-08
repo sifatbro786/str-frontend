@@ -13,27 +13,27 @@ const COOKIE = process.env.ADMIN_COOKIE_NAME ?? "str_admin";
  * redirect, and a `next` param so the user lands where they were headed.
  */
 export function middleware(request) {
-  const { pathname, search } = request.nextUrl;
-  const hasToken = Boolean(request.cookies.get(COOKIE)?.value);
+    const { pathname, search } = request.nextUrl;
+    const hasToken = Boolean(request.cookies.get(COOKIE)?.value);
 
-  if (pathname.startsWith("/admin") && !hasToken) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.search = `?next=${encodeURIComponent(pathname + search)}`;
-    return NextResponse.redirect(url);
-  }
+    if (pathname.startsWith("/admin") && !hasToken) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.search = `?next=${encodeURIComponent(pathname + search)}`;
+        return NextResponse.redirect(url);
+    }
 
-  // Already signed in? /login is pointless.
-  if (pathname === "/login" && hasToken) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
+    // Already signed in? /login is pointless.
+    if (pathname === "/login" && hasToken) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        url.search = "";
+        return NextResponse.redirect(url);
+    }
 
-  return NextResponse.next();
+    return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/login"],
+    matcher: ["/admin/:path*", "/login"],
 };

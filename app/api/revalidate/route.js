@@ -8,7 +8,6 @@ import { getToken } from "@/lib/session";
  */
 export const dynamic = "force-dynamic";
 
-
 const TAGS = new Set(["projects", "services", "blogs", "testimonials", "team", "page-meta"]);
 
 /**
@@ -18,13 +17,13 @@ const TAGS = new Set(["projects", "services", "blogs", "testimonials", "team", "
  * regeneration storm.
  */
 export async function POST(request) {
-  if (!(await getToken())) {
-    return NextResponse.json({ success: false }, { status: 401 });
-  }
-  const { tag } = await request.json().catch(() => ({}));
-  if (!TAGS.has(tag)) {
-    return NextResponse.json({ success: false, message: "Unknown tag" }, { status: 400 });
-  }
-  revalidateTag(tag);
-  return NextResponse.json({ success: true, tag });
+    if (!(await getToken())) {
+        return NextResponse.json({ success: false }, { status: 401 });
+    }
+    const { tag } = await request.json().catch(() => ({}));
+    if (!TAGS.has(tag)) {
+        return NextResponse.json({ success: false, message: "Unknown tag" }, { status: 400 });
+    }
+    revalidateTag(tag);
+    return NextResponse.json({ success: true, tag });
 }

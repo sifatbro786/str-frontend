@@ -53,21 +53,6 @@ const PATH = {
     open: "M 0 0 L 100 0 L 100 100 Q 50 100 0 100 Z",
 };
 
-/* Two-line clipped roll. The clone is aria-hidden, so ScrambleText is free to
-   mutate its textContent without ever touching the accessible name. */
-function RollingLabel({ children, setStack, setClone }) {
-    return (
-        <span className="relative block h-[1.25em] overflow-hidden">
-            <span ref={setStack} className="block will-change-transform">
-                <span className="block">{children}</span>
-                <span ref={setClone} aria-hidden="true" className="block text-signal">
-                    {children}
-                </span>
-            </span>
-        </span>
-    );
-}
-
 export default function Navbar() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
@@ -76,7 +61,6 @@ export default function Navbar() {
     const bar = useRef(null); // the header row itself; fixed geometry
     const plate = useRef(null); // out-of-flow background: blur + hairline + shadow
     const navList = useRef(null);
-    const indicator = useRef(null);
     const cta = useRef(null);
     const ctaZone = useRef(null);
     const ctaFill = useRef(null);
@@ -85,10 +69,6 @@ export default function Navbar() {
     const curve = useRef(null);
     const sheetLinks = useRef([]);
     const sheetTl = useRef(null);
-
-    // One ref pair per nav item, allocated once. Index-stable because site.nav is
-    // a module constant — if it ever becomes fetched, key this by href instead.
-    const labelRefs = useRef(site.nav.map(() => ({ stack: null, clone: null })));
 
     const isActive = useCallback(
         (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href)),
@@ -109,8 +89,8 @@ export default function Navbar() {
                the header subtree, and worse, the nav links physically moved
                under the pointer. A link you were about to click slides 40px
                left and 8px up while you are reaching for it. The magnetic pill
-               indicator then had to re-measure mid-flight, which is why it had
-               a ResizeObserver whose only job was to give up and hide.
+               indicator then had to re-measure mid-flight. That indicator is
+               gone too now; see section 2 below.
 
                What is left is the part that was actually doing work: the bar
                gains a background once content is passing behind it, and loses
@@ -158,154 +138,33 @@ export default function Navbar() {
         { scope: root },
     );
 
-    /* ── 2 · Magnetic pill indicator · 3 · roll + scramble ────────────────── */
-    useGSAP(
-        (context, contextSafe) => {
-            const nav = navList.current;
-            const pill = indicator.current;
-            if (!nav || !pill) return;
-            if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    /* ── 2 · DESKTOP NAV HOVER — REMOVED ──────────────────────────────────
+       There used to be about 150 lines here driving three effects on the
+       desktop nav: a magnetic pill that measured and slid between links, a
+       two-line label roll, and a ScrambleText pass over an aria-hidden clone
+       of each label.
 
-            const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+       All three are gone, and the nav is now plain links with one underline
+       (see the markup below). Beyond the request, this was the right thing to
+       lose on its own terms:
 
-            gsap.set(pill, { autoAlpha: 0, x: 0, y: 0, width: 0, height: 0 });
+         · The pill re-measured getBoundingClientRect() on every pointer
+           enter, deliberately, because a cached rect went stale whenever the
+           font swapped or the bar resized. That is a forced synchronous
+           layout on a hover — cheap in isolation, and it fired constantly on
+           the one element people sweep across most.
+         · The roll needed each label rendered twice, so the accessible name
+           and the visible text were two different nodes kept in sync by hand,
+           and ScrambleText owned the clone's textContent while it ran. A fast
+           in-and-out left the clone holding random glyphs until an
+           onReverseComplete handler put the real string back.
+         · It carried a ResizeObserver whose only job was to notice the nav
+           had changed size and give up.
 
-            // quickTo compiles ONE mutating tween per property. Allocating a fresh
-            // tween on every mouseenter across a 5-item nav is what makes these feel
-            // gummy — the previous tween keeps running and fights the new one.
-            const to = {
-                x: gsap.quickTo(pill, "x", { duration: 0.55, ease: EASE }),
-                y: gsap.quickTo(pill, "y", { duration: 0.45, ease: EASE }),
-                width: gsap.quickTo(pill, "width", { duration: 0.55, ease: EASE }),
-                height: gsap.quickTo(pill, "height", { duration: 0.45, ease: EASE }),
-            };
+       Three moving parts, one ResizeObserver and a duplicated DOM node, to
+       decorate a hover. The underline says the same thing with a transform.
 
-            let visible = false;
-
-            const moveTo = (el) => {
-                // Measured live on every enter. The capsule morph changes link geometry
-                // mid-flight and the font swap changes it again — a cached rect parks
-                // the pill over an empty slot.
-                const a = el.getBoundingClientRect();
-                const b = nav.getBoundingClientRect();
-                const x = a.left - b.left;
-                const y = a.top - b.top;
-
-                if (!visible) {
-                    // First entry: appear at the target instead of sliding in from x:0.
-                    gsap.set(pill, { x, y, width: a.width, height: a.height });
-                    visible = true;
-                    gsap.to(pill, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
-                } else {
-                    to.x(x);
-                    to.y(y);
-                    to.width(a.width);
-                    to.height(a.height);
-                }
-            };
-
-            const hide = () => {
-                visible = false;
-                gsap.to(pill, { autoAlpha: 0, duration: 0.35, ease: "power2.out" });
-            };
-
-            /* One roll timeline per link, built lazily and driven with
-         play()/reverse(). A fresh tween per pointer event is exactly how these
-         desync when the cursor leaves mid-roll. */
-            const timelines = new Map();
-
-            const buildRoll = (i) => {
-                const refs = labelRefs.current[i];
-                if (!refs?.stack) return null;
-                const text = site.nav[i].label;
-
-                const tl = gsap.timeline({ paused: true });
-                tl.to(refs.stack, { yPercent: -50, duration: 0.5, ease: "power3.inOut" }, 0);
-                // General Sans ships as static 400/500/600/700 from Fontshare, so a
-                // fontWeight tween would step between faces mid-roll. Tracking is
-                // continuous and reads as the same "firming up" gesture, no jump.
-                //
-                // fromTo, not to: the computed start value is the keyword `normal`,
-                // which GSAP cannot parse into a number — a plain .to() here yields NaN
-                // and the label silently stops tracking.
-                tl.fromTo(
-                    refs.stack,
-                    { letterSpacing: "0em" },
-                    { letterSpacing: "0.014em", duration: 0.5 },
-                    0,
-                );
-
-                if (!reduced) {
-                    tl.to(
-                        refs.clone,
-                        {
-                            duration: 0.45,
-                            ease: "none",
-                            scrambleText: {
-                                text,
-                                chars: "upperCase",
-                                speed: 0.7,
-                                revealDelay: 0.12,
-                            },
-                        },
-                        0.05,
-                    );
-                }
-                // ScrambleText owns textContent while it runs; restore the real string
-                // once the roll is fully back so a fast in-out leaves no debris.
-                tl.eventCallback("onReverseComplete", () => {
-                    if (refs.clone) refs.clone.textContent = text;
-                });
-                return tl;
-            };
-
-            const onEnter = contextSafe((e) => {
-                const link = e.currentTarget;
-                const i = Number(link.dataset.index);
-                moveTo(link);
-                let tl = timelines.get(link);
-                if (!tl) {
-                    tl = buildRoll(i);
-                    if (tl) timelines.set(link, tl);
-                }
-                tl?.play();
-            });
-
-            const onLeave = contextSafe((e) => {
-                timelines.get(e.currentTarget)?.reverse();
-            });
-
-            const links = gsap.utils.toArray("[data-navlink]", nav);
-            links.forEach((l) => {
-                l.addEventListener("mouseenter", onEnter);
-                l.addEventListener("mouseleave", onLeave);
-                l.addEventListener("focus", onEnter);
-                l.addEventListener("blur", onLeave);
-            });
-            nav.addEventListener("mouseleave", hide);
-
-            // The morph and the webfont swap both resize the nav. Retiring the pill
-            // beats animating it to a position the pointer is no longer near.
-            const ro = new ResizeObserver(() => visible && hide());
-            ro.observe(nav);
-
-            return () => {
-                links.forEach((l) => {
-                    l.removeEventListener("mouseenter", onEnter);
-                    l.removeEventListener("mouseleave", onLeave);
-                    l.removeEventListener("focus", onEnter);
-                    l.removeEventListener("blur", onLeave);
-                });
-                nav.removeEventListener("mouseleave", hide);
-                ro.disconnect();
-                timelines.forEach((t) => t.kill());
-                timelines.clear();
-            };
-        },
-        { scope: root },
-    );
-
-    /* ── 4 · Magnetic CTA + directional liquid fill ───────────────────────── */
+       ── 3 · Magnetic CTA + directional liquid fill ───────────────────────── */
     useGSAP(
         (context, contextSafe) => {
             const zone = ctaZone.current;
@@ -406,7 +265,7 @@ export default function Navbar() {
         { scope: root },
     );
 
-    /* ── 5 · Mobile overlay: curved SVG sweep + 3D staggered links ────────── */
+    /* ── 4 · Mobile overlay: curved SVG sweep + 3D staggered links ────────── */
     useGSAP(
         () => {
             const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -535,54 +394,52 @@ export default function Navbar() {
 
                     <Logo priority height={35} />
 
-                    {/* Desktop nav */}
+                    {/* ── Desktop nav ──────────────────────────────────────────
+              Plain links and one underline. Everything that used to happen
+              here — the magnetic pill sliding between items, the two-line
+              label roll, the ScrambleText pass on hover — is gone. See the
+              note above the removed effect for why.
+
+              The rule is a child span rather than a border-bottom on the
+              link, because a border cannot be animated from nothing: it
+              would appear at full width the instant the class flips. A span
+              scaled on X grows out from the centre, and scaleX is
+              composited, so the whole interaction is one GPU property with
+              no layout involvement at all. */}
                     <nav
                         ref={navList}
                         aria-label="Primary"
-                        className="relative hidden items-center gap-0.5 lg:flex"
+                        className="hidden items-center gap-1 lg:flex"
                     >
-                        <span
-                            ref={indicator}
-                            aria-hidden="true"
-                            className="pointer-events-none invisible absolute left-0 top-0 -z-10 rounded-full border border-(--line) bg-(--raised-2) opacity-0"
-                        />
-
-                        {site.nav.map((item, i) => {
+                        {site.nav.map((item) => {
                             const active = isActive(item.href);
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    data-navlink=""
-                                    data-index={i}
                                     aria-current={active ? "page" : undefined}
                                     className={cn(
-                                        "relative inline-flex items-center rounded-full px-4 py-2 text-[0.9375rem] transition-colors duration-300",
+                                        "group/nav relative inline-flex items-center px-3.5 py-2 text-[0.9375rem] transition-colors duration-200",
                                         active
                                             ? "text-(--text)"
                                             : "text-(--text-mute) hover:text-(--text)",
                                     )}
                                 >
-                                    {/* Active route = one signal dot. The indicator behind the
-                      label is a neutral surface, never a filled brand pill —
-                      that remains the generated-UI tell we avoid. */}
+                                    {item.label}
+
                                     <span
                                         aria-hidden="true"
                                         className={cn(
-                                            "mr-2 block size-1 shrink-0 rounded-full bg-signal transition-opacity duration-300",
-                                            active ? "opacity-100" : "opacity-0",
+                                            "absolute inset-x-3.5 bottom-1 block h-px origin-center transition-transform duration-300 ease-out",
+                                            active
+                                                ? "scale-x-100 bg-brand"
+                                                : // Hover gets the same rule in a muted colour, so
+                                                  // the affordance and the active state are
+                                                  // obviously the same object rather than two
+                                                  // competing signals.
+                                                  "scale-x-0 bg-(--text-mute) group-hover/nav:scale-x-100",
                                         )}
                                     />
-                                    <RollingLabel
-                                        setStack={(el) => {
-                                            labelRefs.current[i].stack = el;
-                                        }}
-                                        setClone={(el) => {
-                                            labelRefs.current[i].clone = el;
-                                        }}
-                                    >
-                                        {item.label}
-                                    </RollingLabel>
                                 </Link>
                             );
                         })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import worldData from "world-atlas/countries-110m.json";
@@ -67,6 +67,64 @@ const MARKETS = [
 const CARD_W = 172;
 const CARD_H = 52;
 const LEADER = 34; // vertical run from pin to card
+
+/**
+ * The landmass, isolated behind memo().
+ *
+ * ── WHY THIS IS ITS OWN COMPONENT ────────────────────────────────────────
+ * countries-110m is roughly 240 country features, each rendering a <path>
+ * with a long `d` string. Inline in the parent, every one of those paths was
+ * reconciled by React on every parent render — and the parent re-renders on
+ * every pointer enter and leave of every pin, because `active` is state. So
+ * hovering across the map ran a 240-node diff per pin, twice.
+ *
+ * memo() with no props means React renders it once and never again. The land
+ * is static by definition; nothing about it depends on which pin is hovered.
+ *
+ * ── pointer-events: none ─────────────────────────────────────────────────
+ * The countries are decoration. Leaving them hit-testable means the browser
+ * runs point-in-path against 240 complex paths on every mousemove across the
+ * map, and it also lets a country swallow a pin's hover when their bounding
+ * boxes overlap.
+ *
+ * ── shapeRendering ───────────────────────────────────────────────────────
+ * optimizeSpeed drops antialiasing on the country fills. At this size the
+ * borders are drawn by the 0.6px stroke rather than by the fill edges, so
+ * the visible difference is nil and the rasterisation is materially cheaper.
+ */
+const Land = memo(function Land() {
+    return (
+        <Geographies geography={worldData}>
+            {({ geographies }) => (
+                <g data-land="" pointerEvents="none" shapeRendering="optimizeSpeed">
+                    {geographies.map((geo) => (
+                        <Geography
+                            key={geo.rsmKey}
+                            geography={geo}
+                            /* Same float-precision exposure as the markers,
+                               and much larger: every country's `d` attribute
+                               is hundreds of projected coordinates. The
+                               markers are simply what React happened to
+                               report first. See the note on <Marker> below. */
+                            suppressHydrationWarning
+                            // Fill and stroke one step apart in the same family,
+                            // so borders read as creases in a single sheet
+                            // rather than outlines around shapes.
+                            fill="var(--raised-2)"
+                            stroke="var(--canvas)"
+                            strokeWidth={0.6}
+                            style={{
+                                default: { outline: "none" },
+                                hover: { outline: "none" },
+                                pressed: { outline: "none" },
+                            }}
+                        />
+                    ))}
+                </g>
+            )}
+        </Geographies>
+    );
+});
 
 export default function GeoWorldMap({ className }) {
     const root = useRef(null);
@@ -181,29 +239,7 @@ export default function GeoWorldMap({ className }) {
                 role="img"
                 aria-label={`Countries served: ${MARKETS.map((m) => m.name).join(", ")}`}
             >
-                <Geographies geography={worldData}>
-                    {({ geographies }) => (
-                        <g data-land="">
-                            {geographies.map((geo) => (
-                                <Geography
-                                    key={geo.rsmKey}
-                                    geography={geo}
-                                    // Fill and stroke one step apart in the same
-                                    // family, so borders read as creases in a single
-                                    // sheet rather than outlines around shapes.
-                                    fill="var(--raised-2)"
-                                    stroke="var(--canvas)"
-                                    strokeWidth={0.6}
-                                    style={{
-                                        default: { outline: "none" },
-                                        hover: { outline: "none" },
-                                        pressed: { outline: "none" },
-                                    }}
-                                />
-                            ))}
-                        </g>
-                    )}
-                </Geographies>
+                <Land />
 
                 {MARKETS.map((m) => {
                     const on = active === m.code;
@@ -211,13 +247,48 @@ export default function GeoWorldMap({ className }) {
                         <Marker
                             key={m.code}
                             coordinates={m.coords}
+                            /* ── WHY suppressHydrationWarning IS CORRECT HERE ──
+                               Marker renders transform="translate(x, y)" where
+                               x and y come out of the d3 projection. Node
+                               produced 109.6164622611006 and the browser
+                               109.61646226110062 for the same input, so React
+                               reported a hydration mismatch.
+
+                               That is not a bug in this code and it cannot be
+                               fixed by writing it differently. ECMA-262 leaves
+                               the precision of Math.sin, Math.cos, Math.atan
+                               and friends implementation-defined, and
+                               geoEqualEarth is trigonometry all the way down.
+                               Node and the browser are free to differ in the
+                               last bit, and they do. Any float that reaches an
+                               attribute through a transcendental is exposed.
+
+                               suppressHydrationWarning is the API React
+                               provides for exactly this: a value that
+                               legitimately differs between server and client
+                               and does not matter. It applies to this element's
+                               own attributes only, so a real mismatch anywhere
+                               else still reports. The kept value is the
+                               server's, which is a ten-thousandth of a pixel
+                               from the client's.
+
+                               The alternatives are worse: rounding would mean
+                               abandoning <Marker> and reimplementing the
+                               projection to stay in sync with ComposableMap's
+                               config by hand, and rendering client-only would
+                               blank the largest element above the fold until
+                               hydration. */
+                            suppressHydrationWarning
                             onMouseEnter={() => setActive(m.code)}
                             onMouseLeave={() => setActive(null)}
                         >
                             {/* Generous transparent hit area. The visible pin is 9px
                   across and a pointer target that small is unusable, but
                   growing the pin to fix it would wreck the graphic. */}
-                            <circle r={16} fill="transparent" tabIndex={0}
+                            <circle
+                                r={16}
+                                fill="transparent"
+                                tabIndex={0}
                                 onFocus={() => setActive(m.code)}
                                 onBlur={() => setActive(null)}
                                 className="outline-none"

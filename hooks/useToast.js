@@ -13,39 +13,39 @@ let nextId = 0;
  * reader hears the result of a save without moving focus.
  */
 export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
+    const [toasts, setToasts] = useState([]);
 
-  const dismiss = useCallback((id) => {
-    setToasts((list) => list.filter((t) => t.id !== id));
-  }, []);
+    const dismiss = useCallback((id) => {
+        setToasts((list) => list.filter((t) => t.id !== id));
+    }, []);
 
-  const push = useCallback(
-    (tone, message) => {
-      const id = ++nextId;
-      setToasts((list) => [...list, { id, tone, message }]);
-      setTimeout(() => dismiss(id), 4000);
-    },
-    [dismiss]
-  );
+    const push = useCallback(
+        (tone, message) => {
+            const id = ++nextId;
+            setToasts((list) => [...list, { id, tone, message }]);
+            setTimeout(() => dismiss(id), 4000);
+        },
+        [dismiss],
+    );
 
-  const value = useMemo(
-    () => ({
-      success: (message) => push("success", message),
-      error: (message) => push("error", message),
-    }),
-    [push]
-  );
+    const value = useMemo(
+        () => ({
+            success: (message) => push("success", message),
+            error: (message) => push("error", message),
+        }),
+        [push],
+    );
 
-  return (
-    <ToastContext.Provider value={value}>
-      {children}
-      <ToastStack toasts={toasts} onDismiss={dismiss} />
-    </ToastContext.Provider>
-  );
+    return (
+        <ToastContext.Provider value={value}>
+            {children}
+            <ToastStack toasts={toasts} onDismiss={dismiss} />
+        </ToastContext.Provider>
+    );
 }
 
 export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast must be used inside <ToastProvider>");
-  return ctx;
+    const ctx = useContext(ToastContext);
+    if (!ctx) throw new Error("useToast must be used inside <ToastProvider>");
+    return ctx;
 }

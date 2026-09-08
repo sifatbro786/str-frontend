@@ -14,44 +14,51 @@ import { cn } from "@/lib/utils";
  * would be a second implementation of a rule that can change on the server.
  */
 export default function MultiSelect({ value = [], onChange, min = 1, max = 4 }) {
-  function toggle(slug) {
-    onChange(value.includes(slug) ? value.filter((v) => v !== slug) : [...value, slug]);
-  }
+    function toggle(slug) {
+        onChange(value.includes(slug) ? value.filter((v) => v !== slug) : [...value, slug]);
+    }
 
-  const over = value.length > max;
-  const under = value.length < min;
+    const over = value.length > max;
+    const under = value.length < min;
 
-  return (
-    <div>
-      <ul className="grid gap-px bg-(--line) sm:grid-cols-2">
-        {SERVICE_TYPES.map((slug) => {
-          const checked = value.includes(slug);
-          return (
-            <li key={slug} className="bg-(--canvas)">
-              <label
-                htmlFor={`svc-${slug}`}
+    return (
+        <div>
+            <ul className="grid gap-px bg-(--line) sm:grid-cols-2">
+                {SERVICE_TYPES.map((slug) => {
+                    const checked = value.includes(slug);
+                    return (
+                        <li key={slug} className="bg-(--canvas)">
+                            <label
+                                htmlFor={`svc-${slug}`}
+                                className={cn(
+                                    "flex cursor-pointer items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-(--raised-2)",
+                                    checked && "bg-(--raised-2)",
+                                )}
+                            >
+                                <input
+                                    id={`svc-${slug}`}
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggle(slug)}
+                                    className="size-4 shrink-0 accent-brand"
+                                />
+                                <span className="text-[0.9375rem] text-(--text)">
+                                    {SERVICE_LABELS[slug] ?? slug}
+                                </span>
+                            </label>
+                        </li>
+                    );
+                })}
+            </ul>
+
+            <p
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-(--raised-2)",
-                  checked && "bg-(--raised-2)"
+                    "label-mono mt-2",
+                    over || under ? "text-signal" : "text-(--text-mute)",
                 )}
-              >
-                <input
-                  id={`svc-${slug}`}
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(slug)}
-                  className="size-4 shrink-0 accent-brand"
-                />
-                <span className="text-[0.9375rem] text-(--text)">{SERVICE_LABELS[slug] ?? slug}</span>
-              </label>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className={cn("label-mono mt-2", over || under ? "text-signal" : "text-(--text-mute)")}>
-        {value.length} selected · {min}–{max} required
-      </p>
-    </div>
-  );
+            >
+                {value.length} selected · {min}–{max} required
+            </p>
+        </div>
+    );
 }

@@ -27,78 +27,79 @@ import { gsap } from "@/lib/gsap";
  * over is a one-line change once someone is in that file for another reason.
  */
 export function useLiquidFill(scope, { duration = 0.62 } = {}) {
-  useGSAP(
-    (context, contextSafe) => {
-      const el = scope.current;
-      if (!el) return;
+    useGSAP(
+        (context, contextSafe) => {
+            const el = scope.current;
+            if (!el) return;
 
-      const fills = gsap.utils.toArray("[data-liquid-fill]", el);
-      // Resting state is off the bottom with a convex top edge, set here rather
-      // than in CSS so the first hover animates from a known transform origin.
-      gsap.set(fills, { yPercent: 101, borderRadius: "42% 58% 0 0" });
+            const fills = gsap.utils.toArray("[data-liquid-fill]", el);
+            // Resting state is off the bottom with a convex top edge, set here rather
+            // than in CSS so the first hover animates from a known transform origin.
+            gsap.set(fills, { yPercent: 101, borderRadius: "42% 58% 0 0" });
 
-      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      let active = null;
+            let active = null;
 
-      const edge = (btn, e) => {
-        const r = btn.getBoundingClientRect();
-        return e.clientY < r.top + r.height / 2 ? -1 : 1; // -1 top, 1 bottom
-      };
+            const edge = (btn, e) => {
+                const r = btn.getBoundingClientRect();
+                return e.clientY < r.top + r.height / 2 ? -1 : 1; // -1 top, 1 bottom
+            };
 
-      const shape = (dir) => (dir === 1 ? "42% 58% 0 0" : "0 0 58% 42%");
+            const shape = (dir) => (dir === 1 ? "42% 58% 0 0" : "0 0 58% 42%");
 
-      const onOver = contextSafe((e) => {
-        const btn = e.target.closest?.("[data-liquid]");
-        if (!btn || btn === active) return;
-        active = btn;
+            const onOver = contextSafe((e) => {
+                const btn = e.target.closest?.("[data-liquid]");
+                if (!btn || btn === active) return;
+                active = btn;
 
-        const fill = btn.querySelector("[data-liquid-fill]");
-        const dir = edge(btn, e);
-        gsap.killTweensOf(fill);
-        gsap.fromTo(
-          fill,
-          { yPercent: dir * 101, borderRadius: shape(dir) },
-          { yPercent: 0, borderRadius: "0% 0% 0% 0%", duration, ease: "power3.out" }
-        );
+                const fill = btn.querySelector("[data-liquid-fill]");
+                const dir = edge(btn, e);
+                gsap.killTweensOf(fill);
+                gsap.fromTo(
+                    fill,
+                    { yPercent: dir * 101, borderRadius: shape(dir) },
+                    { yPercent: 0, borderRadius: "0% 0% 0% 0%", duration, ease: "power3.out" },
+                );
 
-        const on = btn.dataset.liquidOn;
-        if (on) btn.querySelector("[data-liquid-label]")?.classList.add(...on.split(/\s+/));
-      });
+                const on = btn.dataset.liquidOn;
+                if (on) btn.querySelector("[data-liquid-label]")?.classList.add(...on.split(/\s+/));
+            });
 
-      const onOut = contextSafe((e) => {
-        if (!active) return;
-        if (e.relatedTarget && active.contains(e.relatedTarget)) return;
+            const onOut = contextSafe((e) => {
+                if (!active) return;
+                if (e.relatedTarget && active.contains(e.relatedTarget)) return;
 
-        const btn = active;
-        active = null;
+                const btn = active;
+                active = null;
 
-        const fill = btn.querySelector("[data-liquid-fill]");
-        const dir = edge(btn, e);
-        gsap.killTweensOf(fill);
-        gsap.to(fill, {
-          yPercent: dir * 101,
-          borderRadius: shape(dir),
-          duration: duration * 0.8,
-          ease: "power3.in",
-        });
+                const fill = btn.querySelector("[data-liquid-fill]");
+                const dir = edge(btn, e);
+                gsap.killTweensOf(fill);
+                gsap.to(fill, {
+                    yPercent: dir * 101,
+                    borderRadius: shape(dir),
+                    duration: duration * 0.8,
+                    ease: "power3.in",
+                });
 
-        const on = btn.dataset.liquidOn;
-        if (on) btn.querySelector("[data-liquid-label]")?.classList.remove(...on.split(/\s+/));
-      });
+                const on = btn.dataset.liquidOn;
+                if (on)
+                    btn.querySelector("[data-liquid-label]")?.classList.remove(...on.split(/\s+/));
+            });
 
-      el.addEventListener("pointerover", onOver);
-      el.addEventListener("pointerout", onOut);
+            el.addEventListener("pointerover", onOver);
+            el.addEventListener("pointerout", onOut);
 
-      return () => {
-        el.removeEventListener("pointerover", onOver);
-        el.removeEventListener("pointerout", onOut);
-        gsap.killTweensOf(fills);
-      };
-    },
-    { scope, dependencies: [] }
-  );
+            return () => {
+                el.removeEventListener("pointerover", onOver);
+                el.removeEventListener("pointerout", onOut);
+                gsap.killTweensOf(fills);
+            };
+        },
+        { scope, dependencies: [] },
+    );
 }
 
 export default useLiquidFill;

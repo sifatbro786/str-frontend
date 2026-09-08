@@ -59,7 +59,27 @@ import { site } from "@/lib/site";
  */
 
 const MIN_HOLD = 5000; // ms
-const ONCE_PER_SESSION = true;
+
+/* ── WHY THIS IS false, AND WHY THE LOADER "DISAPPEARED" ─────────────────
+ * This was true, and that is the entire reason the loader stopped appearing.
+ *
+ * sessionStorage survives a refresh. It is cleared when the TAB closes, not
+ * when the page reloads. So the loader ran once, wrote its flag, and then
+ * every subsequent reload in that same tab took the skip path — which is
+ * exactly what someone iterating on the site does a hundred times a day. It
+ * was not broken; it was doing what it was told, and what it was told was
+ * wrong for a five second branded intro that is supposed to be the first
+ * thing you see.
+ *
+ * false means it runs on every full page load. It does NOT run on client-side
+ * navigation between routes, because this component lives in the (public)
+ * layout and the layout is not remounted when the route changes underneath
+ * it — so moving around the site costs nothing.
+ *
+ * Set it back to true if the five seconds ever starts costing conversions on
+ * repeat visits; the flag and the storage read are still here for that.
+ */
+const ONCE_PER_SESSION = false;
 const SESSION_KEY = "str-intro-seen";
 const RULES = 5;
 const PANELS = 5;
@@ -435,10 +455,7 @@ export default function IntroLoader() {
                     <p data-intro-meta="" className="label-mono text-(--text-mute)">
                         {site.address.city}, {site.address.country}
                     </p>
-                    <p
-                        data-intro-meta=""
-                        className="label-mono tabular-nums text-(--text-mute)"
-                    >
+                    <p data-intro-meta="" className="label-mono tabular-nums text-(--text-mute)">
                         <span ref={clock}>00:00:00</span>
                         <span className="ml-2 text-(--line)">GMT+6</span>
                     </p>

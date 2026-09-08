@@ -139,13 +139,13 @@ export default function Hero() {
                   shaved mid-transition. The negative margin cancels the
                   padding so the line rhythm is unchanged while the clip
                   rectangle grows. */}
-                            <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
+                            <span className="my-[-0.14em] block overflow-hidden py-[0.14em]">
                                 <span data-hero-line="" className="block will-change-transform">
                                     We build
                                 </span>
                             </span>
 
-                            <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
+                            <span className="my-[-0.14em] block overflow-hidden py-[0.14em]">
                                 <span data-hero-line="" className="block will-change-transform">
                                     <RotatingWord
                                         phrases={SERVICES}
@@ -155,7 +155,7 @@ export default function Hero() {
                                 </span>
                             </span>
 
-                            <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
+                            <span className="my-[-0.14em] block overflow-hidden py-[0.14em]">
                                 <span data-hero-line="" className="block will-change-transform">
                                     that hold up after launch.
                                 </span>
@@ -257,14 +257,14 @@ export default function Hero() {
                 <LoopMarquee
                     items={DISCIPLINES}
                     speed={52}
-                    className="mask-x"
+                    fade="var(--raised)"
                     renderItem={(label, i) => (
                         <span
                             key={`${label}-${i}`}
                             className="group/disc flex shrink-0 items-center gap-8 pr-8 md:gap-12 md:pr-12"
                         >
                             <span
-                                className="text-[clamp(1.75rem,4.5vw,3.25rem)] leading-none font-medium tracking-[-0.025em] transition-colors duration-300 group-hover/disc:text-brand"
+                                className="text-[clamp(1.75rem,4.5vw,3.25rem)] leading-none font-medium tracking-tight transition-colors duration-300 group-hover/disc:text-brand"
                                 style={
                                     i % 2
                                         ? {
