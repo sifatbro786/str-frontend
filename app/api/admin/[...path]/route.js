@@ -34,6 +34,7 @@ const ALLOWED = new Set([
     "team",
     "inquiries",
     "page-meta",
+    "site-content",
     "stats",
     "users",
 ]);

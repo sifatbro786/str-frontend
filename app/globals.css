@@ -439,31 +439,87 @@ html {
     display: inline-block;
 }
 
-/* Custom cursor.
- *
- * ── WHY THIS IS GATED ON AN ATTRIBUTE ────────────────────────────────────
- * This used to be a bare `body { cursor: none }` inside a media query, which
- * assumed the replacement cursor was always mounted. It is not: CustomCursor
- * lives in app/(public)/layout.js, so /admin and /login rendered no cursor
- * component AND no native pointer. The admin panel had an invisible mouse.
- *
- * The component now stamps data-custom-cursor on <html> when it is actually
- * running, and clears it on unmount. So the native cursor is hidden only when
- * something is genuinely drawing a replacement — which also covers the cases
- * the media query could never see, like the component bailing out because the
- * user turned on Reduce Motion mid-session.
- *
- * Never over text-entry controls either: swapping an I-beam for a dot makes a
- * field feel broken. */
-html[data-custom-cursor] body {
-    cursor: none;
-}
-html[data-custom-cursor] :is(input, textarea, select, [contenteditable]) {
-    cursor: auto;
+/* ─────────────────────────────────────────────────────────────
+   ADMIN SURFACE
+   ─────────────────────────────────────────────────────────────
+   Everything below applies only inside [data-admin], which
+   AdminShell stamps on the dashboard root. /login and every
+   public route are untouched.
+
+   ── WHY A SCOPED STYLESHEET AND NOT A PASS OVER ELEVEN PAGES ─
+   The dashboard's visual language lives almost entirely in
+   shared primitives — Fields' CONTROL string, DataTable,
+   Toolbar, StatCard — plus a few hundred inline utility
+   classes spread across the route files. Retyping those class
+   lists would be a very large diff that changes no behaviour
+   and invites a typo on every line.
+
+   The corners, surfaces and borders are the whole difference
+   between "editorial" and "dashboard", and all three are
+   inheritable properties on generic selectors. So they are set
+   here once, at the boundary, and every admin page inherits
+   them without being edited.
+
+   ── WHY THE PUBLIC SITE MUST NOT INHERIT THIS ────────────────
+   Square corners and hairlines are a deliberate choice out
+   there — see the notes in PageMasthead and StatusPill. The
+   admin panel wants the opposite because it is a tool, not a
+   page: a client uses it weekly and should recognise it
+   instantly. The two are allowed to disagree; the attribute is
+   what lets them.
+
+   ⚑ Radius is applied to elements, never to `*`. A universal
+   rule would round the SVG icons' rects and the theme toggle,
+   which is why the selector lists are explicit.
+   ───────────────────────────────────────────────────────────── */
+
+[data-admin] {
+    /* One notch off --canvas so cards read as raised against the page
+       rather than needing a shadow to separate them. */
+    --admin-bg: var(--color-paper-100);
+    --admin-card: var(--color-paper-50);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #smooth-content {
-        will-change: auto;
-    }
+.dark [data-admin] {
+    --admin-bg: var(--color-ink-950);
+    --admin-card: var(--color-ink-900);
+}
+
+/* Controls: rounded, and taller than the public site's inputs. Admin forms are
+   worked through in sequence, so the target size matters more than density. */
+[data-admin] :is(input, textarea, select, button, a[class*="border"]) {
+    border-radius: 0.5rem;
+}
+
+[data-admin] :is(input, textarea, select) {
+    background-color: var(--admin-card);
+}
+
+/* Bordered blocks — cards, tables, panels, the hairline grids the pages build
+   with `border border-(--line)`. Only elements that actually carry a border
+   are rounded; there is deliberately no universal rule, because rounding every
+   descendant is how a 4px radius ends up on a table cell. */
+[data-admin] main :is(section, div, form, ul, ol, table, article)[class*="border-("] {
+    border-radius: 0.75rem;
+}
+
+/* The 1px-gap hairline grids (StatCard rows, spec grids) use the parent's
+   background as the rule. Clipping keeps the outer corners round while the
+   inner rules stay square, which is the conventional dashboard look. */
+[data-admin] main [class*="gap-px"] {
+    overflow: hidden;
+    border-radius: 0.75rem;
+}
+
+/* Cards paint the raised surface rather than the page ground. */
+[data-admin] main .bg-\(--canvas\) {
+    background-color: var(--admin-card);
+}
+
+/* Focus ring. The public site relies on a border-colour change alone, which is
+   a weak affordance in a form someone tabs through fifteen fields of. */
+[data-admin] :is(input, textarea, select):focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: -1px;
+    border-color: var(--color-brand);
 }

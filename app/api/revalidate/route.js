@@ -8,7 +8,15 @@ import { getToken } from "@/lib/session";
  */
 export const dynamic = "force-dynamic";
 
-const TAGS = new Set(["projects", "services", "blogs", "testimonials", "team", "page-meta"]);
+const TAGS = new Set([
+    "projects",
+    "services",
+    "blogs",
+    "testimonials",
+    "team",
+    "page-meta",
+    "site-content",
+]);
 
 /**
  * POST /api/revalidate { tag } — busts the ISR cache for the public pages after

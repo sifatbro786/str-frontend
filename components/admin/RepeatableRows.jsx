@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { CONTROL } from "./Fields";
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from "./icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,6 +15,11 @@ import { cn } from "@/lib/utils";
  *
  * `_key` is stripped on submit by stripKeys() below; it must never reach the API.
  */
+
+/** The three per-row controls, so they cannot drift apart. */
+const ROW_BUTTON =
+    "grid size-9 place-items-center rounded-lg border border-(--line) text-(--text-mute) transition-colors hover:bg-(--raised-2) hover:text-(--text) disabled:opacity-30 disabled:hover:bg-transparent";
+
 export default function RepeatableRows({
     value = [],
     onChange,
@@ -46,7 +52,7 @@ export default function RepeatableRows({
     return (
         <div>
             {rows.length > 0 && (
-                <ul className="border border-(--line)">
+                <ul className="overflow-hidden rounded-xl border border-(--line)">
                     {rows.map((row, i) => (
                         <li
                             key={row._key}
@@ -60,7 +66,7 @@ export default function RepeatableRows({
                                     >
                                         <label
                                             htmlFor={`${row._key}-${c.key}`}
-                                            className="label-mono block text-(--text-mute)"
+                                            className="block text-[0.8125rem] font-medium text-(--text-mute)"
                                         >
                                             {c.label}{" "}
                                             {c.required && <span className="text-signal">*</span>}
@@ -91,32 +97,38 @@ export default function RepeatableRows({
                                     </div>
                                 ))}
 
-                                <div className="flex shrink-0 gap-1.5">
+                                {/* aria-label on every one of these: the icon is
+                                    the only content, so without it a screen
+                                    reader announces three unlabelled buttons per
+                                    row. The row number is in the label because
+                                    "Move up" repeated eight times is no more
+                                    useful than nothing. */}
+                                <div className="flex shrink-0 gap-1">
                                     <button
                                         type="button"
                                         onClick={() => move(i, -1)}
                                         disabled={i === 0}
                                         aria-label={`Move row ${i + 1} up`}
-                                        className="label-mono border border-(--line) px-2.5 py-2.5 text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text) disabled:opacity-30"
+                                        className={ROW_BUTTON}
                                     >
-                                        ↑
+                                        <ChevronUpIcon className="size-4" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => move(i, 1)}
                                         disabled={i === rows.length - 1}
                                         aria-label={`Move row ${i + 1} down`}
-                                        className="label-mono border border-(--line) px-2.5 py-2.5 text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text) disabled:opacity-30"
+                                        className={ROW_BUTTON}
                                     >
-                                        ↓
+                                        <ChevronDownIcon className="size-4" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => update(rows.filter((_, j) => j !== i))}
                                         aria-label={`Remove row ${i + 1}`}
-                                        className="label-mono border border-(--line) px-2.5 py-2.5 text-(--text-dim) transition-colors hover:border-signal hover:text-signal"
+                                        className={cn(ROW_BUTTON, "hover:!text-signal")}
                                     >
-                                        ✕
+                                        <TrashIcon className="size-4" />
                                     </button>
                                 </div>
                             </div>
@@ -129,9 +141,10 @@ export default function RepeatableRows({
                 type="button"
                 onClick={() => update([...rows, { ...newRow, _key: `k${++seq.current}` }])}
                 disabled={rows.length >= max}
-                className="label-mono mt-3 border border-(--line) px-4 py-2.5 text-(--text-dim) transition-colors hover:border-signal hover:text-signal disabled:opacity-40"
+                className="mt-3 inline-flex items-center gap-2 rounded-lg border border-(--line) px-3.5 py-2 text-[0.875rem] font-medium text-(--text-dim) transition-colors hover:border-brand hover:text-brand disabled:opacity-40"
             >
-                + {addLabel}
+                <PlusIcon className="size-4" />
+                {addLabel}
             </button>
         </div>
     );

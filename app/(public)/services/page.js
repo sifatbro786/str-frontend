@@ -5,9 +5,8 @@ import CTABand from "@/components/ui/CTABand";
 import ProcessTracker from "@/components/home/ProcessTracker";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
-import { getServices } from "@/lib/api";
+import { getServices, getSiteContent } from "@/lib/api";
 import { buildMetadata, breadcrumbSchema, serviceSchema } from "@/lib/seo";
-import { processSteps } from "@/lib/data";
 import { SERVICE_MEDIA } from "@/lib/taxonomy";
 import { cn, pad } from "@/lib/utils";
 
@@ -44,7 +43,12 @@ export async function generateMetadata() {
  * they would drift. The index and eyebrow are props for exactly this reuse.
  */
 export default async function ServicesPage() {
-    const services = await getServices();
+    /* Two independent round trips, issued together rather than in sequence —
+       the process steps do not depend on the service list. */
+    const [services, processSteps] = await Promise.all([
+        getServices(),
+        getSiteContent("process"),
+    ]);
 
     return (
         <>
@@ -176,9 +180,9 @@ export default async function ServicesPage() {
                 </div>
             </section>
 
-            {/* ⚑ processSteps is still site copy in lib/data — there is no
-          endpoint behind it. When it gets an admin screen it moves to
-          lib/api and this import disappears. */}
+            {/* Same steps the homepage renders, from the same SiteContent row.
+          The index and eyebrow are props precisely so one source can serve
+          both placements without the copy drifting. */}
             <ProcessTracker steps={processSteps} index="02" eyebrow="How it runs" />
 
             <CTABand

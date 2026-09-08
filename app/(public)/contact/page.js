@@ -4,8 +4,7 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema, buildMetadata, faqSchema } from "@/lib/seo";
-import { getServices } from "@/lib/api";
-import { faqs } from "@/lib/data";
+import { getServices, getSiteContent } from "@/lib/api";
 import { site } from "@/lib/site";
 import { pad } from "@/lib/utils";
 
@@ -57,7 +56,7 @@ const DIRECT = [
  * launch, not a design decision.
  */
 export default async function ContactPage() {
-    const services = await getServices();
+    const [services, faqs] = await Promise.all([getServices(), getSiteContent("faqs")]);
 
     const addressLines = [site.address.line1, site.address.line2, site.address.country].filter(
         Boolean,

@@ -86,14 +86,6 @@ export default async function ArticlePage({ params }) {
                 ]}
             />
 
-            {/* ⚑ The reading-progress bar was removed. The component still
-                exists at components/blogs/ReadingProgress.jsx and works, but a
-                permanent coloured rule pinned under the navbar is a second
-                horizontal line competing with the header's own border on every
-                article, and it reads as a rendering artefact rather than as
-                progress until you have already scrolled. Re-add
-                <ReadingProgress /> here to bring it back. */}
-
             {/* ── Masthead ────────────────────────────────────────────── */}
             <header className="border-b border-(--line)">
                 <div className="shell pt-24 pb-14 md:pt-32">

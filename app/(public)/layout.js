@@ -36,29 +36,7 @@ export default function PublicLayout({ children }) {
           Loader first in source order so it stacks above the banner without
           either of them needing a z-index fight — the loader's z-200 already
           wins, and source order settles anything that later ties. */}
-            {/* ── CustomCursor IS UNMOUNTED, DELIBERATELY ──────────────────
-          The component still exists at components/providers/CustomCursor.jsx
-          and works. It is not rendered because it was, by a wide margin, the
-          most expensive thing on this site, and all of it ran whether or not
-          anything was on screen:
 
-            · a gsap.ticker callback on EVERY frame, for the life of the page
-            · document.elementFromPoint() hit-tests at ~15Hz for 900ms after
-              every scroll event, to re-resolve what the pointer is over
-            · a getBoundingClientRect() loop over every magnetic element in
-              view, per frame, because caching rects is wrong under
-              ScrollSmoother
-            · a MutationObserver on the entire body subtree
-
-          None of that is badly written — it is what a cursor of that kind
-          costs. It is simply a large permanent frame budget spent on a
-          decoration, on a site whose brief is "clean and fast", and it was
-          competing for main-thread time with the smoother on exactly the
-          frames where smoothness is judged.
-
-          Re-add <CustomCursor /> here to bring it back. globals.css hides the
-          native pointer only when the component stamps data-custom-cursor on
-          <html>, so removing it needs no CSS change. */}
             {/* Sitewide structured data, emitted once. Both blocks carry a
           stable @id, which is what lets every per-page schema reference the
           organisation by pointer instead of repeating it — that is how

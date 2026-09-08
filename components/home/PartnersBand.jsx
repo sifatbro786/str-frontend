@@ -92,13 +92,6 @@ function Logo({ partner, clone }) {
                 )}
                 style={{ background: GLOW }}
             />
-
-            {/* `data-magnetic` is read by the global pointer field in CustomCursor,
-          which already gates itself on a fine pointer and no reduced-motion —
-          so there is nothing to guard here. It must be a block-level box: a
-          transform on `display: inline` is discarded silently. The magnet moves
-          this wrapper and the CSS scale moves the image inside it, so the two
-          transforms never fight over one element. */}
             <span data-magnetic className="relative inline-flex flex-col items-center">
                 {href ? (
                     <Link

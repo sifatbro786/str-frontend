@@ -5,9 +5,8 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import MetricGrid from "@/components/ui/MetricGrid";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
-import { getTeam } from "@/lib/api";
+import { getSiteContent, getTeam } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
-import { capabilities, metrics } from "@/lib/data";
 import { partners, site } from "@/lib/site";
 import { pad } from "@/lib/utils";
 
@@ -35,13 +34,18 @@ export async function generateMetadata() {
  * read the names.
  *
  * ⚑ The headcount and the story below are hand-written claims. "Sixty-odd
- * people" and "fourteen countries" appear here, in the masthead meta and in
- * lib/data's metrics, and nothing derives one from another — if the studio
- * changes shape, all three drift independently. Worth deriving from a single
+ * people" and "fourteen countries" appear here and in the masthead meta, while
+ * the metrics band now reads its own numbers from the SiteContent row. Nothing
+ * derives one from another, so an edit in /admin/site-content changes the band
+ * and leaves this prose saying something else. Worth deriving from a single
  * source before launch.
  */
 export default async function AboutPage() {
-    const team = await getTeam();
+    const [team, metrics, capabilities] = await Promise.all([
+        getTeam(),
+        getSiteContent("metrics"),
+        getSiteContent("capabilities"),
+    ]);
 
     return (
         <>
