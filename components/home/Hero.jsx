@@ -214,26 +214,6 @@ export default function Hero() {
                 the two columns stopped starting on the same line, which was
                 the thing being fixed. */}
                     <div data-hero-map="" className="relative lg:col-span-7 xl:-mr-10">
-                        <p
-                            data-hero-meta=""
-                            className="label-mono absolute top-0 left-0 z-10 flex items-center gap-2.5 text-(--text)"
-                        >
-                            <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 16 16"
-                                fill="none"
-                                stroke="var(--color-brand)"
-                                strokeWidth="1.3"
-                                aria-hidden="true"
-                            >
-                                <circle cx="8" cy="8" r="6.4" />
-                                <ellipse cx="8" cy="8" rx="2.8" ry="6.4" />
-                                <path d="M1.9 6h12.2M1.9 10h12.2" strokeLinecap="round" />
-                            </svg>
-                            Global service network
-                        </p>
-
                         <GeoWorldMap />
                     </div>
                 </div>

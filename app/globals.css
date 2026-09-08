@@ -24,40 +24,41 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    /* ── Brand, sampled from public/logo.png ──────────────────── */
-    --color-brand: #1476be; /* STR blue  */
-    --color-brand-hi: #1e8ad9; /* hover / focus */
-    /* ⚑ Orange is now effectively retired on the homepage. It read loud
+  /* ── Brand, sampled from public/logo.png ──────────────────── */
+  --color-brand: #1476be; /* STR blue  */
+  --color-brand-hi: #1e8ad9; /* hover / focus */
+  /* ⚑ Orange is now effectively retired on the homepage. It read loud
      against white and having two accent colours meant neither one told
      you anything. Brand blue carries every accent there. Kept in the
      theme because /about, /services and the admin shell still use it. */
-    --color-signal: #ef5a28; /* STR orange */
-    --color-leaf: #57b04a; /* STR green, sparingly, growth metrics */
+  --color-signal: #ef5a28; /* STR orange */
+  --color-leaf: #57b04a; /* STR green, sparingly, growth metrics */
 
-    /* ── Deep-graphite ramp. Deliberately NOT Tailwind slate. ───
+  /* ── Deep-graphite ramp. Deliberately NOT Tailwind slate. ───
      Neutral-cool, one notch off pure black so the 1px hairlines
      have something to sit against. The paper-* ramp below stays
      warm — the light theme is a different material on purpose. */
-    --color-ink-950: #0a0a0c;
-    --color-ink-900: #121215;
-    --color-ink-850: #1a1a1e;
-    --color-ink-800: #26262b;
-    --color-ink-500: #71717a;
-    --color-ink-300: #a1a1aa;
-    /* ── Paper ramp. Near-white, very slightly cool so it sits with the
+  --color-ink-950: #0a0a0c;
+  --color-ink-900: #121215;
+  --color-ink-850: #1a1a1e;
+  --color-ink-800: #26262b;
+  --color-ink-500: #71717a;
+  --color-ink-300: #a1a1aa;
+  /* ── Paper ramp. Near-white, very slightly cool so it sits with the
      brand blue instead of yellowing against it. Pure #fff for the
      canvas: any tint at all reads as "off" next to a white browser
      chrome, and the surfaces below carry the separation instead. */
-    --color-paper-50: #ffffff;
-    --color-paper-100: #f7f7f9;
-    --color-paper-200: #eeeef1;
-    --color-paper-300: #e3e3e8;
-    --color-paper-600: #6b6b76;
-    --color-paper-950: #111114;
+  --color-paper-50: #ffffff;
+  --color-paper-100: #f7f7f9;
+  --color-paper-200: #eeeef1;
+  --color-paper-300: #e3e3e8;
+  --color-paper-600: #6b6b76;
+  --color-paper-950: #111114;
 
-    /* ── Typography ───────────────────────────────────────────── */
-    --font-sans: "General Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
-    --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-sans:
+    "General Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -75,90 +76,130 @@
    theme rather than an unstyled flash.
    ───────────────────────────────────────────────────────────── */
 :root {
-    --canvas: var(--color-paper-50);
-    --raised: var(--color-paper-100);
-    --raised-2: var(--color-paper-200);
-    --line: var(--color-paper-300);
-    --line-soft: var(--color-paper-200);
-    --text: var(--color-paper-950);
-    --text-dim: #4a4a55;
-    --text-mute: var(--color-paper-600);
-    --on-brand: #ffffff;
-    --overlay: rgb(255 255 255 / 0.78);
+  --canvas: var(--color-paper-50);
+  --raised: var(--color-paper-100);
+  --raised-2: var(--color-paper-200);
+  --line: var(--color-paper-300);
+  --line-soft: var(--color-paper-200);
+  --text: var(--color-paper-950);
+  --text-dim: #4a4a55;
+  --text-mute: var(--color-paper-600);
+  --on-brand: #ffffff;
+  --overlay: rgb(255 255 255 / 0.78);
+
+  /* ── Hero map ─────────────────────────────────────────────
+     The palette of components/home/GeoWorldMap. These are their own
+     tokens rather than reuses of --canvas/--raised-2 because the map is
+     the one place on the site allowed to be cartographic: a pale ocean
+     and a warm land read as a map, while the same two greys as every
+     card read as a diagram of one.
+
+     This is the ONLY place the map's palette lives. To switch to full
+     atlas colour, change these two (and their .dark counterparts) and
+     nothing else:
+       --map-ocean: #cfe4f2;  --map-land: #cfe0b4;
+     To go back to the monochrome brand look, set --map-ocean to
+     var(--canvas) and --map-land to var(--raised-2).
+
+     ⚑ Land and ocean must stay far enough apart in luminance to survive
+     being printed or screenshotted in greyscale — the coastline is
+     carried by the fill contrast, not by the 0.5px border, which
+     disappears at small sizes. */
+  --map-ocean: #e8f2f7;
+  --map-land: #eef0e4;
+  --map-border: #ffffff;
+  --map-graticule: #ffffff;
+  --map-ring: #7f8c96;
+  /* Alpha for the country tint on the markets STR works in. Lower in light
+     mode: a saturated brand colour at full strength on pale sand is a poster,
+     not a map, and it drowns the pins sitting on top of it. */
+  --map-tint-opacity: 0.4;
 }
 
 .dark {
-    --canvas: var(--color-ink-950);
-    --raised: var(--color-ink-900);
-    --raised-2: var(--color-ink-850);
-    --line: var(--color-ink-800);
-    --line-soft: #18181c;
-    --text: #f4f4f5;
-    --text-dim: var(--color-ink-300);
-    --text-mute: var(--color-ink-500);
-    --on-brand: #ffffff;
-    --overlay: rgb(10 10 12 / 0.72);
+  --canvas: var(--color-ink-950);
+  --raised: var(--color-ink-900);
+  --raised-2: var(--color-ink-850);
+  --line: var(--color-ink-800);
+  --line-soft: #18181c;
+  --text: #f4f4f5;
+  --text-dim: var(--color-ink-300);
+  --text-mute: var(--color-ink-500);
+  --on-brand: #ffffff;
+  --overlay: rgb(10 10 12 / 0.72);
+
+  /* Night-earth rather than an inverted day map: a bright ocean flipped to
+     dark grey reads as a hole in the page. These are a deep blue and a dark
+     olive, which keep the land/water relationship legible at low luminance. */
+  --map-ocean: #0d1620;
+  --map-land: #1c2119;
+  --map-border: #0a0a0c;
+  --map-graticule: #1e2a35;
+  --map-ring: #5c6772;
+  /* Higher than light mode, and it has to be: the same alpha over a dark olive
+     lands almost black and the tinted countries disappear entirely. */
+  --map-tint-opacity: 0.62;
 }
 
 @layer base {
-    html {
-        -webkit-text-size-adjust: 100%;
-        scroll-behavior: smooth;
-        color-scheme: light;
-    }
-    html.dark {
-        color-scheme: dark;
-    }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
 
-    body {
-        background-color: var(--canvas);
-        color: var(--text);
-        font-family: var(--font-sans);
-        font-weight: 400;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        font-feature-settings: "ss01" 1;
-    }
+  body {
+    background-color: var(--canvas);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01" 1;
+  }
 
-    /* THE anti-AI rule: display type maxes out at 600, never 800, and the
+  /* THE anti-AI rule: display type maxes out at 600, never 800, and the
      optical tracking tightens as the size grows instead of a blanket
      `tracking-tighter` on everything. */
-    /* Display type maxes out at 600, never 800. Tracking is deliberately mild:
+  /* Display type maxes out at 600, never 800. Tracking is deliberately mild:
      the previous -0.038em on h1 crushed the counters in General Sans at large
      sizes, and aggressive negative tracking is the other half of the "this was
      generated" look. Just enough to close the gaps optical sizing leaves. */
-    h1,
-    h2,
-    h3,
-    h4 {
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        line-height: 1.12;
-        text-wrap: balance;
-    }
-    h1 {
-        letter-spacing: -0.025em;
-    }
-    h5,
-    h6 {
-        font-weight: 500;
-        letter-spacing: -0.012em;
-    }
-    p {
-        text-wrap: pretty;
-    }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+  h1 {
+    letter-spacing: -0.025em;
+  }
+  h5,
+  h6 {
+    font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+  p {
+    text-wrap: pretty;
+  }
 
-    ::selection {
-        background-color: var(--color-signal);
-        color: #fff;
-    }
+  ::selection {
+    background-color: var(--color-signal);
+    color: #fff;
+  }
 
-    :focus-visible {
-        outline: 2px solid var(--color-brand-hi);
-        outline-offset: 3px;
-        border-radius: 2px;
-    }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-hi);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -173,22 +214,22 @@
    loud. 68px tops out about where the reference sits, and the line-height
    is back above 1 so the lines breathe instead of stacking. */
 @utility text-display {
-    font-size: clamp(2.5rem, 1.6rem + 3.4vw, 4.25rem);
-    line-height: 1.08;
-    letter-spacing: -0.025em;
-    font-weight: 600;
+  font-size: clamp(2.5rem, 1.6rem + 3.4vw, 4.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 600;
 }
 @utility text-heading {
-    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 2.75rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    font-weight: 600;
+  font-size: clamp(1.75rem, 1.1rem + 2.2vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 @utility text-subheading {
-    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.625rem);
-    line-height: 1.28;
-    letter-spacing: -0.015em;
-    font-weight: 600;
+  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.625rem);
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  font-weight: 600;
 }
 
 /* Small quiet label. Replaces the pill eyebrow badge everywhere.
@@ -204,55 +245,67 @@
  * would be pure churn. The name is historical; the style is not mono.
  */
 @utility label-mono {
-    font-family: var(--font-sans);
-    font-size: 0.8125rem;
-    line-height: 1.2;
-    font-weight: 500;
-    letter-spacing: -0.005em;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 /* Faint structural graph-paper grid. */
 @utility bg-grid {
-    background-image:
-        linear-gradient(to right, var(--line-soft) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--line-soft) 1px, transparent 1px);
-    background-size: 72px 72px;
+  background-image:
+    linear-gradient(to right, var(--line-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-soft) 1px, transparent 1px);
+  background-size: 72px 72px;
 }
 
 /* Fine dot field. Backdrop for the hero map panel — reads as graph paper at a
    distance and disappears entirely under the map dots at close range. */
 @utility bg-dots {
-    background-image: radial-gradient(var(--line) 1px, transparent 1px);
-    background-size: 22px 22px;
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 @utility nums {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 @utility mask-x {
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
-    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
 }
 
 /* Page gutter — one utility, so every route lines up on the same rails. */
 @utility shell {
-    width: 100%;
-    margin-inline: auto;
-    max-width: 84rem;
-    padding-inline: 1.25rem;
+  width: 100%;
+  margin-inline: auto;
+  max-width: 84rem;
+  padding-inline: 1.25rem;
 }
 @media (min-width: 768px) {
-    .shell {
-        padding-inline: 2.5rem;
-    }
+  .shell {
+    padding-inline: 2.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -260,10 +313,10 @@
    Scoped, token-driven, no @tailwindcss/typography dependency.
    ───────────────────────────────────────────────────────────── */
 .prose-str {
-    color: var(--text-dim);
-    font-size: 1.0625rem;
-    line-height: 1.8;
-    max-width: 68ch;
+  color: var(--text-dim);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  max-width: 68ch;
 }
 
 /* ⚑ THIS IS A DIRECT-CHILD SELECTOR AND THAT MATTERS.
@@ -276,107 +329,107 @@
  *
  * Set the class and the HTML on the SAME element. */
 .prose-str > * + * {
-    margin-top: 1.55em;
+  margin-top: 1.55em;
 }
 
 /* Headings own the space above them, and the element after a heading owns
    almost none — that asymmetry is what groups a heading with its own section
    instead of leaving it floating equidistant between two. */
 .prose-str h2 {
-    margin-top: 2.9em;
-    font-size: 1.6rem;
-    line-height: 1.25;
-    color: var(--text);
+  margin-top: 2.9em;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: var(--text);
 }
 .prose-str h3 {
-    margin-top: 2.3em;
-    font-size: 1.2rem;
-    line-height: 1.3;
-    color: var(--text);
+  margin-top: 2.3em;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  color: var(--text);
 }
 .prose-str h2 + *,
 .prose-str h3 + * {
-    margin-top: 0.85em;
+  margin-top: 0.85em;
 }
 .prose-str strong {
-    color: var(--text);
-    font-weight: 600;
+  color: var(--text);
+  font-weight: 600;
 }
 .prose-str a {
-    color: var(--text);
-    text-decoration: underline;
-    text-decoration-color: var(--color-signal);
-    text-underline-offset: 4px;
-    text-decoration-thickness: 1.5px;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-signal);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
 }
 .prose-str a:hover {
-    color: var(--color-signal);
+  color: var(--color-signal);
 }
 .prose-str ul,
 .prose-str ol {
-    padding-left: 1.15rem;
+  padding-left: 1.15rem;
 }
 .prose-str li {
-    margin-top: 0.5em;
+  margin-top: 0.5em;
 }
 .prose-str ul > li {
-    list-style: none;
-    position: relative;
+  list-style: none;
+  position: relative;
 }
 .prose-str ul > li::before {
-    content: "";
-    position: absolute;
-    left: -1.05rem;
-    top: 0.78em;
-    width: 5px;
-    height: 5px;
-    border-radius: 999px;
-    background: var(--color-brand);
+  content: "";
+  position: absolute;
+  left: -1.05rem;
+  top: 0.78em;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-brand);
 }
 .prose-str ol {
-    list-style: decimal;
+  list-style: decimal;
 }
 /* Brand, not signal. Orange came off the rest of the site in the light pass
    and a pull-quote was the last place it survived, which made it read as a
    warning callout rather than as emphasis. */
 .prose-str blockquote {
-    border-left: 2px solid var(--color-brand);
-    margin-block: 2.2em;
-    padding-left: 1.75rem;
-    font-size: 1.3rem;
-    line-height: 1.5;
-    letter-spacing: -0.015em;
-    color: var(--text);
+  border-left: 2px solid var(--color-brand);
+  margin-block: 2.2em;
+  padding-left: 1.75rem;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+  color: var(--text);
 }
 .prose-str code {
-    font-family: var(--font-mono);
-    font-size: 0.86em;
-    background: var(--raised-2);
-    border: 1px solid var(--line);
-    padding: 0.12em 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--raised-2);
+  border: 1px solid var(--line);
+  padding: 0.12em 0.4em;
 }
 .prose-str pre {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    line-height: 1.6;
-    background: var(--raised);
-    border: 1px solid var(--line);
-    padding: 1.25rem;
-    overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  padding: 1.25rem;
+  overflow-x: auto;
 }
 .prose-str pre code {
-    background: none;
-    border: 0;
-    padding: 0;
+  background: none;
+  border: 0;
+  padding: 0;
 }
 .prose-str img,
 .prose-str figure {
-    margin-block: 2.4em;
+  margin-block: 2.4em;
 }
 .prose-str hr {
-    border: 0;
-    border-top: 1px solid var(--line);
-    margin-block: 3em;
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-block: 3em;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -389,26 +442,26 @@
    scrolling on this site now; under reduced motion instant jumps are wanted
    anyway. Overrides the `scroll-behavior: smooth` in @layer base above. */
 html {
-    scroll-behavior: auto;
+  scroll-behavior: auto;
 }
 
 /* ScrollSmoother sets these itself, but declaring them prevents a one-frame
    jump between hydration and smoother creation. */
 #smooth-wrapper {
-    overflow: hidden;
+  overflow: hidden;
 }
 #smooth-content {
-    will-change: transform;
+  will-change: transform;
 }
 
 /* SplitText line masking. `mask: "lines"` wraps each line in a clipping div;
    this is what stops descenders being sheared off during a y-reveal. */
 .split-line {
-    overflow: hidden;
+  overflow: hidden;
 }
 .split-line-inner {
-    display: block;
-    will-change: transform;
+  display: block;
+  will-change: transform;
 }
 
 /* Word-level clip reveal. SplitText emits inline-block words; the clip-path
@@ -420,8 +473,8 @@ html {
    .js-split is added by the hook the moment SplitText has run, so text stays
    readable if JS never arrives. */
 .js-split .split-word {
-    display: inline-block;
-    will-change: transform, clip-path;
+  display: inline-block;
+  will-change: transform, clip-path;
 }
 
 /* RotatingWord characters.
@@ -436,7 +489,36 @@ html {
  * actually tweening (force3D) and releases it afterwards, which is the
  * behaviour we want. */
 .rw-char {
-    display: inline-block;
+  display: inline-block;
+}
+
+/* Custom cursor.
+ *
+ * ── WHY THIS IS GATED ON AN ATTRIBUTE ────────────────────────────────────
+ * This used to be a bare `body { cursor: none }` inside a media query, which
+ * assumed the replacement cursor was always mounted. It is not: CustomCursor
+ * lives in app/(public)/layout.js, so /admin and /login rendered no cursor
+ * component AND no native pointer. The admin panel had an invisible mouse.
+ *
+ * The component now stamps data-custom-cursor on <html> when it is actually
+ * running, and clears it on unmount. So the native cursor is hidden only when
+ * something is genuinely drawing a replacement — which also covers the cases
+ * the media query could never see, like the component bailing out because the
+ * user turned on Reduce Motion mid-session.
+ *
+ * Never over text-entry controls either: swapping an I-beam for a dot makes a
+ * field feel broken. */
+html[data-custom-cursor] body {
+  cursor: none;
+}
+html[data-custom-cursor] :is(input, textarea, select, [contenteditable]) {
+  cursor: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #smooth-content {
+    will-change: auto;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -474,52 +556,54 @@ html {
    ───────────────────────────────────────────────────────────── */
 
 [data-admin] {
-    /* One notch off --canvas so cards read as raised against the page
+  /* One notch off --canvas so cards read as raised against the page
        rather than needing a shadow to separate them. */
-    --admin-bg: var(--color-paper-100);
-    --admin-card: var(--color-paper-50);
+  --admin-bg: var(--color-paper-100);
+  --admin-card: var(--color-paper-50);
 }
 
 .dark [data-admin] {
-    --admin-bg: var(--color-ink-950);
-    --admin-card: var(--color-ink-900);
+  --admin-bg: var(--color-ink-950);
+  --admin-card: var(--color-ink-900);
 }
 
 /* Controls: rounded, and taller than the public site's inputs. Admin forms are
    worked through in sequence, so the target size matters more than density. */
 [data-admin] :is(input, textarea, select, button, a[class*="border"]) {
-    border-radius: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 [data-admin] :is(input, textarea, select) {
-    background-color: var(--admin-card);
+  background-color: var(--admin-card);
 }
 
 /* Bordered blocks — cards, tables, panels, the hairline grids the pages build
    with `border border-(--line)`. Only elements that actually carry a border
    are rounded; there is deliberately no universal rule, because rounding every
    descendant is how a 4px radius ends up on a table cell. */
-[data-admin] main :is(section, div, form, ul, ol, table, article)[class*="border-("] {
-    border-radius: 0.75rem;
+[data-admin]
+  main
+  :is(section, div, form, ul, ol, table, article)[class*="border-("] {
+  border-radius: 0.75rem;
 }
 
 /* The 1px-gap hairline grids (StatCard rows, spec grids) use the parent's
    background as the rule. Clipping keeps the outer corners round while the
    inner rules stay square, which is the conventional dashboard look. */
 [data-admin] main [class*="gap-px"] {
-    overflow: hidden;
-    border-radius: 0.75rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
 }
 
 /* Cards paint the raised surface rather than the page ground. */
 [data-admin] main .bg-\(--canvas\) {
-    background-color: var(--admin-card);
+  background-color: var(--admin-card);
 }
 
 /* Focus ring. The public site relies on a border-colour change alone, which is
    a weak affordance in a form someone tabs through fifteen fields of. */
 [data-admin] :is(input, textarea, select):focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: -1px;
-    border-color: var(--color-brand);
+  outline: 2px solid var(--color-brand);
+  outline-offset: -1px;
+  border-color: var(--color-brand);
 }

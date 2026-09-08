@@ -31,12 +31,27 @@ import {
  * distance. Recentre it on another city and it is a visibly different picture,
  * which is the property a rectangular map with relocated pins does not have.
  *
+ * ── WHY THE MAP IS CARTOGRAPHIC AND THE REST OF THE SITE IS NOT ──────────
+ * Land and ocean read as land and ocean — a pale blue and a warm sand, not
+ * two greys off the brand ramp. This is the one graphic on the site allowed
+ * to break the monochrome, because a map drawn in card-greys reads as a
+ * diagram of a map rather than as a place. The palette is five CSS tokens
+ * defined once in globals.css (--map-ocean, --map-land, --map-border,
+ * --map-graticule, --map-ring), so changing it — to a full atlas green, or
+ * back to monochrome — is an edit in one file that this component never
+ * needs to know about.
+ *
  * ── WHY THERE ARE THREE COLOURS NOW ──────────────────────────────────────
  * The old map had one accent, so every pin said "we are here" and no more.
  * Each market is coloured by the discipline that actually ships there, which
  * turns a presence map into a capability map at no cost in ink. The
  * distribution is deliberately not balanced for looks — four engineering
  * markets, one visualization, one production is what is true.
+ *
+ * The colour runs through three things at once: the pin, the spoke, and the
+ * country itself, which is tinted where STR works. lib/heroMap owns the
+ * country-to-discipline map and carries the note about what that tint does to
+ * the United States on this projection — read it before changing either.
  *
  * ── WHAT CARRIES OVER FROM THE OLD VERSION ───────────────────────────────
  * The topojson is imported rather than fetched, so the largest element above
@@ -86,15 +101,29 @@ const CARD_H = 56;
 function Land() {
   return (
     <g data-land="" pointerEvents="none" shapeRendering="optimizeSpeed">
-      {LAND_PATHS.map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          fill="var(--raised-2)"
-          stroke="var(--canvas)"
-          strokeWidth={0.5}
-        />
-      ))}
+      {LAND_PATHS.map((country, i) => {
+        const tint = country.discipline
+          ? DISCIPLINES[country.discipline].color
+          : null;
+
+        return (
+          <path
+            key={i}
+            d={country.d}
+            fill={tint ?? "var(--map-land)"}
+            /* The tint is the brand colour at partial alpha, not a
+               pre-mixed pale variant. Alpha lets the same value work on
+               the light sand and the dark olive without a second palette,
+               and it keeps the country reading as land with colour on it
+               rather than as a flat sticker laid over the map. The opacity
+               itself is a token because the two themes need different
+               values — see globals.css. */
+            fillOpacity={tint ? "var(--map-tint-opacity)" : 1}
+            stroke="var(--map-border)"
+            strokeWidth={0.5}
+          />
+        );
+      })}
     </g>
   );
 }
@@ -228,16 +257,16 @@ export default function GeoWorldMap({ className }) {
         <path
           id="hero-map-sphere"
           d={SPHERE_PATH}
-          fill="var(--canvas)"
+          fill="var(--map-ocean)"
           stroke="var(--line)"
           strokeWidth={1}
         />
         <path
           d={GRATICULE_PATH}
           fill="none"
-          stroke="var(--line)"
+          stroke="var(--map-graticule)"
           strokeWidth={0.5}
-          opacity={0.7}
+          opacity={0.9}
           pointerEvents="none"
         />
         <Land />
@@ -256,7 +285,7 @@ export default function GeoWorldMap({ className }) {
                 cy={CY}
                 r={ring.r}
                 fill="none"
-                stroke="var(--text-mute)"
+                stroke="var(--map-ring)"
                 strokeWidth={0.8}
                 strokeDasharray="2 6"
                 opacity={0.55}
@@ -271,8 +300,8 @@ export default function GeoWorldMap({ className }) {
                 width={60}
                 height={16}
                 rx={8}
-                fill="var(--canvas)"
-                opacity={0.82}
+                fill="var(--map-ocean)"
+                opacity={0.85}
               />
               <text
                 x={CX + ring.r}
