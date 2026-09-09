@@ -20,26 +20,6 @@ export async function generateMetadata() {
     });
 }
 
-/**
- * About.
- *
- * ── WHAT CAME OUT ────────────────────────────────────────────────────────
- * This route used to render <MetricsSection /> and <PartnersBand /> from
- * components/home/. Both were built for the dark canvas, both carried the
- * orange accent that came off the rest of the site, and both were the last
- * two things importing that generation of component. The metrics are now a
- * shared MetricGrid, and the partner logos are a plain hairline grid rather
- * than a marquee — a moving rail is right on the homepage where it is one
- * band among many, but on a credibility page the reader wants to stop and
- * read the names.
- *
- * ⚑ The headcount and the story below are hand-written claims. "Sixty-odd
- * people" and "fourteen countries" appear here and in the masthead meta, while
- * the metrics band now reads its own numbers from the SiteContent row. Nothing
- * derives one from another, so an edit in /admin/site-content changes the band
- * and leaves this prose saying something else. Worth deriving from a single
- * source before launch.
- */
 export default async function AboutPage() {
     const [team, metrics, capabilities] = await Promise.all([
         getTeam(),
@@ -181,13 +161,13 @@ export default async function AboutPage() {
                     >
                         {team.map((m, i) => (
                             <li key={m._id} data-reveal="" className="group/person bg-(--canvas)">
-                                <div className="relative aspect-[4/5] overflow-hidden">
+                                <div className="relative aspect-4/5 overflow-hidden">
                                     <Image
                                         src={m.image}
                                         alt={m.name}
                                         fill
                                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                        className="object-cover object-top grayscale transition-[filter,transform] duration-700 ease-out group-hover/person:scale-[1.03] group-hover/person:grayscale-0"
+                                        className="object-cover object-top transition-transform duration-700 ease-out motion-safe:group-hover/person:scale-[1.03]"
                                     />
                                     <span className="label-mono absolute top-0 left-0 rounded-br-xl bg-(--canvas) px-3 py-2 tabular-nums text-(--text-mute)">
                                         {pad(i + 1)}
@@ -266,7 +246,7 @@ export default async function AboutPage() {
                                     alt={p.name}
                                     width={140}
                                     height={44}
-                                    className="h-8 w-auto object-contain opacity-55 grayscale transition-[opacity,filter] duration-400 group-hover/logo:opacity-100 group-hover/logo:grayscale-0"
+                                    className="h-8 w-auto object-contain transition-transform duration-400 ease-out motion-safe:group-hover/logo:scale-105"
                                 />
                                 <div>
                                     <p className="text-[0.9375rem] font-medium text-(--text)">

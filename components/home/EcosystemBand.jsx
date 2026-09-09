@@ -19,10 +19,12 @@ import { partners } from "@/lib/site";
  * important client. A rail moving at a constant rate gives each the same
  * dwell time and hides the weight mismatch in the motion.
  *
- * ── WHY grayscale IS ON THE IMAGE AND NOT THE ROW ────────────────────────
- * A filter on a container creates a containing block for its descendants,
- * which silently breaks the absolutely-positioned caption inside each cell.
- * Per-image is one extra declaration and no stacking surprises.
+ * ── LOGOS RENDER IN FULL COLOUR ──────────────────────────────────────────
+ * They used to sit at opacity-55 + grayscale and only resolve on hover. Two
+ * problems with that: the mark is the credential, so hiding it defeats the
+ * band, and hover is a mouse-only affordance — every phone visitor saw the
+ * grey state and nothing else. Hover is now a 5% lift, which is decoration
+ * rather than information.
  *
  * ── THE QUOTES USED TO LIVE HERE ─────────────────────────────────────────
  * Two testimonial cards sat in the right column until TestimonialRail was
@@ -85,10 +87,12 @@ export default function EcosystemBand() {
                                 alt={p.name}
                                 width={140}
                                 height={44}
-                                // 55, not the 45 this started at. On the old dark canvas
-                                // a low opacity still left a legible mark; on white the
-                                // same value washes a mid-tone logo out to nothing.
-                                className="h-9 w-auto object-contain opacity-55 grayscale transition-[opacity,filter] duration-400 group-hover/logo:opacity-100 group-hover/logo:grayscale-0"
+                                // Full brand colour at rest. The desaturate-until-hover
+                                // pattern that used to live here hid the one thing the
+                                // rail exists to show, and it only ever paid out to a
+                                // mouse — touch visitors saw eight grey marks and left.
+                                // Hover is now a lift, not a reveal.
+                                className="h-9 w-auto object-contain transition-transform duration-400 ease-out motion-safe:group-hover/logo:scale-105"
                             />
                         </span>
                     )}

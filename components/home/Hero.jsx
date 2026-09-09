@@ -195,14 +195,6 @@ export default function Hero() {
                                     />
                                 </svg>
                             </Link>
-
-                            <Link
-                                data-hero-cta=""
-                                href="/contact"
-                                className="inline-flex items-center rounded-full border border-(--line) px-7 py-3.5 text-[0.9375rem] font-medium text-(--text) transition-colors duration-200 hover:border-(--text)"
-                            >
-                                Get in touch
-                            </Link>
                         </div>
                     </div>
 

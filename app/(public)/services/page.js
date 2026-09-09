@@ -108,7 +108,7 @@ export default async function ServicesPage() {
                                                 alt=""
                                                 fill
                                                 sizes="(max-width: 1024px) 100vw, 42vw"
-                                                className="object-cover object-top grayscale transition-[transform,filter] duration-700 ease-out group-hover/row:scale-[1.03] group-hover/row:grayscale-0"
+                                                className="object-cover object-top transition-transform duration-700 ease-out motion-safe:group-hover/row:scale-[1.03]"
                                             />
                                         </Link>
 

@@ -107,7 +107,7 @@ export default function CapabilityStack({ services }) {
     );
 
     return (
-        <section id="services" ref={root} className="border-b border-(--line)">
+        <section id="services" ref={root}>
             <div className="shell py-24 md:py-32">
                 <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
                     <div className="lg:col-span-5">

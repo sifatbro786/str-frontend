@@ -1,6 +1,7 @@
 import Hero from "@/components/home/Hero";
 import AboutStatement from "@/components/home/AboutStatement";
 import CapabilityStack from "@/components/home/CapabilityStack";
+import ToolMarquee from "@/components/home/ToolMarquee";
 import ProcessTracker from "@/components/home/ProcessTracker";
 import SelectedWork from "@/components/home/SelectedWork";
 import EcosystemBand from "@/components/home/EcosystemBand";
@@ -68,6 +69,10 @@ export async function generateMetadata() {
  *   Hero          statement, delivery map, discipline band
  *   About         01 — narrative and the four numbers behind it
  *   Capabilities  02 — the full service line, one open at a time
+ *   Tooling       -- — the stack, as two crossing rails. Unnumbered on
+ *                      purpose: it is a band, like the logo rail inside
+ *                      EcosystemBand, not a chapter. Numbering it would
+ *                      renumber 03–07 across four other files.
  *   Process       03 — how an engagement actually runs
  *   Work          04 — what it produced
  *   Ecosystem     05 — who stayed
@@ -128,6 +133,7 @@ export default async function HomePage() {
             <Hero />
             <AboutStatement metrics={metrics} />
             <CapabilityStack services={services} />
+            <ToolMarquee />
             <ProcessTracker steps={processSteps} />
             <SelectedWork projects={projects} />
             <EcosystemBand />
