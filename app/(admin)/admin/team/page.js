@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/useToast";
 import { Field, Input, Textarea, NumberInput, Toggle, CONTROL } from "@/components/admin/Fields";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import StatusPill from "@/components/admin/StatusPill";
-import { cn } from "@/lib/utils";
+import { cn, mediaUrl } from "@/lib/utils";
+import ImageField from "@/components/admin/ImageField";
 
 const EMPTY = {
   name: "", designation: "", bio: "", image: "",
@@ -16,7 +17,10 @@ const EMPTY = {
   displayOrder: 0, isActive: true,
 };
 
-/** An external URL not in next.config.mjs remotePatterns throws at render. */
+/** An external URL not in next.config.mjs remotePatterns throws at render.
+    Called with the RESOLVED src, not the stored path: "/uploads/x.webp" is
+    local-looking and resolves to the API host, which is whitelisted, while a
+    pasted CDN URL is not and must bypass the optimiser. */
 function isExternal(src) {
   return /^https?:\/\//i.test(src ?? "");
 }
@@ -148,13 +152,12 @@ export default function TeamAdminPage() {
           <Input id="tm-role" value={draft.designation} onChange={onInput("designation")} />
         </Field>
         <Field
-          label="Image"
-          htmlFor="tm-image"
+          label="Photo"
           error={errors.image}
-          hint="A path under /public, or an absolute URL."
+          hint="Portrait crop. The /about grid renders it at 4:5, so a square headshot loses the top of the head."
           className="sm:col-span-2"
         >
-          <Input id="tm-image" value={draft.image} onChange={onInput("image")} placeholder="/team/name.jpg" />
+          <ImageField value={draft.image} onChange={set("image")} folder="team" disabled={saving} />
         </Field>
         <Field label="Bio" htmlFor="tm-bio" error={errors.bio} className="sm:col-span-2">
           <Textarea id="tm-bio" rows={4} value={draft.bio} onChange={onInput("bio")} />
@@ -251,11 +254,11 @@ export default function TeamAdminPage() {
                 <div className="relative size-10 shrink-0 overflow-hidden border border-(--line) bg-(--raised-2)">
                   {row.image ? (
                     <Image
-                      src={row.image}
+                      src={mediaUrl(row.image)}
                       alt=""
                       fill
                       sizes="40px"
-                      unoptimized={isExternal(row.image)}
+                      unoptimized={isExternal(mediaUrl(row.image))}
                       className="object-cover"
                     />
                   ) : null}

@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { Field, Input, Textarea, Toggle, Counter } from "./Fields";
 import TagInput from "./TagInput";
 import FormSection from "./FormSection";
+import ImageField from "./ImageField";
 
 const EMPTY = {
     title: "",
@@ -151,12 +152,11 @@ export default function BlogForm({ mode, id, initial }) {
                 <Field label="Category" htmlFor="category" error={errors.category}>
                     <Input id="category" value={values.category} onChange={onInput("category")} />
                 </Field>
-                <Field label="Cover image" htmlFor="coverImage" error={errors.coverImage}>
-                    <Input
-                        id="coverImage"
+                <Field label="Cover image" error={errors.coverImage} className="sm:col-span-2">
+                    <ImageField
                         value={values.coverImage}
-                        onChange={onInput("coverImage")}
-                        placeholder="/blog/cover.jpg"
+                        onChange={set("coverImage")}
+                        folder="blogs"
                     />
                 </Field>
                 <Field label="Tags" htmlFor="tags" error={errors.tags} className="sm:col-span-2">

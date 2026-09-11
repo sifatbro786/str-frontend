@@ -32,7 +32,10 @@ const BASE = process.env.API_URL;
  * upstream status through, reshape nothing.
  */
 
-const FOLDERS = new Set(["services", "projects", "team", "blogs", "misc"]);
+/* Mirrors UPLOAD_FOLDERS in the API's middleware/upload.js. Duplicated because
+   this route has to reject an unknown folder before it spends time reading a
+   multipart body; the API rejects it again, which is the check that counts. */
+const FOLDERS = new Set(["services", "projects", "team", "blogs", "partners", "misc"]);
 
 export async function POST(request) {
     const token = await getToken();

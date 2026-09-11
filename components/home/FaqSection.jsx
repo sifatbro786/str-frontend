@@ -71,6 +71,9 @@ export default function FaqSection({ faqs }) {
         { scope: root, dependencies: [open] },
     );
 
+    // A heading that says "Questions" above an empty list reads as a bug.
+    if (!faqs?.length) return null;
+
     return (
         <section id="faq" ref={root}>
             <div className="shell pt-24 md:pt-32 pb-10">

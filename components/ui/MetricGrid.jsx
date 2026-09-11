@@ -64,6 +64,10 @@ export default function MetricGrid({ metrics, className }) {
         { scope: root },
     );
 
+    // Callers render this inside their own section, so returning null here
+    // drops the band and leaves the surrounding copy intact.
+    if (!metrics?.length) return null;
+
     return (
         <dl
             ref={root}

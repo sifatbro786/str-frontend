@@ -4,16 +4,16 @@ import { notFound } from "next/navigation";
 import CTABand from "@/components/ui/CTABand";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
-import { getBlogs, getBlogBySlug, getRelatedBlogs } from "@/lib/api";
-import { articleSchema, breadcrumbSchema, buildMetadata } from "@/lib/seo";
-import { formatDate } from "@/lib/utils";
+import { getBlogBySlug, getBlogs, getRelatedBlogs, paramsOrEmpty } from "@/lib/api";
+import { absoluteMedia, articleSchema, breadcrumbSchema, buildMetadata } from "@/lib/seo";
+import { MEDIA_FALLBACK, formatDate, mediaUrl } from "@/lib/utils";
 
 /* dynamicParams: a post published after the build renders on demand instead
    of 404ing until the next deploy. */
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-    const posts = await getBlogs({ limit: 200 });
+    const posts = await paramsOrEmpty(() => getBlogs({ limit: 200 }));
     return posts.map((b) => ({ slug: b.slug }));
 }
 
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }) {
         path: `/blogs/${post.slug}`,
         title: post.metaTitle || post.title,
         description: post.metaDescription || post.excerpt,
-        image: post.coverImage,
+        image: absoluteMedia(post.coverImage),
         type: "article",
         keywords: post.tags,
         article: {
@@ -156,7 +156,7 @@ export default async function ArticlePage({ params }) {
                             >
                                 {post.author.avatar ? (
                                     <Image
-                                        src={post.author.avatar}
+                                        src={mediaUrl(post.author.avatar)}
                                         alt=""
                                         width={40}
                                         height={40}
@@ -187,7 +187,7 @@ export default async function ArticlePage({ params }) {
                         intersection callback. */}
                     <Reveal className="relative aspect-video overflow-hidden rounded-2xl border border-(--line)">
                         <Image
-                            src={post.coverImage}
+                            src={mediaUrl(post.coverImage) ?? MEDIA_FALLBACK}
                             alt={post.title}
                             fill
                             priority

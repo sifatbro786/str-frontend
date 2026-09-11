@@ -218,6 +218,14 @@ export default function ProcessTracker({ steps, index = "03", eyebrow = "Process
         tabs.current[next]?.focus();
     };
 
+    /* No steps means no section. Every read below assumes at least one: `step`
+       is steps[i], the track fill divides by steps.length, and the grid is
+       `repeat(steps.length, ...)`. With an empty block those become undefined,
+       Infinity and repeat(0) respectively, so the component would render a
+       broken track above a crash rather than nothing. After the hooks, never
+       before — an early return above them changes the hook count. */
+    if (!steps?.length) return null;
+
     return (
         <section id="process" ref={root} className="border-b border-(--line)">
             <div className="shell py-24">

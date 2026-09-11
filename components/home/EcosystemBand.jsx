@@ -8,7 +8,7 @@ import { gsap } from "@/lib/gsap";
 import SectionIndex from "@/components/ui/SectionIndex";
 import LoopMarquee from "@/components/motion/LoopMarquee";
 import useSplitReveal from "@/components/motion/useSplitReveal";
-import { partners } from "@/lib/site";
+import { MEDIA_FALLBACK, mediaUrl } from "@/lib/utils";
 
 /**
  * 05 // ECOSYSTEM — client logos, and what was actually built for each.
@@ -38,7 +38,12 @@ import { partners } from "@/lib/site";
  * owner before launch: a wrong project label under a real client's logo is
  * worse than no label at all.
  */
-export default function EcosystemBand() {
+/**
+ * @param {Array<{name, logo, sector, work}>} partners — the SiteContent
+ *   "partners" block, edited at /admin/site-content. It used to be a hardcoded
+ *   export in lib/site.js, so adding a client meant a developer and a deploy.
+ */
+export default function EcosystemBand({ partners = [] }) {
     const root = useRef(null);
     const heading = useSplitReveal({ type: "words", stagger: 0.04 });
 
@@ -62,6 +67,11 @@ export default function EcosystemBand() {
         { scope: root },
     );
 
+    // Every part of this section is the client list: a logo rail, a statement
+    // about retention, and an index of who stayed. With no partners there is
+    // nothing left to render but the chrome.
+    if (!partners.length) return null;
+
     return (
         <section id="ecosystem" ref={root} className="border-b border-(--line)">
             {/* ── Logo rail ───────────────────────────────────────────────── */}
@@ -83,7 +93,7 @@ export default function EcosystemBand() {
                             className="group/logo relative flex h-16 w-44 shrink-0 items-center justify-center px-4 md:w-56"
                         >
                             <Image
-                                src={p.logo}
+                                src={mediaUrl(p.logo) ?? MEDIA_FALLBACK}
                                 alt={p.name}
                                 width={140}
                                 height={44}

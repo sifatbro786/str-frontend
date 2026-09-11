@@ -7,6 +7,7 @@ import { Field, Input, Textarea, Counter } from "@/components/admin/Fields";
 import TagInput from "@/components/admin/TagInput";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import ImageField from "@/components/admin/ImageField";
 
 /** Mirrors the PageMeta.pageIdentifier enum on the API, in nav order. */
 const IDENTIFIERS = ["home", "about", "services", "projects", "blogs", "contact"];
@@ -165,8 +166,13 @@ export default function PageMetaAdminPage() {
           <Field label="Keywords" htmlFor="pm-keywords" error={errors.keywords} className="sm:col-span-2">
             <TagInput id="pm-keywords" value={draft.keywords} onChange={set("keywords")} />
           </Field>
-          <Field label="OG image" htmlFor="pm-og" error={errors.ogImage} className="sm:col-span-2">
-            <Input id="pm-og" value={draft.ogImage} onChange={onInput("ogImage")} placeholder="/logo.png" />
+          <Field
+            label="OG image"
+            error={errors.ogImage}
+            hint="The social share card for this page. 1200x630 renders without cropping on every platform."
+            className="sm:col-span-2"
+          >
+            <ImageField value={draft.ogImage} onChange={set("ogImage")} folder="misc" />
           </Field>
           <Field label="Hero headline" htmlFor="pm-headline" error={errors.dynamicHeroHeadline}>
             <Input

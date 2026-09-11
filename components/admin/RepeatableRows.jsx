@@ -2,11 +2,17 @@
 
 import { useRef } from "react";
 import { CONTROL } from "./Fields";
+import ImageField from "./ImageField";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from "./icons";
 import { cn } from "@/lib/utils";
 
 /**
  * Generic array-of-objects editor (techStack, galleryImages).
+ *
+ * Column types: text (default), select, and image. The image type renders an
+ * ImageField and takes a `folder` on the column, because a gallery row's url
+ * is an uploaded file like every other picture on the site and pasting a path
+ * into a text box is exactly what this change set removed everywhere else.
  *
  * Keys must be stable across reorders. A client-side `_key` stamped from a ref
  * counter is what makes that true — using the array index instead means
@@ -62,7 +68,10 @@ export default function RepeatableRows({
                                 {columns.map((c) => (
                                     <div
                                         key={c.key}
-                                        className={cn("min-w-40", c.grow !== false && "flex-1")}
+                                        className={cn(
+                                            c.type === "image" ? "w-full" : "min-w-40",
+                                            c.type !== "image" && c.grow !== false && "flex-1",
+                                        )}
                                     >
                                         <label
                                             htmlFor={`${row._key}-${c.key}`}
@@ -71,7 +80,15 @@ export default function RepeatableRows({
                                             {c.label}{" "}
                                             {c.required && <span className="text-signal">*</span>}
                                         </label>
-                                        {c.type === "select" ? (
+                                        {c.type === "image" ? (
+                                            <div className="mt-2">
+                                                <ImageField
+                                                    value={row[c.key] ?? ""}
+                                                    onChange={(v) => patch(i, c.key, v)}
+                                                    folder={c.folder ?? "misc"}
+                                                />
+                                            </div>
+                                        ) : c.type === "select" ? (
                                             <select
                                                 id={`${row._key}-${c.key}`}
                                                 value={row[c.key] ?? ""}

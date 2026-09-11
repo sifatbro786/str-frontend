@@ -7,8 +7,8 @@ import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { getSiteContent, getTeam } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
-import { partners, site } from "@/lib/site";
-import { pad } from "@/lib/utils";
+import { site } from "@/lib/site";
+import { MEDIA_FALLBACK, mediaUrl, pad } from "@/lib/utils";
 
 export async function generateMetadata() {
     return buildMetadata({
@@ -21,10 +21,11 @@ export async function generateMetadata() {
 }
 
 export default async function AboutPage() {
-    const [team, metrics, capabilities] = await Promise.all([
+    const [team, metrics, capabilities, partners] = await Promise.all([
         getTeam(),
         getSiteContent("metrics"),
         getSiteContent("capabilities"),
+        getSiteContent("partners"),
     ]);
 
     return (
@@ -163,7 +164,7 @@ export default async function AboutPage() {
                             <li key={m._id} data-reveal="" className="group/person bg-(--canvas)">
                                 <div className="relative aspect-4/5 overflow-hidden">
                                     <Image
-                                        src={m.image}
+                                        src={mediaUrl(m.image) ?? MEDIA_FALLBACK}
                                         alt={m.name}
                                         fill
                                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -216,6 +217,9 @@ export default async function AboutPage() {
             </section>
 
             {/* ── Clients ─────────────────────────────────────────────── */}
+            {/* Whole section, not just the grid: the heading names the sectors
+                the logos below are supposed to prove. */}
+            {partners.length > 0 && (
             <section className="border-b border-(--line)">
                 <div className="shell py-20 md:py-24">
                     <div className="flex flex-wrap items-end justify-between gap-6">
@@ -242,7 +246,7 @@ export default async function AboutPage() {
                                 className="group/logo flex flex-col items-start justify-between gap-6 bg-(--canvas) p-6"
                             >
                                 <Image
-                                    src={p.logo}
+                                    src={mediaUrl(p.logo) ?? MEDIA_FALLBACK}
                                     alt={p.name}
                                     width={140}
                                     height={44}
@@ -264,6 +268,7 @@ export default async function AboutPage() {
                     </Reveal>
                 </div>
             </section>
+            )}
 
             <CTABand
                 title="Come and see how we actually run a project."

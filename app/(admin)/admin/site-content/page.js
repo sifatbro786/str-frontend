@@ -8,18 +8,18 @@ import { SaveIcon } from "@/components/admin/icons";
 import { cn } from "@/lib/utils";
 
 /**
- * /admin/site-content — the four marketing blocks that used to be hard-coded
- * in lib/data.js and needed a deploy to change: the metrics band, the FAQ, the
- * process steps and the engagement shapes.
+ * /admin/site-content — the marketing blocks that used to be hard-coded in the
+ * frontend and needed a deploy to change: the metrics band, the FAQ, the
+ * process steps, the engagement shapes and the client list.
  *
- * ── WHY ONE SCREEN AND NOT FOUR ──────────────────────────────────────────
+ * ── WHY ONE SCREEN AND NOT FIVE ──────────────────────────────────────────
  * Same reasoning as the single SiteContent collection behind it. Every block
  * is an ordered list of short flat rows, edited as a whole and saved as a
  * whole, and RepeatableRows already does exactly that. Four routes would be
- * four copies of this file differing only in a column array.
+ * five copies of this file differing only in a column array.
  *
  * ── WHY EVERY BLOCK LOADS AT ONCE ────────────────────────────────────────
- * GET /site-content returns all four keyed in one response, so switching tabs
+ * GET /site-content returns every block keyed in one response, so switching tabs
  * is instant and costs no request. They are a few kilobytes in total; paging
  * them would be optimising the wrong number.
  *
@@ -105,6 +105,26 @@ const BLOCKS = [
             { key: "body", label: "Body", required: true },
         ],
     },
+    {
+        key: "partners",
+        label: "Clients",
+        where: "Homepage · About",
+        hint: "The logo rail and the client index. Logos render at 140x44 against the page background, so a transparent PNG or a WebP with the right ground beats a JPEG with a white box.",
+        max: 24,
+        addLabel: "Add client",
+        newRow: { name: "", logo: "", sector: "", work: "" },
+        columns: [
+            { key: "name", label: "Name", placeholder: "Wintex", required: true },
+            /* The only image column in this screen. RepeatableRows renders an
+               ImageField for type "image" and uploads to the folder named here;
+               the stored value is a path, same as every other picture on the
+               site. The eight seeded rows still point at /logo/partners in the
+               Next app's /public and keep working until each is re-uploaded. */
+            { key: "logo", label: "Logo", type: "image", folder: "partners" },
+            { key: "sector", label: "Sector", placeholder: "Garments export" },
+            { key: "work", label: "Work", placeholder: "Export ERP" },
+        ],
+    },
 ];
 
 export default function SiteContentAdminPage() {
@@ -184,7 +204,7 @@ export default function SiteContentAdminPage() {
             /* The item validator reports the offending row as
                `items[2].label`, which is more useful in the summary line than
                attached to a field — RepeatableRows has no per-cell error slot,
-               and inventing one for four screens is not worth it. */
+               and inventing one for five screens is not worth it. */
             const detail = Array.isArray(err.details)
                 ? err.details.map((d) => d.message).join(" · ")
                 : "";
@@ -222,7 +242,7 @@ export default function SiteContentAdminPage() {
             </div>
 
             {/* Tabs. A tab strip rather than the left rail /admin/page-meta
-                uses: there are four of these, not six, and each one needs the
+                uses: there are five of these, not six, and each one needs the
                 full width for its rows. */}
             <div
                 role="tablist"

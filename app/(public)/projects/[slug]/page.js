@@ -5,17 +5,17 @@ import CTABand from "@/components/ui/CTABand";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { getProjects, getProjectBySlug, getProjectNeighbours } from "@/lib/api";
-import { breadcrumbSchema, buildMetadata, caseStudySchema } from "@/lib/seo";
+import { getProjectBySlug, getProjectNeighbours, getProjects, paramsOrEmpty } from "@/lib/api";
+import { absoluteMedia, breadcrumbSchema, buildMetadata, caseStudySchema } from "@/lib/seo";
 import { SERVICE_LABELS } from "@/lib/taxonomy";
-import { cn, formatDate } from "@/lib/utils";
+import { MEDIA_FALLBACK, cn, formatDate, mediaUrl } from "@/lib/utils";
 
 /* dynamicParams: a case study published from the admin panel after the build
    renders on demand instead of 404ing until the next deploy. */
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-    const projects = await getProjects({ limit: 200 });
+    const projects = await paramsOrEmpty(() => getProjects({ limit: 200 }));
     return projects.map((p) => ({ slug: p.slug }));
 }
 
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }) {
         path: `/projects/${p.slug}`,
         title: p.metaTitle || p.title,
         description: p.metaDescription || p.shortDescription,
-        image: p.ogImage || p.coverImage,
+        image: absoluteMedia(p.ogImage || p.coverImage),
         type: "article",
         keywords: p.tags,
         article: {
@@ -166,7 +166,7 @@ export default async function ProjectDetailPage({ params }) {
                         the largest paint waits on an intersection callback. */}
                     <Reveal className="relative mt-12 aspect-[16/9] overflow-hidden rounded-2xl border border-(--line) md:mt-16">
                         <Image
-                            src={p.coverImage}
+                            src={mediaUrl(p.coverImage) ?? MEDIA_FALLBACK}
                             alt={`${p.title}, ${p.subtitle}`}
                             fill
                             priority
@@ -305,7 +305,7 @@ export default async function ProjectDetailPage({ params }) {
                                 >
                                     <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-(--line)">
                                         <Image
-                                            src={img.url}
+                                            src={mediaUrl(img.url) ?? MEDIA_FALLBACK}
                                             alt={img.caption || `${p.title} screen`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"

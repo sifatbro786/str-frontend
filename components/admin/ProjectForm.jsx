@@ -10,6 +10,7 @@ import MultiSelect from "./MultiSelect";
 import RepeatableRows, { stripKeys } from "./RepeatableRows";
 import FormSection from "./FormSection";
 import { cn } from "@/lib/utils";
+import ImageField from "./ImageField";
 
 /** Absolute-URL fields: the API rejects "" and bare domains, so blanks are stripped. */
 const URL_FIELDS = ["liveUrl", "githubUrl", "figmaUrl", "appStoreUrl", "playStoreUrl"];
@@ -33,7 +34,7 @@ const TECH_COLUMNS = [
 ];
 
 const GALLERY_COLUMNS = [
-    { key: "url", label: "URL", required: true, placeholder: "/websites/paarel-website.png" },
+    { key: "url", label: "Image", required: true, type: "image", folder: "projects" },
     { key: "caption", label: "Caption" },
     {
         key: "layoutType",
@@ -301,24 +302,20 @@ export default function ProjectForm({ mode, id, initial }) {
 
             <FormSection
                 title="Media"
-                hint="A path under /public such as /websites/paarel-website.png, or an absolute URL."
+                hint="Uploaded to the API and stored as a path. Cover is the 16:9 hero on the case study; thumbnail is the 16:10 card on /projects and the homepage, and falls back to the cover when it is empty."
             >
-                <Field label="Cover image" htmlFor="coverImage" error={errors.coverImage}>
-                    <Input
-                        id="coverImage"
+                <Field label="Cover image" error={errors.coverImage}>
+                    <ImageField
                         value={values.coverImage}
-                        onChange={onInput("coverImage")}
+                        onChange={set("coverImage")}
+                        folder="projects"
                     />
                 </Field>
-                <Field
-                    label="Thumbnail image"
-                    htmlFor="thumbnailImage"
-                    error={errors.thumbnailImage}
-                >
-                    <Input
-                        id="thumbnailImage"
+                <Field label="Thumbnail image" error={errors.thumbnailImage}>
+                    <ImageField
                         value={values.thumbnailImage}
-                        onChange={onInput("thumbnailImage")}
+                        onChange={set("thumbnailImage")}
+                        folder="projects"
                     />
                 </Field>
                 <div className="sm:col-span-2">
@@ -414,8 +411,16 @@ export default function ProjectForm({ mode, id, initial }) {
                         onChange={onInput("metaTitle")}
                     />
                 </Field>
-                <Field label="OG image" htmlFor="ogImage" error={errors.ogImage}>
-                    <Input id="ogImage" value={values.ogImage} onChange={onInput("ogImage")} />
+                {/* Separate from the cover on purpose: a 16:9 case-study hero
+                    cropped to the 1.91:1 social card usually loses the part that
+                    made it worth sharing. Empty falls back to the cover in
+                    lib/seo. */}
+                <Field label="OG image" error={errors.ogImage}>
+                    <ImageField
+                        value={values.ogImage}
+                        onChange={set("ogImage")}
+                        folder="projects"
+                    />
                 </Field>
                 <Field
                     label="Meta description"

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import { gsap, Flip } from "@/lib/gsap";
 import { refreshScroll } from "@/lib/scrollRefresh";
-import { cn, formatDate, pad } from "@/lib/utils";
+import { MEDIA_FALLBACK, cn, formatDate, mediaUrl, pad } from "@/lib/utils";
 
 /**
  * Article archive with a topic filter.
@@ -166,7 +166,7 @@ export default function BlogArchive({ posts, categories }) {
                                 className="relative block aspect-16/10 overflow-hidden rounded-2xl border border-(--line) lg:col-span-7"
                             >
                                 <Image
-                                    src={lead.coverImage}
+                                    src={mediaUrl(lead.coverImage) ?? MEDIA_FALLBACK}
                                     alt=""
                                     fill
                                     priority

@@ -4,18 +4,18 @@ import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
-import { getServices, getServiceBySlug, getProjects } from "@/lib/api";
+import { getProjects, getServiceBySlug, getServices, paramsOrEmpty } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata, serviceSchema } from "@/lib/seo";
 import ServiceMedia from "@/components/ui/ServiceMedia";
 import { SERVICE_LABELS } from "@/lib/taxonomy";
-import { mediaUrl, pad } from "@/lib/utils";
+import { MEDIA_FALLBACK, mediaUrl, pad } from "@/lib/utils";
 
 /* dynamicParams: a service published from the admin panel after the build
    renders on demand instead of 404ing until the next deploy. */
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-    const services = await getServices();
+    const services = await paramsOrEmpty(() => getServices());
     return services.map((s) => ({ slug: s.slug }));
 }
 
@@ -228,7 +228,7 @@ export default async function ServiceDetailPage({ params }) {
                                 >
                                     <div className="relative aspect-16/11 overflow-hidden rounded-xl border border-(--line)">
                                         <Image
-                                            src={p.thumbnailImage || p.coverImage}
+                                            src={mediaUrl(p.thumbnailImage || p.coverImage) ?? MEDIA_FALLBACK}
                                             alt={p.title}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 30vw"

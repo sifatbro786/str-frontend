@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import SectionIndex from "@/components/ui/SectionIndex";
 import useSplitReveal from "@/components/motion/useSplitReveal";
+import { MEDIA_FALLBACK, mediaUrl } from "@/lib/utils";
 
 /**
  * 04 // WORK — featured case studies.
@@ -54,6 +55,9 @@ export default function SelectedWork({ projects }) {
         { scope: root },
     );
 
+    // "Selected work" with nothing selected is worse than no section at all.
+    if (!projects?.length) return null;
+
     return (
         <section id="work" ref={root} className="border-b border-(--line)">
             <div className="shell py-24 md:py-32">
@@ -90,7 +94,7 @@ export default function SelectedWork({ projects }) {
                                 className="relative block aspect-16/10 overflow-hidden border border-(--line)"
                             >
                                 <Image
-                                    src={p.thumbnailImage || p.coverImage}
+                                    src={mediaUrl(p.thumbnailImage || p.coverImage) ?? MEDIA_FALLBACK}
                                     alt={`${p.title} — ${p.subtitle}`}
                                     fill
                                     sizes="(min-width: 768px) 46vw, 92vw"

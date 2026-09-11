@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { cn, mediaUrl } from "@/lib/utils";
 
 /**
@@ -71,6 +71,10 @@ function upload(file, folder, onProgress) {
 }
 
 export default function ImageField({ value, onChange, folder = "misc", disabled }) {
+    /* useId, not the folder name. RepeatableRows renders one of these per
+       gallery row, all with folder="projects", so a folder-derived id would
+       give every row the same input id and every label would focus row one. */
+    const inputId = `upload-${useId()}`;
     const inputRef = useRef(null);
     const [progress, setProgress] = useState(null); // null = idle
     const [error, setError] = useState("");
@@ -180,12 +184,12 @@ export default function ImageField({ value, onChange, folder = "misc", disabled 
                         disabled={disabled || busy}
                         onChange={(e) => handleFile(e.target.files?.[0])}
                         className="sr-only"
-                        id={`upload-${folder}`}
+                        id={inputId}
                     />
 
                     <div className="flex flex-wrap items-center gap-3">
                         <label
-                            htmlFor={`upload-${folder}`}
+                            htmlFor={inputId}
                             className={cn(
                                 "label-mono cursor-pointer border border-(--line) px-4 py-2.5 text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text)",
                                 (disabled || busy) && "pointer-events-none",

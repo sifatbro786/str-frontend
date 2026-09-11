@@ -6,10 +6,12 @@ import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import { gsap, Flip } from "@/lib/gsap";
 import { refreshScroll } from "@/lib/scrollRefresh";
-/* From taxonomy, not data: this is a client component and lib/data.js carries
-   every case-study body — importing it here would ship all of that. */
+/* From taxonomy, which is enums and labels only. This is a client component,
+   so anything it imports ships to the browser; taxonomy is kept free of
+   content for exactly that reason. Project data arrives as a prop, fetched on
+   the server. */
 import { SERVICE_LABELS } from "@/lib/taxonomy";
-import { cn, formatDate, pad } from "@/lib/utils";
+import { MEDIA_FALLBACK, cn, formatDate, mediaUrl, pad } from "@/lib/utils";
 
 /**
  * Filterable case-study rail.
@@ -205,7 +207,7 @@ export default function ProjectRail({ projects, services }) {
                                     <div className="relative overflow-hidden rounded-2xl border border-(--line)">
                                         <div className="relative aspect-16/10">
                                             <Image
-                                                src={p.coverImage}
+                                                src={mediaUrl(p.coverImage) ?? MEDIA_FALLBACK}
                                                 alt={p.title}
                                                 fill
                                                 sizes="(max-width: 1024px) 100vw, 55vw"

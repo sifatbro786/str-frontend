@@ -1,5 +1,5 @@
 import { site } from "@/lib/site";
-import { getBlogs, getProjects, getServices } from "@/lib/api";
+import { getBlogs, getProjects, getServices, paramsOrEmpty } from "@/lib/api";
 
 /**
  * sitemap.xml, generated from the live catalogue.
@@ -23,10 +23,15 @@ import { getBlogs, getProjects, getServices } from "@/lib/api";
  * Do not spend time tuning them.
  *
  * ── WHY IT CANNOT THROW ──────────────────────────────────────────────────
- * lib/api swallows fetch failures and falls back to static content, so a
- * backend outage yields a sitemap of the static catalogue rather than a 500.
- * A 500 on /sitemap.xml is treated as an error by Search Console and repeated
- * errors get the sitemap dropped.
+ * lib/api no longer swallows anything, so each list is wrapped here instead.
+ * A backend outage yields a sitemap of the eight static routes rather than a
+ * 500: Search Console treats a 500 on /sitemap.xml as an error, and repeated
+ * errors get the sitemap dropped entirely. A short sitemap costs nothing —
+ * the missing URLs are already indexed and are re-listed on the next hourly
+ * revalidation.
+ *
+ * This is the one place the swallow is correct, which is why it is spelled out
+ * here rather than hidden back inside the selectors.
  */
 export const revalidate = 3600;
 
@@ -34,9 +39,9 @@ const iso = (d) => (d ? new Date(d) : new Date());
 
 export default async function sitemap() {
     const [services, projects, blogs] = await Promise.all([
-        getServices(),
-        getProjects({ limit: 200 }),
-        getBlogs({ limit: 200 }),
+        paramsOrEmpty(() => getServices()),
+        paramsOrEmpty(() => getProjects({ limit: 200 })),
+        paramsOrEmpty(() => getBlogs({ limit: 200 })),
     ]);
 
     const staticRoutes = [
