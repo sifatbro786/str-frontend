@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageMasthead from "@/components/ui/PageMasthead";
@@ -7,8 +6,9 @@ import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { getServices, getServiceBySlug, getProjects } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata, serviceSchema } from "@/lib/seo";
-import { SERVICE_MEDIA, SERVICE_LABELS } from "@/lib/taxonomy";
-import { pad } from "@/lib/utils";
+import ServiceMedia from "@/components/ui/ServiceMedia";
+import { SERVICE_LABELS } from "@/lib/taxonomy";
+import { mediaUrl, pad } from "@/lib/utils";
 
 /* dynamicParams: a service published from the admin panel after the build
    renders on demand instead of 404ing until the next deploy. */
@@ -37,7 +37,11 @@ export async function generateMetadata({ params }) {
         path: `/services/${service.slug}`,
         title: service.metaTitle || service.title,
         description: service.metaDescription || service.shortDescription,
-        image: SERVICE_MEDIA[service.slug] ?? "/logo.png",
+        /* The share card wants an absolute, cacheable URL. mediaUrl resolves an
+           uploaded path against the API origin; a service with no artwork yet
+           falls back to the logo rather than shipping a card with a dead
+           image, which some scrapers cache for days. */
+        image: mediaUrl(service.image) ?? "/logo.png",
         type: "article",
     });
 }
@@ -120,17 +124,24 @@ export default async function ServiceDetailPage({ params }) {
                             dangerouslySetInnerHTML={{ __html: service.detailedOverview }}
                         />
 
-                        {SERVICE_MEDIA[service.slug] && (
-                            <figure className="relative mt-14 aspect-[16/9] overflow-hidden rounded-2xl border border-(--line)">
-                                <Image
-                                    src={SERVICE_MEDIA[service.slug]}
-                                    alt={`${service.title}, representative work`}
-                                    fill
-                                    sizes="(max-width: 1024px) 100vw, 58vw"
-                                    className="object-cover object-top"
-                                />
-                            </figure>
-                        )}
+                        {/* Rendered unconditionally now. The old guard existed
+                            because a missing SERVICE_MEDIA entry produced a
+                            broken <Image>; ServiceMedia has a real empty state,
+                            and a service awaiting artwork keeps its page rhythm
+                            instead of losing a block. */}
+                        <figure className="mt-14">
+                            <ServiceMedia
+                                src={service.image}
+                                alt={
+                                    service.imageAlt ||
+                                    `${service.title} work produced by STR Solutions`
+                                }
+                                title={service.title}
+                                index={index + 1}
+                                sizes="(max-width: 1024px) 100vw, 58vw"
+                                className="aspect-video rounded-2xl border border-(--line)"
+                            />
+                        </figure>
                     </Reveal>
 
                     {/* sticky, so the answer to "what do I get" stays on screen
@@ -160,7 +171,7 @@ export default async function ServiceDetailPage({ params }) {
                                 className="mt-10 rounded-2xl border border-(--line) bg-(--raised) p-6"
                             >
                                 <p className="label-mono text-(--text-mute)">Typical timeline</p>
-                                <p className="mt-3 text-[1.5rem] font-medium tracking-[-0.025em] text-(--text)">
+                                <p className="mt-3 text-[1.5rem] font-medium tracking-tight text-(--text)">
                                     {service.deliverableTimeline}
                                 </p>
                                 <p className="mt-4 text-[0.9375rem] leading-relaxed text-(--text-mute)">
@@ -215,7 +226,7 @@ export default async function ServiceDetailPage({ params }) {
                                     data-reveal=""
                                     className="group/card flex flex-col bg-(--canvas) p-6"
                                 >
-                                    <div className="relative aspect-[16/11] overflow-hidden rounded-xl border border-(--line)">
+                                    <div className="relative aspect-16/11 overflow-hidden rounded-xl border border-(--line)">
                                         <Image
                                             src={p.thumbnailImage || p.coverImage}
                                             alt={p.title}

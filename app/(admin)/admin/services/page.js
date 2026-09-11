@@ -6,19 +6,26 @@ import { api, revalidate } from "@/lib/apiClient";
 import { useToast } from "@/hooks/useToast";
 import { Field, Input, Textarea, NumberInput, Toggle, CONTROL } from "@/components/admin/Fields";
 import TagInput from "@/components/admin/TagInput";
+import ImageField from "@/components/admin/ImageField";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import StatusPill from "@/components/admin/StatusPill";
-import { cn } from "@/lib/utils";
+import { cn, mediaUrl } from "@/lib/utils";
 
 const EMPTY = {
-  title: "", shortDescription: "", detailedOverview: "", icon: "",
+  title: "", shortDescription: "", detailedOverview: "",
+  image: "", imageAlt: "",
   featuresList: [], deliverableTimeline: "", order: 0, isActive: true,
 };
 
 /**
- * Services list. Seven rows and a small form, so this uses an inline expanding
+ * Services list. Nine rows and a small form, so this uses an inline expanding
  * row editor rather than separate /new and /[id] routes — the round trip to a
  * dedicated page costs more than the form is worth at this size.
+ *
+ * ⚑ `image` is uploaded by ImageField the moment a file is chosen, which means
+ * the file exists on the API before this form is submitted. `draft.image` only
+ * ever holds the returned path, so Save is still a plain JSON PATCH and the
+ * payload below needs no special handling.
  */
 export default function ServicesAdminPage() {
   const [editing, setEditing] = useState(null); // service _id, or "new"
@@ -140,12 +147,31 @@ export default function ServicesAdminPage() {
           <Input id="svc-title" value={draft.title} onChange={onInput("title")} error={errors.title} maxLength={120} />
         </Field>
         <Field
-          label="Icon"
-          htmlFor="svc-icon"
-          error={errors.icon}
-          hint="A lucide key such as code — not a file path. Artwork lives in SERVICE_MEDIA."
+          label="Image alt text"
+          htmlFor="svc-image-alt"
+          error={errors.imageAlt}
+          hint="Describe the picture, not the service. Leave empty to render it decoratively."
         >
-          <Input id="svc-icon" value={draft.icon} onChange={onInput("icon")} placeholder="code" />
+          <Input
+            id="svc-image-alt"
+            value={draft.imageAlt}
+            onChange={onInput("imageAlt")}
+            maxLength={160}
+            placeholder="Interior render of a three bedroom apartment"
+          />
+        </Field>
+        <Field
+          label="Image"
+          error={errors.image}
+          hint="Shown on the homepage preview, the /services row and the top of the service page. 16:10 or wider crops best."
+          className="sm:col-span-2"
+        >
+          <ImageField
+            value={draft.image}
+            onChange={set("image")}
+            folder="services"
+            disabled={saving}
+          />
         </Field>
         <Field label="Short description" htmlFor="svc-short" error={errors.shortDescription} className="sm:col-span-2">
           <Textarea id="svc-short" rows={3} value={draft.shortDescription} onChange={onInput("shortDescription")} />
@@ -254,6 +280,23 @@ export default function ServicesAdminPage() {
                   onBlur={(e) => saveOrder(row, e.target.value)}
                   className={cn(CONTROL, "nums w-20 shrink-0 px-2 py-1.5 text-center")}
                 />
+
+                {/* The thumbnail is the point of this row. Nine services and
+                    one of them silently missing its artwork is exactly the
+                    thing a list of titles will not tell you. */}
+                <div className="grid size-10 shrink-0 place-items-center overflow-hidden border border-(--line-soft) bg-(--raised)">
+                  {mediaUrl(row.image) ? (
+                    <img
+                      src={mediaUrl(row.image)}
+                      alt=""
+                      className="size-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span className="label-mono text-(--text-mute)">··</span>
+                  )}
+                </div>
 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[0.9375rem] font-medium text-(--text)">{row.title}</p>

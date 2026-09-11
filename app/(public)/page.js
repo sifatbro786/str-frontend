@@ -68,7 +68,8 @@ export async function generateMetadata() {
  * ── SECTION RHYTHM ───────────────────────────────────────────────────────
  *   Hero          statement, delivery map, discipline band
  *   About         01 — narrative and the four numbers behind it
- *   Capabilities  02 — the full service line, one open at a time
+ *   Capabilities  02 — the full service line as an index, with a sticky
+ *                      preview of the hovered discipline
  *   Tooling       -- — the stack, as two crossing rails. Unnumbered on
  *                      purpose: it is a band, like the logo rail inside
  *                      EcosystemBand, not a chapter. Numbering it would
@@ -95,12 +96,17 @@ export default async function HomePage() {
         getSiteContent("faqs"),
     ]);
 
+    /* featuresList is gone from this projection: CapabilityStack stopped
+       rendering deliverables when it became an index with a preview frame, and
+       an unread field here is six strings per service crossing the server to
+       client boundary on every homepage request. `image` replaces it. */
     const services = rawServices.map((s) => ({
         slug: s.slug,
         title: s.title,
         shortDescription: s.shortDescription,
         deliverableTimeline: s.deliverableTimeline,
-        featuresList: (s.featuresList ?? []).slice(0, 6),
+        image: s.image ?? "",
+        imageAlt: s.imageAlt ?? "",
     }));
 
     const projects = rawProjects.map((p) => ({

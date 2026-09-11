@@ -1,3 +1,24 @@
+/**
+ * Service, project and team artwork is uploaded to the API host and served
+ * from its /uploads mount, so that host has to be a remotePattern or
+ * next/image refuses it with "hostname is not configured".
+ *
+ * Derived from NEXT_PUBLIC_API_URL rather than hardcoded, because this value
+ * differs per environment (localhost in dev, Render in production, a custom
+ * domain later) and a hardcoded list means images silently stop rendering on
+ * whichever environment was forgotten. A malformed or missing env var yields
+ * no pattern rather than throwing: the build still succeeds and only remote
+ * images fail, which is the better failure for a CI box with no env file.
+ */
+const apiHost = (() => {
+    try {
+        const { protocol, hostname, port } = new URL(process.env.NEXT_PUBLIC_API_URL);
+        return [{ protocol: protocol.replace(":", ""), hostname, port, pathname: "/uploads/**" }];
+    } catch {
+        return [];
+    }
+})();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
@@ -8,6 +29,7 @@ const nextConfig = {
         remotePatterns: [
             // Add production asset/CDN hosts here as the project grows.
             { protocol: "https", hostname: "strsltd.com" },
+            ...apiHost,
         ],
         /* Default is a 60 second cache on optimised output, which means the CDN
        re-optimises the same case-study screenshot every minute for no reason.

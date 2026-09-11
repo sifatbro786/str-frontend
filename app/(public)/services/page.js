@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
@@ -7,7 +6,7 @@ import Reveal from "@/components/motion/Reveal";
 import JsonLd from "@/components/seo/JsonLd";
 import { getServices, getSiteContent } from "@/lib/api";
 import { buildMetadata, breadcrumbSchema, serviceSchema } from "@/lib/seo";
-import { SERVICE_MEDIA } from "@/lib/taxonomy";
+import ServiceMedia from "@/components/ui/ServiceMedia";
 import { cn, pad } from "@/lib/utils";
 
 export async function generateMetadata() {
@@ -16,7 +15,7 @@ export async function generateMetadata() {
         path: "/services",
         title: "Services",
         description:
-            "Seven disciplines under one delivery team: web platforms, custom software, mobile applications, product design, graphics production, 3D visualization and digital marketing.",
+            "Nine disciplines under one delivery team: websites, custom software, consultancy, graphic design, digital marketing, data and analytics, 2D and 3D production, dashboards and mobile apps.",
     });
 }
 
@@ -24,7 +23,7 @@ export async function generateMetadata() {
  * Services index.
  *
  * ── WHY ALTERNATING ROWS AND NOT A CARD GRID ─────────────────────────────
- * Seven services in a grid is either two ragged rows or an arbitrary "top six
+ * Nine services in a grid is either three thin rows or an arbitrary "top six
  * and a view-all". Full-width rows let each short description sit at a
  * readable measure instead of being clamped to a card, and the alternation
  * gives the page a rhythm a uniform grid cannot. It is also deliberately NOT
@@ -66,7 +65,7 @@ export default async function ServicesPage() {
                 index="01"
                 eyebrow="Services"
                 title="What we take on, and how it is scoped."
-                lede="Engineering and visual production in the same studio. Below is what each discipline actually delivers and how long it usually takes, not a capability list."
+                lede="Engineering, data and visual production in the same studio. Below is what each discipline actually delivers and how long it usually takes, not a capability list."
                 breadcrumb={[{ label: "Home", href: "/" }, { label: "Services" }]}
                 meta={[
                     { label: "Disciplines", value: `${services.length} active` },
@@ -99,16 +98,20 @@ export default async function ServicesPage() {
                                             tabIndex={-1}
                                             data-reveal=""
                                             className={cn(
-                                                "relative block aspect-[16/10] overflow-hidden rounded-2xl border border-(--line) lg:col-span-5",
+                                                "block lg:col-span-5",
                                                 flip ? "lg:order-2 lg:col-start-8" : "lg:order-1",
                                             )}
                                         >
-                                            <Image
-                                                src={SERVICE_MEDIA[s.slug]}
+                                            <ServiceMedia
+                                                src={s.image}
+                                                /* alt="" on purpose: the title below is the
+                                                   same link, so announcing the picture as
+                                                   well reads the destination twice. */
                                                 alt=""
-                                                fill
-                                                sizes="(max-width: 1024px) 100vw, 42vw"
-                                                className="object-cover object-top transition-transform duration-700 ease-out motion-safe:group-hover/row:scale-[1.03]"
+                                                title={s.title}
+                                                index={i + 1}
+                                                className="aspect-[16/10] rounded-2xl border border-(--line)"
+                                                imageClassName="transition-transform duration-700 ease-out motion-safe:group-hover/row:scale-[1.03]"
                                             />
                                         </Link>
 
