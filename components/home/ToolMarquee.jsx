@@ -183,7 +183,7 @@ export default function ToolMarquee() {
                 them out of flow the section would collapse to the label. The
                 value is the rail height plus the vertical reach of the rotation
                 at the widest breakpoint, rounded up. */}
-            <div className="relative mt-20">
+            <div className="relative mt-20 md:mt-40">
                 {/* Blue — under, travelling left. */}
                 <div
                     className="absolute top-1/2 left-1/2 z-10 w-[132%]"
