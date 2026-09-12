@@ -113,6 +113,11 @@ export default async function HomePage() {
         clientName: t.clientName,
         clientDesignation: t.clientDesignation,
         companyName: t.companyName,
+        /* ⚑ This was missing, and it is why an avatar saved in the dashboard
+           never appeared: the field was written to the database, read by the
+           API, and then dropped here before it ever reached the rail. A
+           projection is a whitelist, so forgetting a field is silent. */
+        clientAvatar: t.clientAvatar ?? "",
     }));
 
     return (

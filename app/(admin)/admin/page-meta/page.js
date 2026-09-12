@@ -9,14 +9,24 @@ import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import ImageField from "@/components/admin/ImageField";
 
-/** Mirrors the PageMeta.pageIdentifier enum on the API, in nav order. */
-const IDENTIFIERS = ["home", "about", "services", "projects", "blogs", "contact"];
+/**
+ * Mirrors the PageMeta.pageIdentifier enum on the API, in nav order.
+ *
+ * ⚑ THREE PLACES MOVE TOGETHER. This list, IDENTIFIERS in
+ * str-backend/src/validators/pageMeta.validator.js, and the schema enum in
+ * str-backend/src/models/PageMeta.js. Add an id here only and the PUT is
+ * rejected with a 400; add it to the validator only and Mongoose refuses the
+ * write. "portfolio" is in all three.
+ */
+const IDENTIFIERS = ["home", "about", "services", "projects", "portfolio", "blogs", "contact"];
 
 const PATHS = {
   home: "/",
   about: "/about",
   services: "/services",
   projects: "/projects",
+  // Not in the navbar by design; reachable by direct URL and via the sitemap.
+  portfolio: "/portfolio",
   blogs: "/blogs",
   contact: "/contact",
 };

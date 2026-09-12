@@ -5,7 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap, Draggable, Observer, ScrollSmoother } from "@/lib/gsap";
 import SectionIndex from "@/components/ui/SectionIndex";
 import useSplitReveal from "@/components/motion/useSplitReveal";
-import { cn } from "@/lib/utils";
+import { cn, mediaUrl } from "@/lib/utils";
 
 /**
  * 06 // TESTIMONIALS — a rail you throw rather than a carousel you click.
@@ -41,7 +41,91 @@ import { cn } from "@/lib/utils";
 const CARD = 380; // px, must match the card width class below
 const GAP = 16;
 
-export default function TestimonialRail({ testimonials }) {
+function initials(name = "") {
+    return name
+        .replace(/[^A-Za-z0-9 ]/g, " ")
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase();
+}
+
+/**
+ * The client's photo, if there is one.
+ *
+ * ── WHY A PLAIN <img> AND NOT next/image ─────────────────────────────────
+ * `clientAvatar` is a free-text input in /admin/testimonials, hinted as "a
+ * path under /public, or an absolute URL", so authors paste from imgbb,
+ * Drive, a client's own site — anywhere. next/image refuses any host absent
+ * from next.config.mjs `remotePatterns` and THROWS at render, so one pasted
+ * link would turn into a 500 on the homepage. Whitelisting hosts one at a
+ * time is a losing game against a free-text field, and at 44px the optimiser
+ * saves almost nothing, so this trades it for a field that cannot break the
+ * page.
+ *
+ * `mediaUrl()` still runs, so an /uploads/... path saved by the API resolves
+ * exactly as it does everywhere else.
+ *
+ * ⚑ If avatars should be uploaded rather than pasted, the fix is to swap the
+ * admin Input for ImageField (as services and team already do) and then this
+ * can become next/image, because the host becomes the API's and is already
+ * whitelisted.
+ */
+function Avatar({ src, name }) {
+    const [failed, setFailed] = useState(false);
+    const url = mediaUrl(src);
+
+    /* No avatar and a dead link are the same thing to a reader, so both land
+       on initials. A broken image frame reads as a bug; initials read as a
+       choice. */
+    if (!url || failed) {
+        return (
+            <span
+                aria-hidden="true"
+                className="grid size-11 shrink-0 place-items-center rounded-full border border-(--line) bg-(--canvas) text-[0.8125rem] font-medium text-(--text-mute)"
+            >
+                {initials(name)}
+            </span>
+        );
+    }
+
+    return (
+        <img
+            src={url}
+            /* Decorative: the name sits directly beside it, so alt text would
+               make a screen reader say it twice. */
+            alt=""
+            width={44}
+            height={44}
+            loading="lazy"
+            decoding="async"
+            /* Several image hosts refuse a hotlink by referrer. Sending none is
+               the difference between a picture and a broken frame. */
+            referrerPolicy="no-referrer"
+            onError={() => setFailed(true)}
+            className="size-11 shrink-0 rounded-full border border-(--line) object-cover"
+        />
+    );
+}
+
+/**
+ * ── WHY THE HEADING IS PROPS AND NOT LITERALS ────────────────────────────
+ * This rail now runs on the homepage AND on /portfolio, where it is section
+ * 03 rather than 06 and needs a heading that fits a pricing page above it.
+ * The alternative was a second rail component duplicating the drag, wheel,
+ * keyboard and skew logic for the sake of two strings, which is how a
+ * codebase ends up with two carousels that drift apart. Same arrangement as
+ * ProcessTracker: the defaults are the homepage's copy, so its call site did
+ * not change.
+ */
+export default function TestimonialRail({
+    testimonials,
+    index = "06",
+    eyebrow = "In their words",
+    title = "What the people who paid for it say.",
+}) {
     const root = useRef(null);
     const viewport = useRef(null);
     const track = useRef(null);
@@ -231,9 +315,9 @@ export default function TestimonialRail({ testimonials }) {
             <div className="shell py-24 md:py-32">
                 <div className="flex flex-wrap items-end justify-between gap-6">
                     <div className="max-w-xl">
-                        <SectionIndex index="06" label="In their words" />
+                        <SectionIndex index={index} label={eyebrow} />
                         <h2 ref={heading} className="text-heading mt-6">
-                            What the people who paid for it say.
+                            {title}
                         </h2>
                     </div>
 
@@ -289,11 +373,24 @@ export default function TestimonialRail({ testimonials }) {
                             <blockquote className="text-[1.0625rem] leading-[1.6] text-(--text)">
                                 {t.reviewText}
                             </blockquote>
-                            <figcaption className="mt-8 border-t border-(--line) pt-5">
-                                <p className="text-sm font-medium text-(--text)">{t.clientName}</p>
-                                <p className="label-mono mt-1.5 text-(--text-mute)">
-                                    {t.clientDesignation}, {t.companyName}
-                                </p>
+                            <figcaption className="mt-8 flex items-center gap-3.5 border-t border-(--line) pt-5">
+                                <Avatar src={t.clientAvatar} name={t.clientName} />
+                                <div className="min-w-0">
+                                    <p className="text-sm font-medium text-(--text)">
+                                        {t.clientName}
+                                    </p>
+                                    {/* Joined rather than interpolated with a literal comma.
+                                        Both fields default to "" on the model, so the old
+                                        `{role}, {company}` rendered a dangling ", Acme" or
+                                        "Head of Ops," whenever an author filled only one. */}
+                                    {(t.clientDesignation || t.companyName) && (
+                                        <p className="label-mono mt-1.5 text-(--text-mute)">
+                                            {[t.clientDesignation, t.companyName]
+                                                .filter(Boolean)
+                                                .join(", ")}
+                                        </p>
+                                    )}
+                                </div>
                             </figcaption>
                         </figure>
                     ))}

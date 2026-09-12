@@ -48,6 +48,10 @@ export default async function sitemap() {
         { path: "/", priority: 1, changeFrequency: "weekly" },
         { path: "/services", priority: 0.9, changeFrequency: "monthly" },
         { path: "/projects", priority: 0.9, changeFrequency: "weekly" },
+        // /portfolio is the sample library and is not linked from the navbar, so
+        // the sitemap is the only route a crawler has to it. It sits below
+        // /projects on purpose: the case studies are the pages that should rank.
+        { path: "/portfolio", priority: 0.7, changeFrequency: "monthly" },
         { path: "/about", priority: 0.7, changeFrequency: "monthly" },
         { path: "/blogs", priority: 0.8, changeFrequency: "weekly" },
         { path: "/contact", priority: 0.8, changeFrequency: "yearly" },

@@ -128,7 +128,7 @@ export default function TestimonialsAdminPage() {
           label="Avatar"
           htmlFor="t-avatar"
           error={errors.clientAvatar}
-          hint="A path under /public, or an absolute URL."
+          hint="Direct image URL (ending .jpg, .png or .webp), or a path under /public. Square, around 200px. An imgbb or Drive page link will not work — copy the image address itself."
         >
           <Input id="t-avatar" value={draft.clientAvatar} onChange={onInput("clientAvatar")} />
         </Field>
