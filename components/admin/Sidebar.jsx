@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ADMIN_NAV_GROUPS, isNavActive } from "@/lib/adminNav";
+import { navGroupsFor, isNavActive } from "@/lib/adminNav";
 import { CloseIcon, ExternalIcon } from "./icons";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +22,11 @@ import { cn } from "@/lib/utils";
  * every click for anyone who is not in here daily — which is the client, who
  * is the actual user of this panel.
  */
-export default function Sidebar({ onNavigate, onClose }) {
+export default function Sidebar({ onNavigate, onClose, role }) {
     const pathname = usePathname();
+    // Entries this role may actually open. See the `roles` note in lib/adminNav.js:
+    // this hides a dead door, it does not lock one.
+    const groups = navGroupsFor(role);
 
     return (
         <nav aria-label="Admin sections" className="flex h-full flex-col bg-(--raised)">
@@ -56,7 +59,7 @@ export default function Sidebar({ onNavigate, onClose }) {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-4">
-                {ADMIN_NAV_GROUPS.map((group) => (
+                {groups.map((group) => (
                     <div key={group.title} className="mb-5 last:mb-0">
                         <p className="px-3 pb-2 text-[0.6875rem] font-semibold tracking-[0.04em] text-(--text-mute) uppercase">
                             {group.title}

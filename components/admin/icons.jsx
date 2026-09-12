@@ -111,6 +111,14 @@ export const SiteContentIcon = (p) => (
     </Icon>
 );
 
+export const UsersIcon = (p) => (
+    <Icon {...p}>
+        <circle cx="12" cy="7.5" r="3.5" />
+        <path d="M5 20a7 7 0 0 1 14 0" />
+        <path d="M19.5 4.5h3M21 3v3" />
+    </Icon>
+);
+
 /* ── Controls ─────────────────────────────────────────────────────────── */
 
 export const MenuIcon = (p) => (

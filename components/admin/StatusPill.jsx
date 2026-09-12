@@ -22,6 +22,9 @@ const TONES = {
     published: "bg-leaf/14 text-leaf",
     active: "bg-leaf/14 text-leaf",
     featured: "bg-leaf/14 text-leaf",
+    // A suspended account is not "off", it is a deliberate block someone needs
+    // to notice in a column of active rows — same weight as an unread inquiry.
+    suspended: "bg-signal/12 text-signal",
     draft: "bg-(--raised-2) text-(--text-mute)",
     inactive: "bg-(--raised-2) text-(--text-mute)",
 };

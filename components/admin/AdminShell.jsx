@@ -22,7 +22,7 @@ export default function AdminShell({ user, children }) {
             <div data-admin="" className="min-h-dvh bg-(--admin-bg)">
                 {/* Desktop rail */}
                 <div className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-(--line) lg:block">
-                    <Sidebar />
+                    <Sidebar role={user?.role} />
                 </div>
 
                 {/* Mobile sheet */}
@@ -36,6 +36,7 @@ export default function AdminShell({ user, children }) {
                         />
                         <div className="absolute inset-y-0 left-0 w-64 border-r border-(--line)">
                             <Sidebar
+                                role={user?.role}
                                 onNavigate={() => setNavOpen(false)}
                                 onClose={() => setNavOpen(false)}
                             />
