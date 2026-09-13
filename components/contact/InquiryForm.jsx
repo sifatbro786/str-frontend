@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,38 @@ const LABEL = "label-mono block text-(--text-mute)";
 export default function InquiryForm({ services }) {
     const [state, setState] = useState("idle"); // idle | submitting | sent | error
     const [errors, setErrors] = useState({});
+    const [prefill, setPrefill] = useState("");
+
+    /**
+     * Seeds the message box when someone arrives from a package card on
+     * /packages, which links here as /contact?package=Corporate%20Package%20(BIZ-02).
+     *
+     * ── WHY window.location AND NOT useSearchParams ──────────────────────
+     * useSearchParams opts the whole route out of static generation and, in an
+     * app-router build, has to sit behind its own <Suspense> boundary. This
+     * page is otherwise static and has no other reason to be dynamic, and the
+     * cost of getting it wrong is a build error rather than a runtime one.
+     * Reading the query in an effect keeps the route exactly as it was.
+     *
+     * ── WHY IT IS SAFE FOR HYDRATION ─────────────────────────────────────
+     * The first render is "" on the server and on the client; the effect runs
+     * after hydration, so there is no markup mismatch. `key={prefill}` on the
+     * textarea below is what makes a late defaultValue take: without it React
+     * keeps the already-mounted uncontrolled node and the change is ignored.
+     * Uncontrolled on purpose — the form reads itself with FormData, and the
+     * visitor must be able to delete this sentence and write their own.
+     */
+    useEffect(() => {
+        try {
+            const requested = new URLSearchParams(window.location.search).get("package");
+            if (!requested) return;
+            // Bounded: this string is rendered into a textarea, and a query
+            // param is attacker-controlled even when the only link to it is ours.
+            setPrefill(`I'm interested in the ${requested.slice(0, 120)} package. `);
+        } catch {
+            /* No query string to parse is the normal case, not an error. */
+        }
+    }, []);
 
     function validate(data) {
         const next = {};
@@ -221,6 +253,10 @@ export default function InquiryForm({ services }) {
                     What is the actual constraint? *
                 </label>
                 <textarea
+                    // Remounts when the effect above resolves a ?package= param,
+                    // so the late defaultValue is actually applied.
+                    key={prefill}
+                    defaultValue={prefill}
                     id="message"
                     name="message"
                     rows={6}

@@ -29,6 +29,10 @@ const BASE = process.env.API_URL;
 const ALLOWED = new Set([
     "projects",
     "services",
+    // Covers /packages, /packages/categories, /packages/tiers and
+    // /packages/page — the guard is on the first segment only, and every
+    // sub-path is gated by checkRole on the Express router behind it.
+    "packages",
     "blogs",
     "testimonials",
     "team",

@@ -65,6 +65,15 @@ export const ServicesIcon = (p) => (
     </Icon>
 );
 
+/* Price tag: the only entry in the rail that is about money rather than
+   content, and the only one that needs to read as such at a glance. */
+export const PackagesIcon = (p) => (
+    <Icon {...p}>
+        <path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6.2-6.2a2 2 0 0 1-.5-1.9l1.4-5.6A2 2 0 0 1 5.9 4.8l5.6-1.4a2 2 0 0 1 1.9.5l6.2 6.2a2 2 0 0 1 0 2.8Z" />
+        <path d="M8.5 8.5h.01" />
+    </Icon>
+);
+
 export const BlogsIcon = (p) => (
     <Icon {...p}>
         <path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />

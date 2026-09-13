@@ -18,7 +18,16 @@ import ImageField from "@/components/admin/ImageField";
  * rejected with a 400; add it to the validator only and Mongoose refuses the
  * write. "portfolio" is in all three.
  */
-const IDENTIFIERS = ["home", "about", "services", "projects", "portfolio", "blogs", "contact"];
+const IDENTIFIERS = [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "portfolio",
+  "packages",
+  "blogs",
+  "contact",
+];
 
 const PATHS = {
   home: "/",
@@ -27,6 +36,11 @@ const PATHS = {
   projects: "/projects",
   // Not in the navbar by design; reachable by direct URL and via the sitemap.
   portfolio: "/portfolio",
+  // Bilingual. The row edited here is the ENGLISH <head> — the Bengali view is
+  // the same URL with ?lang=bn and inherits this title and description, because
+  // PageMeta has one row per route and no locale dimension. If the Bengali
+  // listing ever needs its own copy, that is a schema change, not a second row.
+  packages: "/packages",
   blogs: "/blogs",
   contact: "/contact",
 };

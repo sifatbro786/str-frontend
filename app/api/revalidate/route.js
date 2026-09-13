@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 const TAGS = new Set([
     "projects",
     "services",
+    "packages",
     "blogs",
     "testimonials",
     "team",

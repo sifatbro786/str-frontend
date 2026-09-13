@@ -52,6 +52,11 @@ export default async function sitemap() {
         // the sitemap is the only route a crawler has to it. It sits below
         // /projects on purpose: the case studies are the pages that should rank.
         { path: "/portfolio", priority: 0.7, changeFrequency: "monthly" },
+        /* Listed once, at the bare path. The Bengali view is the same URL with
+           ?lang=bn and is declared to Google through the hreflang alternates in
+           the route's generateMetadata — listing it here as well would submit
+           two URLs for one page and invite a duplicate-content call. */
+        { path: "/packages", priority: 0.8, changeFrequency: "monthly" },
         { path: "/about", priority: 0.7, changeFrequency: "monthly" },
         { path: "/blogs", priority: 0.8, changeFrequency: "weekly" },
         { path: "/contact", priority: 0.8, changeFrequency: "yearly" },
