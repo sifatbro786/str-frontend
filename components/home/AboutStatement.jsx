@@ -137,15 +137,43 @@ export default function AboutStatement({ metrics }) {
 
                     <div data-about-panel="" className="lg:col-span-7">
                         {/* Fixed aspect + overflow-hidden so the parallax translate
-                has somewhere to travel without changing document height. */}
-                        <div className="relative aspect-16/10 overflow-hidden border border-(--line)">
+                has somewhere to travel without changing document height.
+
+                ── WHY THIS IS A CENTRED LOGO AND NOT A FULL-BLEED IMAGE ──
+                It held a screenshot, which is what `fill` + object-cover is
+                for: a photo big enough to crop, bleeding to all four edges. A
+                logo is the opposite kind of asset. Covering with it crops the
+                wordmark and blows a 395px-wide file up to panel width, so it
+                arrives cropped AND soft. So the panel became a brand plate:
+                the logo sits at its natural size on a surface, contained
+                rather than cropped. */}
+                        <div className="relative grid aspect-16/10 place-items-center overflow-hidden border border-(--line) bg-(--raised)">
                             <Image
                                 data-about-img=""
-                                src="/websites/paarel-website.png"
-                                alt="Paarel storefront, one of the platforms built by STR Solutions"
-                                fill
-                                sizes="(min-width: 1024px) 58vw, 100vw"
-                                className="scale-110 object-cover object-top will-change-transform"
+                                src="/logo.png"
+                                alt="STR Solutions Limited"
+                                /* The file's OWN pixel dimensions, not the size it
+                                   renders at. Next only needs them to reserve the
+                                   right box before the bytes arrive — that is what
+                                   stops the layout shifting. CSS below decides how
+                                   big it actually looks. */
+                                width={395}
+                                height={146}
+                                /* The widest this ever renders, which is what the
+                                   max-w below pins it to. Any larger hint picks the
+                                   same file anyway — the 395px source is the
+                                   ceiling, so Next caps every variant there.
+
+                                   ⚑ Which is also the one real limit here: on a 2x
+                                   display this needs ~660px and there are only 395,
+                                   so it renders slightly soft on a retina screen.
+                                   Not fixable in this file — it wants a bigger
+                                   export of /logo.png (790x292 covers 2x). */
+                                sizes="395px"
+                                /* max-w caps it at 1:1 with the source. Past that a
+                                   395px PNG is being upscaled and goes visibly soft,
+                                   which on a logo reads as a broken export. */
+                                className="h-auto w-[46%] max-w-[395px] will-change-transform"
                                 priority={false}
                             />
                         </div>
