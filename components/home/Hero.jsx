@@ -18,11 +18,9 @@ import GeoWorldMap from "@/components/home/GeoWorldMap";
  * is the worst thing you can do to the LCP element.
  *
  * ── THE HEADLINE IS THREE LINES, ONE OF WHICH MOVES ──────────────────────
- * Line two cycles through nine service phrases. Every phrase is phrased as a
- * PLURAL noun, which is not a style preference: line three reads "that hold
- * up after launch", and "software that hold up" is broken English. Keeping
- * the list grammatically uniform is what lets the surrounding sentence stay
- * fixed. Add to SERVICES only in the same form.
+ * Line two cycles through nine service names, and the two fixed lines have to
+ * stay grammatical for all nine. See the note on SERVICES: the verb is
+ * "deliver", not "build", and every entry is a SINGULAR mass noun.
  *
  * The h1 carries an explicit aria-label so the accessible name is one stable
  * sentence rather than whatever happens to be on screen when a screen reader
@@ -35,45 +33,49 @@ import GeoWorldMap from "@/components/home/GeoWorldMap";
  * most of what made it feel assembled rather than typeset.
  */
 
-/* ── TWO HARD CONSTRAINTS ON THIS LIST, BOTH LOAD-BEARING ────────────────
+/* ── ONE HARD CONSTRAINT ON THIS LIST, AND IT IS GRAMMATICAL ─────────────
  *
- * 1. SHORT. Every phrase has to fit on one line at display size inside a
- *    five-column hero. RotatingWord sizes its box to the widest of these and
- *    holds it at one line with nowrap, so a long entry does not wrap — it
- *    overflows into the map. "retouched catalogues" and "3D visualizations"
- *    were both in the first version of this list, and they are what produced
- *    the dead vertical band under the rotating line.
+ * The headline is a fixed sentence with a moving word in it:
  *
- * 2. PLURAL NOUNS. Line three reads "that hold up after launch", so the
- *    phrase is the subject of a plural verb. "software systems" works;
- *    "custom software" and "retouching" do not, because "software that hold
- *    up" is broken English. The whole point of a fixed sentence around a
- *    moving word is that it stays grammatical for every value.
+ *     We deliver · <entry> · that holds up after launch.
  *
- * Add entries only in the same form. */
+ * so every entry has to be a SINGULAR MASS NOUN naming a service. Two rules
+ * fall out of that, and both were broken before:
+ *
+ * 1. THE VERB IS "deliver", NOT "build". You build software; you do not build
+ *    video editing, business consultancy or digital marketing. Six of these
+ *    nine name a practice rather than an artefact, so the only verb that
+ *    governs all nine is a delivery verb. If the list is ever re-nouned to
+ *    concrete artefacts ("Websites", "Mobile Apps", "Brand Systems") then
+ *    "We build" comes back and line three becomes "that hold up".
+ *
+ * 2. SINGULAR. "Mobile Applications that holds up" and "AI Automations that
+ *    holds up" are both broken, which is why those two entries are
+ *    "Mobile App Development" and "AI Automation". Title Case throughout, so
+ *    the rotating word does not visibly change weight between phrases.
+ *
+ * Length is no longer a constraint: RotatingWord measures the widest entry
+ * and scales the line to the column. A long addition costs type size, not a
+ * clipped word. It is still worth keeping them short.
+ *
+ * ⚑ These strings are duplicated from the services taxonomy rather than
+ * fetched, because the hero is static and must not wait on the API. If a
+ * service is renamed in the dashboard, rename it here too. */
 const SERVICES = [
-    "Website Development",
+    "Modern Websites",
     "Custom Software",
-    "Mobile Applications",
+    "Mobile Apps",
     "Video Editing",
     "Business Consultancy",
-    "2D/3D visualization",
+    "2D/3D Visualization",
     "Graphic Design",
-    "Digital marketing",
-    "AI Automations",
+    "Digital Marketing",
+    "AI Automation",
 ];
 
-const DISCIPLINES = [
-    "Website Development",
-    "Custom Software",
-    "Mobile Applications",
-    "Video Editing",
-    "Business Consultancy",
-    "2D/3D visualization",
-    "Graphic Design",
-    "Digital marketing",
-    "AI Automations",
-];
+/* The marquee band showed a second, hand-copied version of the same nine
+   strings, which had already drifted in case from the list above. One source. */
+const DISCIPLINES = SERVICES;
 
 export default function Hero() {
     const root = useRef(null);
@@ -123,11 +125,18 @@ export default function Hero() {
                 {/* items-start, not items-center. The map is the taller column and
             centring it pushed the headline down the page for no reason. */}
                 <div className="grid grid-cols-1 items-start gap-x-10 gap-y-14 lg:grid-cols-12">
-                    {/* ── Statement ───────────────────────────────────────── */}
-                    <div className="lg:col-span-5">
+                    {/* ── Statement ─────────────────────────────────────────
+                Six columns, not five. The rotating line now scales itself to
+                whatever column it is given, and at five columns the longest
+                service name was landing around 0.75 of display size — legible,
+                but visibly lighter than the two fixed lines around it. Six
+                columns keeps the worst case near 0.9, where the step is not
+                readable as a step. The map gives up the width; it is a
+                viewport-scaled SVG and does not care. */}
+                    <div className="lg:col-span-6">
                         <h1
                             className="text-display"
-                            aria-label={`We build ${SERVICES.join(", ")} that hold up after launch.`}
+                            aria-label={`We deliver ${SERVICES.join(", ")} that holds up after launch.`}
                         >
                             {/* Each line gets its own overflow-hidden wrapper so the
                   intro rise is masked per line. One wrapper around all
@@ -143,7 +152,7 @@ export default function Hero() {
                   rectangle grows. */}
                             <span className="my-[-0.14em] block overflow-hidden py-[0.14em]">
                                 <span data-hero-line="" className="block will-change-transform">
-                                    We build
+                                    We deliver
                                 </span>
                             </span>
 
@@ -159,7 +168,7 @@ export default function Hero() {
 
                             <span className="my-[-0.14em] block overflow-hidden py-[0.14em]">
                                 <span data-hero-line="" className="block will-change-transform">
-                                    that hold up after launch.
+                                    that holds up after launch.
                                 </span>
                             </span>
                         </h1>
@@ -207,7 +216,7 @@ export default function Hero() {
                 it pushed the map down by its own height plus a margin, and
                 the two columns stopped starting on the same line, which was
                 the thing being fixed. */}
-                    <div data-hero-map="" className="relative lg:col-span-7 xl:-mr-10">
+                    <div data-hero-map="" className="relative lg:col-span-6 xl:-mr-10">
                         <GeoWorldMap />
                     </div>
                 </div>

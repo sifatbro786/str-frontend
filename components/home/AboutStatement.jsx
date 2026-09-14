@@ -173,7 +173,7 @@ export default function AboutStatement({ metrics }) {
                                 /* max-w caps it at 1:1 with the source. Past that a
                                    395px PNG is being upscaled and goes visibly soft,
                                    which on a logo reads as a broken export. */
-                                className="h-auto w-[46%] max-w-[395px] will-change-transform"
+                                className="h-auto w-[46%] max-w-98.75 will-change-transform"
                                 priority={false}
                             />
                         </div>

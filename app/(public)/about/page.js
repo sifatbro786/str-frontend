@@ -48,9 +48,57 @@ export default async function AboutPage() {
 
             {/* ── Story ───────────────────────────────────────────────── */}
             <section className="border-b border-(--line)">
-                <div className="shell grid gap-x-12 gap-y-12 py-20 md:py-28 lg:grid-cols-12">
-                    <div className="lg:col-span-4">
+                <div className="shell grid gap-x-12 gap-y-12 py-20 md:py-28 lg:grid-cols-12 lg:items-start">
+                    <div className="lg:sticky lg:top-28 lg:col-span-4">
                         <SectionIndex index="01" label="Where this came from" />
+
+                        {/* ── Colophon mark ───────────────────────────────
+                            The same logo as the homepage, deliberately NOT the
+                            same object. AboutStatement.jsx frames it as a
+                            16:10 brand plate that scrubs on scroll — a piece
+                            of art direction sized to sit beside a metric row.
+                            Repeating that here would read as a template.
+
+                            So this is the other thing a mark can be: a
+                            colophon. Square rather than landscape, graph paper
+                            rather than a flat surface, a dashed rule rather
+                            than a solid one, a stamped caption under it, and
+                            it holds still and sticks while the story scrolls
+                            past instead of drifting. Nothing about it is
+                            borrowed from the homepage panel except the file.
+
+                            The --raised ground stays: /logo.png is dark ink on
+                            transparency, so on the bare canvas it disappears
+                            in the dark theme. The texture sits ON that ground,
+                            which is what keeps it safe in both.
+
+                            Hidden below lg: at that width the column collapses
+                            to a full-bleed row directly above the prose, where
+                            a logo is a speed bump between the section label
+                            and the first sentence. */}
+                        <figure className="mt-10 hidden lg:block">
+                            <div className="bg-grid relative grid aspect-square place-items-center border border-dashed border-(--line) bg-(--raised) p-10">
+                                <Image
+                                    src="/logo.png"
+                                    alt="STR Solutions Limited"
+                                    /* The file's own pixel dimensions, so Next
+                                       reserves the box before the bytes land.
+                                       Same ⚑ as the homepage: the 395px source
+                                       is the ceiling, so this renders slightly
+                                       soft at 2x until a 790px export exists. */
+                                    width={395}
+                                    height={146}
+                                    sizes="260px"
+                                    className="h-auto w-full max-w-65"
+                                />
+                            </div>
+
+                            <figcaption className="label-mono mt-4 flex items-center gap-3 text-(--text-mute)">
+                                <span className="nums">EST. {site.foundedYear}</span>
+                                <span aria-hidden="true" className="h-px flex-1 bg-(--line)" />
+                                <span>{site.address.city}</span>
+                            </figcaption>
+                        </figure>
                     </div>
 
                     <Reveal className="lg:col-span-7 lg:col-start-6" stagger={0.1}>
@@ -220,54 +268,54 @@ export default async function AboutPage() {
             {/* Whole section, not just the grid: the heading names the sectors
                 the logos below are supposed to prove. */}
             {partners.length > 0 && (
-            <section className="border-b border-(--line)">
-                <div className="shell py-20 md:py-24">
-                    <div className="flex flex-wrap items-end justify-between gap-6">
-                        <div>
-                            <SectionIndex index="05" label="Who we work with" />
-                            <h2 className="text-subheading mt-6 max-w-[22ch]">
-                                Construction, retail, media, logistics and export.
-                            </h2>
+                <section className="border-b border-(--line)">
+                    <div className="shell py-20 md:py-24">
+                        <div className="flex flex-wrap items-end justify-between gap-6">
+                            <div>
+                                <SectionIndex index="05" label="Who we work with" />
+                                <h2 className="text-subheading mt-6 max-w-[22ch]">
+                                    Construction, retail, media, logistics and export.
+                                </h2>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* A static grid, not the homepage marquee. A moving rail works
+                        {/* A static grid, not the homepage marquee. A moving rail works
                         where it is one band among many; on a credibility page the
                         reader wants to stop and read the names. */}
-                    <Reveal
-                        as="ul"
-                        className="mt-12 grid grid-cols-2 gap-px border border-(--line) bg-(--line) sm:grid-cols-3 lg:grid-cols-4"
-                        stagger={0.05}
-                    >
-                        {partners.map((p) => (
-                            <li
-                                key={p.name}
-                                data-reveal=""
-                                className="group/logo flex flex-col items-start justify-between gap-6 bg-(--canvas) p-6"
-                            >
-                                <Image
-                                    src={mediaUrl(p.logo) ?? MEDIA_FALLBACK}
-                                    alt={p.name}
-                                    width={140}
-                                    height={44}
-                                    className="h-8 w-auto object-contain transition-transform duration-400 ease-out motion-safe:group-hover/logo:scale-105"
-                                />
-                                <div>
-                                    <p className="text-[0.9375rem] font-medium text-(--text)">
-                                        {p.name}
-                                    </p>
-                                    {/* ⚑ These labels are reconstructed rather than
+                        <Reveal
+                            as="ul"
+                            className="mt-12 grid grid-cols-2 gap-px border border-(--line) bg-(--line) sm:grid-cols-3 lg:grid-cols-4"
+                            stagger={0.05}
+                        >
+                            {partners.map((p) => (
+                                <li
+                                    key={p.name}
+                                    data-reveal=""
+                                    className="group/logo flex flex-col items-start justify-between gap-6 bg-(--canvas) p-6"
+                                >
+                                    <Image
+                                        src={mediaUrl(p.logo) ?? MEDIA_FALLBACK}
+                                        alt={p.name}
+                                        width={140}
+                                        height={44}
+                                        className="h-8 w-auto object-contain transition-transform duration-400 ease-out motion-safe:group-hover/logo:scale-105"
+                                    />
+                                    <div>
+                                        <p className="text-[0.9375rem] font-medium text-(--text)">
+                                            {p.name}
+                                        </p>
+                                        {/* ⚑ These labels are reconstructed rather than
                                         contract-sourced — see lib/site.js. Confirm each
                                         with the account owner before launch. */}
-                                    <p className="mt-1 text-[0.875rem] text-(--text-dim)">
-                                        {p.work}
-                                    </p>
-                                </div>
-                            </li>
-                        ))}
-                    </Reveal>
-                </div>
-            </section>
+                                        <p className="mt-1 text-[0.875rem] text-(--text-dim)">
+                                            {p.work}
+                                        </p>
+                                    </div>
+                                </li>
+                            ))}
+                        </Reveal>
+                    </div>
+                </section>
             )}
 
             <CTABand

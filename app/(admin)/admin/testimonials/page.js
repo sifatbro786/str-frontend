@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { Field, Input, Textarea, Select, Toggle } from "@/components/admin/Fields";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import StatusPill from "@/components/admin/StatusPill";
+import ImageField from "@/components/admin/ImageField";
 import { cn } from "@/lib/utils";
 
 const EMPTY = {
@@ -124,13 +125,24 @@ export default function TestimonialsAdminPage() {
         <Field label="Company" htmlFor="t-company" error={errors.companyName}>
           <Input id="t-company" value={draft.companyName} onChange={onInput("companyName")} />
         </Field>
+        {/* Uploaded, not pasted. The field used to take a free-text URL, which
+            meant every avatar on the homepage depended on an image host we do
+            not control staying up and not blocking hotlinks. Records saved
+            before this change still hold absolute URLs and still render —
+            mediaUrl() passes them through untouched — so this is additive, not
+            a migration. */}
         <Field
           label="Avatar"
-          htmlFor="t-avatar"
           error={errors.clientAvatar}
-          hint="Direct image URL (ending .jpg, .png or .webp), or a path under /public. Square, around 200px. An imgbb or Drive page link will not work — copy the image address itself."
+          hint="Square crop, around 200px. The rail renders it at 44px in a circle, so anything with margin around the face loses the face."
+          className="sm:col-span-2"
         >
-          <Input id="t-avatar" value={draft.clientAvatar} onChange={onInput("clientAvatar")} />
+          <ImageField
+            value={draft.clientAvatar}
+            onChange={set("clientAvatar")}
+            folder="testimonials"
+            disabled={saving}
+          />
         </Field>
         <Field label="Rating" htmlFor="t-rating" error={errors.rating}>
           <Select

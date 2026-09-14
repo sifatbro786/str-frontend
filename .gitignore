@@ -23,6 +23,7 @@ yarn-error.log*
 # env files
 .env
 .env*.local
+.claude-changes.diff
 
 # typescript / vercel
 *.tsbuildinfo

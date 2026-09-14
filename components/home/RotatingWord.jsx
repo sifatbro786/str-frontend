@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger, SplitText } from "@/lib/gsap";
+import { cn } from "@/lib/utils";
 
 /**
  * One line of a heading that cycles through a list of phrases, character by
@@ -62,11 +63,36 @@ import { gsap, ScrollTrigger, SplitText } from "@/lib/gsap";
  * An infinite timeline requests frames forever, including while the hero is
  * two screens up. One ScrollTrigger toggles it.
  *
- * @param {string[]} phrases  Short, and grammatically uniform. See Hero.
+ * ── WHY THE LINE SCALES ITSELF ───────────────────────────────────────────
+ * The phrase list is the studio's service taxonomy, so its longest entry is
+ * decided by the business, not by this component. At display size "Business
+ * Consultancy" measures ~700px and the headline column is ~530px, and the
+ * per-line overflow-hidden mask in Hero clips HORIZONTALLY as well as
+ * vertically — which is exactly the shaved word this fixes. Rather than
+ * policing phrase length in review forever, the line measures itself once per
+ * layout and sets `--rw-fit`, a 0–1 multiplier on its own font-size.
+ *
+ * Two details make that measurement safe:
+ *
+ *   · The ruler is a separate hidden stack that is never split and never
+ *     animated, so it can be read at any point in the timeline. Reading the
+ *     live phrases instead would return whatever width a half-finished SLIDE
+ *     happens to be at.
+ *   · The ruler's font-size DIVIDES --rw-fit back out, so it always measures
+ *     at the inherited size. It is therefore immune to the scale it is used
+ *     to compute — one pass is exact, and the ResizeObserver cannot feed back
+ *     into itself.
+ *
+ * The line-height is copied from the host in pixels rather than scaled by
+ * hand, so line two's box stays exactly as tall as lines one and three
+ * whatever the fit turns out to be and the headline rhythm never moves.
+ *
+ * @param {string[]} phrases  Grammatically uniform. See Hero.
  * @param {number}   hold     Seconds each phrase stays still.
  */
 export default function RotatingWord({ phrases, hold = 2.2, className }) {
     const root = useRef(null);
+    const ruler = useRef(null);
 
     useGSAP(
         (context, contextSafe) => {
@@ -75,14 +101,32 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
 
             const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-            /* Reduced motion gets the first phrase, held. Text that cycles on a
-               timer is one of the specific things the preference exists to
-               stop: motion the reader did not ask for and cannot pause. */
-            if (reduced) {
-                gsap.set(items, { autoAlpha: 0 });
-                gsap.set(items[0], { autoAlpha: 1 });
-                return;
-            }
+            let ro = null;
+
+            const applyFit = () => {
+                const el = root.current;
+                const rule = ruler.current;
+                const host = el?.parentElement;
+                if (!el || !rule || !host) return;
+
+                const natural = rule.getBoundingClientRect().width;
+                /* 1px of slack. A natural width that lands on a sub-pixel
+                   rounds up into the mask and shaves the final glyph — the
+                   original bug, reintroduced at 1/60th the size. */
+                const available = (host.clientWidth || host.getBoundingClientRect().width) - 1;
+                if (!natural || available <= 0) return;
+
+                el.style.setProperty("--rw-fit", String(Math.min(1, available / natural)));
+                el.style.lineHeight = window.getComputedStyle(host).lineHeight;
+            };
+
+            /* A first pass against fallback metrics, before the webfont has
+               landed. It is approximate — General Sans is narrower than the
+               fallback, so this over-shrinks slightly — and build() corrects it
+               the moment the real font is measurable. The point is that the
+               uncorrected frame is a hair small rather than visibly clipped,
+               and useGSAP runs this pre-paint so there is no flash either way. */
+            applyFit();
 
             const AT_REST = { xPercent: 0, yPercent: 0, autoAlpha: 1 };
             const ABOVE = { xPercent: 0, yPercent: -115, autoAlpha: 0 };
@@ -101,6 +145,23 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
                and neither would be collected on a route change. */
             const build = contextSafe(() => {
                 if (!root.current) return;
+
+                /* Fit BEFORE the split. SplitText freezes nothing here, but a
+                   split measured at the unscaled size and then reflowed is one
+                   extra layout pass on the LCP element for no gain. */
+                applyFit();
+                ro = new ResizeObserver(applyFit);
+                ro.observe(root.current.parentElement ?? root.current);
+
+                /* Reduced motion gets the first phrase, held. Text that cycles
+                   on a timer is one of the specific things the preference
+                   exists to stop: motion the reader did not ask for and cannot
+                   pause. It still gets the fit — clipping is not a motion. */
+                if (reduced) {
+                    gsap.set(items, { autoAlpha: 0 });
+                    gsap.set(items[0], { autoAlpha: 1 });
+                    return;
+                }
 
                 splits = items.map((el) =>
                     SplitText.create(el, { type: "chars", charsClass: "rw-char" }),
@@ -223,6 +284,7 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
             else document.fonts.ready.then(build);
 
             return () => {
+                ro?.disconnect();
                 st?.kill();
                 tl?.kill();
                 // revert() restores each phrase's original text, which matters
@@ -243,9 +305,35 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
            The box sizes itself, correctly, with no measurement and no JS.
 
            whitespace-nowrap keeps the track one line tall however narrow the
-           column gets. Combined with the short phrase list in Hero, nothing
-           needs to wrap. */
-        <span ref={root} className={`grid justify-items-start ${className ?? ""}`}>
+           column gets; --rw-fit (see the header note) is what keeps that one
+           line inside the column instead of under the mask. */
+        <span
+            ref={root}
+            className={cn("relative grid justify-items-start", className)}
+            style={{ fontSize: "calc(1em * var(--rw-fit, 1))" }}
+        >
+            {/* The ruler. Out of flow so it contributes no track, invisible
+                rather than display:none so it still has a box to measure, and
+                its font-size divides --rw-fit back out so it always reports
+                the phrase at the INHERITED size. Never split, never tweened —
+                measuring the live phrases mid-handover returns a width the
+                line does not actually need. */}
+            <span
+                ref={ruler}
+                aria-hidden="true"
+                className="pointer-events-none invisible absolute top-0 left-0 grid"
+                style={{ fontSize: "calc(1em / var(--rw-fit, 1))" }}
+            >
+                {phrases.map((p) => (
+                    <span
+                        key={p}
+                        className="col-start-1 row-start-1 block whitespace-nowrap"
+                    >
+                        {p}
+                    </span>
+                ))}
+            </span>
+
             {phrases.map((p) => (
                 <span
                     key={p}
