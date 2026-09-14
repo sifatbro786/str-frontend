@@ -8,7 +8,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getProjects, getServiceBySlug, getServices, paramsOrEmpty } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata, serviceSchema } from "@/lib/seo";
 import ServiceMedia from "@/components/ui/ServiceMedia";
-import { SERVICE_LABELS } from "@/lib/taxonomy";
+import { serviceLabel } from "@/lib/taxonomy";
 import { MEDIA_FALLBACK, mediaUrl, pad } from "@/lib/utils";
 
 /* dynamicParams: a service published from the admin panel after the build
@@ -253,7 +253,7 @@ export default async function ServiceDetailPage({ params }) {
                                                 key={st}
                                                 className="label-mono rounded-full border border-(--line) px-3 py-1 text-(--text-mute)"
                                             >
-                                                {SERVICE_LABELS[st]}
+                                                {serviceLabel(st)}
                                             </span>
                                         ))}
                                     </div>

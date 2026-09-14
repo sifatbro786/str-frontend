@@ -7,7 +7,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import SectionIndex from "@/components/ui/SectionIndex";
 import { getProjectBySlug, getProjectNeighbours, getProjects, paramsOrEmpty } from "@/lib/api";
 import { absoluteMedia, breadcrumbSchema, buildMetadata, caseStudySchema } from "@/lib/seo";
-import { SERVICE_LABELS } from "@/lib/taxonomy";
+import { serviceLabel } from "@/lib/taxonomy";
 import { MEDIA_FALLBACK, cn, formatDate, mediaUrl } from "@/lib/utils";
 
 /* dynamicParams: a case study published from the admin panel after the build
@@ -154,7 +154,7 @@ export default async function ProjectDetailPage({ params }) {
                                         href={`/services/${s}`}
                                         className="inline-block rounded-full border border-(--line) px-3.5 py-1.5 text-[0.8125rem] text-(--text-dim) transition-colors hover:border-(--text) hover:text-(--text)"
                                     >
-                                        {SERVICE_LABELS[s]}
+                                        {serviceLabel(s)}
                                     </Link>
                                 </li>
                             ))}

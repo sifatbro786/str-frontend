@@ -2,9 +2,9 @@ import PageMasthead from "@/components/ui/PageMasthead";
 import CTABand from "@/components/ui/CTABand";
 import ProjectRail from "@/components/projects/ProjectRail";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProjects } from "@/lib/api";
+import { getProjects, getServices } from "@/lib/api";
 import { breadcrumbSchema, buildMetadata, caseStudySchema } from "@/lib/seo";
-import { SERVICE_TYPES } from "@/lib/taxonomy";
+
 
 export async function generateMetadata() {
     return buildMetadata({
@@ -32,7 +32,7 @@ export async function generateMetadata() {
  * Worth deriving from the records if this list grows much past ten.
  */
 export default async function ProjectsPage() {
-    const projects = await getProjects();
+    const [projects, services] = await Promise.all([getProjects(), getServices()]);
 
     return (
         <>
@@ -60,7 +60,7 @@ export default async function ProjectsPage() {
                 ]}
             />
 
-            <ProjectRail projects={projects} services={SERVICE_TYPES} />
+            <ProjectRail projects={projects} services={services} />
 
             <CTABand
                 title="Yours could be the next one written up."

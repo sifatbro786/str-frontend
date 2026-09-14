@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, revalidate } from "@/lib/apiClient";
 import { useToast } from "@/hooks/useToast";
+import { useResource } from "@/hooks/useResource";
 import { Field, Input, Textarea, Select, NumberInput, Toggle, Counter } from "./Fields";
 import TagInput from "./TagInput";
 import MultiSelect from "./MultiSelect";
@@ -87,6 +88,15 @@ function toDateInput(v) {
 export default function ProjectForm({ mode, id, initial }) {
     const router = useRouter();
     const toast = useToast();
+
+    /* The disciplines a project can be tagged with are whatever /admin/services
+       holds, so they are fetched rather than imported. limit 50 covers a
+       taxonomy that has ten entries and grows by one or two a year; `order` is
+       the sequence an editor arranged the services in, so the checkbox grid
+       reads in the same order as the services screen. Inactive ones are
+       included on purpose — retiring a service must not make it impossible to
+       edit the projects already delivered under it. */
+    const { rows: services } = useResource("services", { limit: 50, sort: "order" });
 
     const [values, setValues] = useState(() => ({
         ...EMPTY,
@@ -237,7 +247,11 @@ export default function ProjectForm({ mode, id, initial }) {
                     error={errors.serviceTypes}
                     className="sm:col-span-2"
                 >
-                    <MultiSelect value={values.serviceTypes} onChange={set("serviceTypes")} />
+                    <MultiSelect
+                        value={values.serviceTypes}
+                        onChange={set("serviceTypes")}
+                        services={services}
+                    />
                 </Field>
                 <Field label="Tags" htmlFor="tags" error={errors.tags}>
                     <TagInput id="tags" value={values.tags} onChange={set("tags")} max={24} />

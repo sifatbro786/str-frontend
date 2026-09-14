@@ -10,7 +10,7 @@ import Toolbar from "@/components/admin/Toolbar";
 import Pagination from "@/components/admin/Pagination";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import StatusPill from "@/components/admin/StatusPill";
-import { SERVICE_TYPES, SERVICE_LABELS } from "@/lib/taxonomy";
+import { serviceLabel, serviceOptions } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
 
 export default function ProjectsAdminPage() {
@@ -21,6 +21,11 @@ export default function ProjectsAdminPage() {
   const toast = useToast();
 
   const debounced = useDebounced(search);
+
+  /* The filter's options are the services that exist, not a list compiled into
+     this bundle — see lib/taxonomy.js. Its own hook rather than a prop: this
+     page is the route root, so there is nothing above it to fetch for it. */
+  const { rows: services } = useResource("services", { limit: 50, sort: "order" });
 
   const { rows, meta, status, error, reload } = useResource("projects/admin/all", {
     search: debounced,
@@ -65,7 +70,7 @@ export default function ProjectsAdminPage() {
         <div className="flex flex-wrap gap-1.5">
           {(row.serviceTypes ?? []).map((s) => (
             <span key={s} className="label-mono border border-(--line) px-2 py-1 text-(--text-dim)">
-              {SERVICE_LABELS[s] ?? s}
+              {serviceLabel(s, services)}
             </span>
           ))}
         </div>
@@ -100,7 +105,7 @@ export default function ProjectsAdminPage() {
             },
             options: [
               { value: "", label: "All services" },
-              ...SERVICE_TYPES.map((s) => ({ value: s, label: SERVICE_LABELS[s] })),
+              ...serviceOptions(services),
             ],
           },
         ]}

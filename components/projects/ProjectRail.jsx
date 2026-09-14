@@ -6,11 +6,12 @@ import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import { gsap, Flip } from "@/lib/gsap";
 import { refreshScroll } from "@/lib/scrollRefresh";
-/* From taxonomy, which is enums and labels only. This is a client component,
-   so anything it imports ships to the browser; taxonomy is kept free of
-   content for exactly that reason. Project data arrives as a prop, fetched on
-   the server. */
-import { SERVICE_LABELS } from "@/lib/taxonomy";
+/* Label helpers only. This is a client component, so anything it imports ships
+   to the browser; taxonomy is kept free of content for exactly that reason.
+   Both the projects AND the service list arrive as props, fetched on the
+   server — the disciplines are whatever /admin/services holds, so a hardcoded
+   list here would hide a newly added one from the filter rail. */
+import { serviceLabel, serviceOptions } from "@/lib/taxonomy";
 import { MEDIA_FALLBACK, cn, formatDate, mediaUrl, pad } from "@/lib/utils";
 
 /**
@@ -88,13 +89,18 @@ export default function ProjectRail({ projects, services }) {
         [active, projects],
     );
 
+    /* `services` is now the Service documents, not a slug array — so the chips
+       and their counts are both derived from it rather than from a compiled-in
+       list. Memoised together because they are read on the same render. */
+    const options = useMemo(() => serviceOptions(services), [services]);
+
     const counts = useMemo(() => {
         const map = { all: projects.length };
-        for (const s of services) {
-            map[s] = projects.filter((p) => p.serviceTypes.includes(s)).length;
+        for (const { value } of options) {
+            map[value] = projects.filter((p) => p.serviceTypes.includes(value)).length;
         }
         return map;
-    }, [projects, services]);
+    }, [projects, options]);
 
     const onFilter = (key) => {
         if (key === active) return;
@@ -145,7 +151,7 @@ export default function ProjectRail({ projects, services }) {
                     <span className="label-mono shrink-0 text-(--text-mute)">Filter</span>
 
                     <div className="flex items-center gap-2">
-                        {[["all", "Everything"], ...services.map((s) => [s, SERVICE_LABELS[s]])]
+                        {[["all", "Everything"], ...options.map((o) => [o.value, o.label])]
                             // A filter that yields nothing is a dead end, not a
                             // choice. Disciplines with no published work are hidden
                             // rather than shown disabled.
@@ -256,7 +262,7 @@ export default function ProjectRail({ projects, services }) {
                                                 key={s}
                                                 className="label-mono rounded-full border border-(--line) px-3 py-1 text-(--text-mute)"
                                             >
-                                                {SERVICE_LABELS[s]}
+                                                {serviceLabel(s, services)}
                                             </span>
                                         ))}
                                     </div>

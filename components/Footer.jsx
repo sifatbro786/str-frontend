@@ -63,12 +63,6 @@ const META =
 export default function Footer() {
     const year = new Date().getFullYear();
 
-    // site.address.line1/line2 are intentionally empty until the street address
-    // is confirmed (see lib/site.js). Filtering rather than rendering blank <br>s.
-    const addressLines = [site.address.line1, site.address.line2, site.address.country].filter(
-        Boolean,
-    );
-
     return (
         <FooterReveal>
             {/* The curve is inside the reveal window, in normal flow, so it is

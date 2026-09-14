@@ -2,7 +2,7 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/apiServer";
 import StatCard from "@/components/admin/StatCard";
 import StatusPill from "@/components/admin/StatusPill";
-import { SERVICE_LABELS } from "@/lib/taxonomy";
+import { serviceLabel } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +92,7 @@ export default async function OverviewPage() {
               return (
                 <li key={row.serviceType} className="flex items-center gap-4">
                   <span className="w-44 shrink-0 text-[0.875rem] text-(--text-dim)">
-                    {SERVICE_LABELS[row.serviceType] ?? row.serviceType}
+                    {serviceLabel(row.serviceType)}
                   </span>
                   {/* Static width, set at render. No transition — see §0.4. */}
                   <span className="h-2 flex-1 bg-(--raised-2)">
