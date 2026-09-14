@@ -25,7 +25,7 @@ const DIRECT = [
         value: site.contact.salesEmail,
         href: `mailto:${site.contact.salesEmail}`,
     },
-    { label: "Dhaka", value: site.contact.phone, href: site.contact.phoneHref },
+    { label: "Whatsapp", value: site.contact.whatsapp, href: site.contact.whatsappHref },
     { label: "Europe", value: site.contact.phoneEu, href: site.contact.phoneEuHref },
 ];
 
@@ -49,18 +49,26 @@ const DIRECT = [
  * competing entity rather than reinforcing the first. The FAQ and the
  * breadcrumb are what this page genuinely adds.
  *
- * ⚑ The address block reads from site.address.line1/line2, which are
- * deliberately EMPTY in lib/site.js pending confirmation of the street
- * address. They are filtered out below rather than rendered as blank lines —
- * but a contact page with no street address is a gap worth closing before
- * launch, not a design decision.
+ * The address block is assembled below rather than stored as display lines,
+ * so the same site.address powers this, the footer and the JSON-LD.
  */
 export default async function ContactPage() {
     const [services, faqs] = await Promise.all([getServices(), getSiteContent("faqs")]);
 
-    const addressLines = [site.address.line1, site.address.line2, site.address.country].filter(
-        Boolean,
-    );
+    /* ⚑ The city line used to be missing entirely: this was [line1, line2,
+       country], which renders "970 East Shewrapara / Bangladesh" — an address
+       with no city in it. The bug was invisible while line1 and line2 were
+       empty placeholders, because the only surviving line was the country.
+       Filling in the street address is what surfaced it.
+
+       Still filtered: line2 is genuinely optional, and a blank <span> in an
+       <address> is a visible gap rather than a missing line. */
+    const addressLines = [
+        site.address.line1,
+        site.address.line2,
+        [site.address.city, site.address.postalCode].filter(Boolean).join(" "),
+        site.address.country,
+    ].filter(Boolean);
 
     return (
         <>

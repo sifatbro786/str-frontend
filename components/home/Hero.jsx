@@ -52,25 +52,27 @@ import GeoWorldMap from "@/components/home/GeoWorldMap";
  *
  * Add entries only in the same form. */
 const SERVICES = [
-    "web platforms",
-    "mobile apps",
-    "design systems",
-    "dashboards",
-    "3D renders",
-    "data pipelines",
-    "AI workflows",
-    "brand systems",
-    "storefronts",
+    "Website Development",
+    "Custom Software",
+    "Mobile Applications",
+    "Video Editing",
+    "Business Consultancy",
+    "2D/3D visualization",
+    "Graphic Design",
+    "Digital marketing",
+    "AI Automations",
 ];
 
 const DISCIPLINES = [
-    "Web platforms",
-    "Custom software",
-    "Mobile apps",
-    "Product design",
-    "3D visualization",
-    "Graphics production",
+    "Website Development",
+    "Custom Software",
+    "Mobile Applications",
+    "Video Editing",
+    "Business Consultancy",
+    "2D/3D visualization",
+    "Graphic Design",
     "Digital marketing",
+    "AI Automations",
 ];
 
 export default function Hero() {

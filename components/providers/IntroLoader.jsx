@@ -88,13 +88,15 @@ const PANELS = 5;
    the hero's discipline band, deliberately: the loader should be saying the
    same thing the page is about to say. */
 const DISCIPLINES = [
-    "Web platforms",
-    "Custom software",
-    "Mobile applications",
-    "Product design",
-    "3D visualization",
-    "Graphics production",
+    "Website Development",
+    "Custom Software",
+    "Mobile Applications",
+    "Video Editing",
+    "Business Consultancy",
+    "2D/3D visualization",
+    "Graphic Design",
     "Digital marketing",
+    "AI Automations",
 ];
 
 function alreadySeen() {
