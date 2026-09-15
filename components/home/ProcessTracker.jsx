@@ -227,7 +227,19 @@ export default function ProcessTracker({ steps, index = "03", eyebrow = "Process
     if (!steps?.length) return null;
 
     return (
-        <section id="process" ref={root} className="border-b border-(--line)">
+        /* ── THE DARK ANCHOR ──────────────────────────────────────────────
+           One inverted band, roughly halfway down the homepage. The page had
+           exactly one dark moment and it was the CTA at the very bottom, so a
+           visitor met eleven screens of paper before anything carried weight.
+
+           This section rather than another one, for a mechanical reason: it
+           contains no imagery and not one hard-coded colour — every rule in it
+           already reads --canvas, --text, --line or the brand. surface-ink
+           redefines those on the section, so the whole thing inverts without a
+           single local override. Putting the band on Selected Work or the
+           partner rail would mean auditing artwork and client logos against a
+           dark ground, which is a different job. */
+        <section id="process" ref={root} className="surface-ink border-b border-(--line)">
             <div className="shell py-24">
                 <div className="flex flex-wrap items-end justify-between gap-6">
                     <div className="max-w-xl">

@@ -73,7 +73,9 @@ export default function EcosystemBand({ partners = [] }) {
     if (!partners.length) return null;
 
     return (
-        <section id="ecosystem" ref={root} className="border-b border-(--line)">
+        /* Second raised chapter: partners and testimonials read as one block
+           of proof, so they share a surface rather than alternating. */
+        <section id="ecosystem" ref={root} className="border-b border-(--line) bg-(--raised)">
             {/* ── Logo rail ───────────────────────────────────────────────── */}
             <div className="border-b border-(--line) py-10">
                 <p className="shell label-mono mb-8 text-(--text-mute)">

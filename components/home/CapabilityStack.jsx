@@ -247,6 +247,12 @@ export default function CapabilityStack({ services }) {
             ref={root}
             className={cn(
                 "flex flex-col overflow-hidden border-b border-(--line)",
+                /* The first of the two raised chapters. Nothing structural —
+                   one surface token and the graph-paper utility, which the
+                   design system has shipped unused since it was written. It
+                   only reads at all now that --raised is a value away from
+                   --canvas rather than 2% off it. */
+                "bg-grid bg-(--raised)",
                 "py-24 md:py-28",
                 /* Exactly one viewport, laid out top to bottom, and only when
                    there is room for it. `pt` is the 68px fixed navbar's

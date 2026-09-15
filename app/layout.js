@@ -35,7 +35,10 @@ export const metadata = {
 
 export const viewport = {
     themeColor: [
-        { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+        /* Keep in step with --color-stock-50. Mobile Safari and Chrome paint
+           the address bar with this, and a #ffffff bar above warm stock is a
+           visible seam at the top of every page. */
+        { media: "(prefers-color-scheme: light)", color: "#fbfaf7" },
         { media: "(prefers-color-scheme: dark)", color: "#0a0a0c" },
     ],
 };

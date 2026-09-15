@@ -44,16 +44,49 @@
   --color-ink-800: #26262b;
   --color-ink-500: #71717a;
   --color-ink-300: #a1a1aa;
-  /* ── Paper ramp. Near-white, very slightly cool so it sits with the
-     brand blue instead of yellowing against it. Pure #fff for the
-     canvas: any tint at all reads as "off" next to a white browser
-     chrome, and the surfaces below carry the separation instead. */
+  /* ── Paper ramp. Near-white, very slightly cool.
+     ⚑ NO LONGER THE PUBLIC SITE'S RAMP. This is now the DASHBOARD ramp: it
+     is what [data-admin] and [data-auth] scope themselves back to, below.
+     Its values are unchanged, so the admin shell and the login screen render
+     byte-identically to before the paper change — that is the point of
+     keeping it rather than editing it.
+
+     The note that used to live here argued for pure #fff on the canvas:
+     "any tint at all reads as 'off' next to a white browser chrome". It held
+     up for a dashboard, which is a tool sitting in a browser. It did not hold
+     up for the marketing site, where eleven sections on one value read as
+     flat rather than as clean. See the stock ramp below. */
   --color-paper-50: #ffffff;
   --color-paper-100: #f7f7f9;
   --color-paper-200: #eeeef1;
   --color-paper-300: #e3e3e8;
   --color-paper-600: #6b6b76;
   --color-paper-950: #111114;
+
+  /* ── Stock ramp. The PUBLIC SITE's paper, and the reason it exists ──
+     Low-chroma warm, not cream: #FBFAF7 is two points off white on the red
+     and green channels and four on blue. Far enough that the page reads as a
+     stock rather than as a screen, close enough that it is never "beige".
+
+     The value that actually matters is 100. The old pair was #ffffff and
+     #f7f7f9 — a 2% step, which is a step on a calibrated monitor and nothing
+     at all on a laptop at 60% brightness. #F3F0EA is a surface you can see in
+     a meeting room, which is what lets a section sit on it and read as a
+     separate chapter. Everything else here follows from those two:
+
+       300  the hairline has to follow the paper or it goes blue-grey on it
+       950  warm black; a cool black on warm stock reads as a printing error
+       600  #6F6960 is 5.2:1 on stock-50 — still AA for body copy
+
+     The brand blue is deliberately NOT retuned. It was sampled from the logo,
+     so it is a brand value, not a design one — and blue on warm stock is a
+     blueprint pairing that gains from the change. */
+  --color-stock-50: #fbfaf7;
+  --color-stock-100: #f3f0ea;
+  --color-stock-200: #e9e5dc;
+  --color-stock-300: #dbd5c9;
+  --color-stock-600: #6f6960;
+  --color-stock-950: #191612;
 
   /* ── Typography ───────────────────────────────────────────── */
   --font-sans:
@@ -76,16 +109,16 @@
    theme rather than an unstyled flash.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --canvas: var(--color-paper-50);
-  --raised: var(--color-paper-100);
-  --raised-2: var(--color-paper-200);
-  --line: var(--color-paper-300);
-  --line-soft: var(--color-paper-200);
-  --text: var(--color-paper-950);
-  --text-dim: #4a4a55;
-  --text-mute: var(--color-paper-600);
+  --canvas: var(--color-stock-50);
+  --raised: var(--color-stock-100);
+  --raised-2: var(--color-stock-200);
+  --line: var(--color-stock-300);
+  --line-soft: var(--color-stock-200);
+  --text: var(--color-stock-950);
+  --text-dim: #4e4a42;
+  --text-mute: var(--color-stock-600);
   --on-brand: #ffffff;
-  --overlay: rgb(255 255 255 / 0.78);
+  --overlay: rgb(251 250 247 / 0.82);
 
   /* ── Hero map ─────────────────────────────────────────────
      The palette of components/home/GeoWorldMap. These are their own
@@ -107,8 +140,12 @@
      disappears at small sizes. */
   --map-ocean: #e8f2f7;
   --map-land: #eef0e4;
-  --map-border: #ffffff;
-  --map-graticule: #ffffff;
+  /* Follows the canvas, not pure white. The disc sits ON the page, so a #fff
+     coastline against warm stock is the one place the old ramp would still be
+     visible after the change. The land was already warm (#eef0e4), which is
+     why ocean and land themselves need no adjustment. */
+  --map-border: var(--color-stock-50);
+  --map-graticule: var(--color-stock-50);
   --map-ring: #7f8c96;
   /* Alpha for the country tint on the markets STR works in. Lower in light
      mode: a saturated brand colour at full strength on pale sand is a poster,
@@ -139,6 +176,36 @@
   /* Higher than light mode, and it has to be: the same alpha over a dark olive
      lands almost black and the tinted countries disappear entirely. */
   --map-tint-opacity: 0.62;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   The dashboard and the login screen keep the old cool paper.
+
+   The warm stock is art direction for the marketing site. A dashboard is a
+   tool someone has open for six hours next to a spreadsheet and a terminal,
+   and warm paper under dense tabular data reads as a filter over the screen
+   rather than as a material. So /admin and /login opt out, and they opt out
+   by pointing at the ORIGINAL ramp rather than at new values — which is what
+   makes "nothing changed in the dashboard" verifiable rather than asserted.
+
+   ── WHY THE html:not(.dark) GUARD IS LOAD-BEARING ───────────────────────
+   Custom properties inherit, and .dark sets these same names on <html>.
+   [data-admin] sits BELOW <html>, so an unguarded block here would win
+   inside that subtree at every specificity — the dashboard would be forced
+   into the light palette while the rest of the site went dark. The guard
+   confines this to the light theme; `.dark [data-admin]` further down keeps
+   owning the dark one.
+   ───────────────────────────────────────────────────────────── */
+html:not(.dark) :is([data-admin], [data-auth]) {
+  --canvas: var(--color-paper-50);
+  --raised: var(--color-paper-100);
+  --raised-2: var(--color-paper-200);
+  --line: var(--color-paper-300);
+  --line-soft: var(--color-paper-200);
+  --text: var(--color-paper-950);
+  --text-dim: #4a4a55;
+  --text-mute: var(--color-paper-600);
+  --overlay: rgb(255 255 255 / 0.78);
 }
 
 @layer base {
@@ -250,6 +317,48 @@
   line-height: 1.2;
   font-weight: 500;
   letter-spacing: -0.005em;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   A full-bleed dark band on a light page.
+
+   ── WHY THIS INVERTS TOKENS AND NOT JUST A BACKGROUND ───────────────────
+   CTABand.jsx paints itself with `bg-(--text) text-(--canvas)` and its own
+   header comment warns what that costs: any nested component that reads
+   --text for its own colour renders dark-on-dark inside it, which is why the
+   secondary link in that file has to spell out its border colour by hand
+   instead of using the shared button.
+
+   This utility does the opposite. It redefines the whole semantic set on the
+   section, so every descendant that already reads --canvas / --text / --line
+   — which on this codebase is all of them — flips correctly with no local
+   overrides and no component needing to know it is inside a dark band. The
+   values are lifted verbatim from the .dark block so the band is the night
+   theme, not a second dark palette that has to be maintained alongside it.
+
+   ⚑ In the dark theme an ink band would BE the page and the section would
+   vanish, so it steps up to the raised surfaces instead and keeps reading as
+   a distinct chapter. That override lives just below.
+   ───────────────────────────────────────────────────────────── */
+@utility surface-ink {
+  --canvas: var(--color-ink-950);
+  --raised: var(--color-ink-900);
+  --raised-2: var(--color-ink-850);
+  --line: var(--color-ink-800);
+  --line-soft: #18181c;
+  --text: #f4f4f5;
+  --text-dim: var(--color-ink-300);
+  --text-mute: var(--color-ink-500);
+  background-color: var(--canvas);
+  color: var(--text);
+}
+
+.dark .surface-ink {
+  --canvas: var(--color-ink-900);
+  --raised: var(--color-ink-850);
+  --raised-2: var(--color-ink-800);
+  --line: #2b2b31;
+  --line-soft: var(--color-ink-850);
 }
 
 /* Faint structural graph-paper grid. */

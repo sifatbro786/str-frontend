@@ -24,6 +24,7 @@ const IDENTIFIERS = [
   "services",
   "projects",
   "portfolio",
+  "graphics",
   "packages",
   "blogs",
   "contact",
@@ -36,6 +37,8 @@ const PATHS = {
   projects: "/projects",
   // Not in the navbar by design; reachable by direct URL and via the sitemap.
   portfolio: "/portfolio",
+  // Same call as portfolio: a page you are sent to, not one you browse into.
+  graphics: "/graphics",
   // Bilingual. The row edited here is the ENGLISH <head> — the Bengali view is
   // the same URL with ?lang=bn and inherits this title and description, because
   // PageMeta has one row per route and no locale dimension. If the Bengali
