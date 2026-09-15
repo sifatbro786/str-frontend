@@ -262,7 +262,7 @@ export default function CapabilityStack({ services }) {
                    is how the header got clipped in the first place. */
                 "[@media(min-width:1024px)_and_(min-height:640px)]:h-screen",
                 "[@media(min-width:1024px)_and_(min-height:640px)]:py-0",
-                "[@media(min-width:1024px)_and_(min-height:640px)]:pt-[6.5rem]",
+                "[@media(min-width:1024px)_and_(min-height:640px)]:pt-26",
                 "[@media(min-width:1024px)_and_(min-height:640px)]:pb-10",
             )}
         >
@@ -300,7 +300,7 @@ export default function CapabilityStack({ services }) {
                     "snap-x snap-mandatory overflow-x-auto overscroll-x-contain",
                     // The scrollbar is noise under a row of artwork; the rail
                     // reads as draggable from the cards themselves.
-                    "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                    "scrollbar-none [&::-webkit-scrollbar]:hidden",
                 )}
             >
                 <ol
@@ -324,7 +324,7 @@ export default function CapabilityStack({ services }) {
                             <Link
                                 href={`/services/${s.slug}`}
                                 className={cn(
-                                    "relative block aspect-[3/4] overflow-hidden rounded-2xl border border-(--line) bg-(--raised)",
+                                    "relative block aspect-3/4 overflow-hidden rounded-2xl border border-(--line) bg-(--raised)",
                                     /* The 3:4 box is what gives the card its
                                        height everywhere the section is NOT a
                                        pinned viewport. Dropping the ratio
@@ -337,13 +337,56 @@ export default function CapabilityStack({ services }) {
                             >
                                 {/* Wider than its box and pulled left, so the
                                     parallax travel never exposes an edge. */}
-                                <div data-media="" className="absolute inset-y-0 -left-[9%] w-[118%]">
+                                <div data-media="" className="absolute inset-y-0 left-[-9%] w-[118%]">
                                     <ServiceMedia
                                         src={s.image}
                                         alt={s.imageAlt || ""}
                                         title={s.title}
                                         index={i + 1}
-                                        sizes="(max-width: 640px) 76vw, (max-width: 1024px) 38vw, 22vw"
+                                        /* ⚑ THIS IS NOT THE CARD WIDTH, AND THAT
+                                           IS THE POINT.
+
+                                           The old value was 22vw on desktop,
+                                           taken straight off the card, and the
+                                           artwork was visibly soft here while
+                                           the same file looked fine on
+                                           /services/[slug]. Two multipliers
+                                           were missing:
+
+                                           1. The media box is w-[118%] of the
+                                              card, for the parallax overshoot.
+                                           2. The box is PORTRAIT (3:4, or the
+                                              full rail height on desktop) and
+                                              the uploads are landscape. Under
+                                              object-cover the height binds, so
+                                              the browser has to decode a source
+                                              roughly `boxHeight x sourceRatio`
+                                              wide and then show a slice of it.
+                                              On a 3:4 box that is about 2.1x
+                                              the card width, not 1.18x.
+
+                                           sizes only ever describes WIDTH, so
+                                           it cannot say any of that; the number
+                                           has to carry it. At 22vw the browser
+                                           was picking a 384w candidate for a
+                                           slot that decodes near 900px and
+                                           upscaling it well past 2x.
+
+                                           The detail page was never wrong
+                                           because its figure is landscape too,
+                                           so there width binds and the naive
+                                           value is the correct one.
+
+                                           Deliberately rounded DOWN from the
+                                           ideal: a large cover-cropped photo at
+                                           roughly 0.9 of full DPR is
+                                           indistinguishable, and asking for the
+                                           exact figure pushes every retina
+                                           viewport onto the 1920w candidate.
+                                           Over-declaring costs bytes, under-
+                                           declaring costs sharpness, and only
+                                           one of those is visible. */
+                                        sizes="(max-width: 640px) 115vw, (max-width: 1024px) 78vw, 760px"
                                         className="size-full"
                                         imageClassName="transition-transform duration-700 ease-out motion-safe:group-hover/card:scale-[1.05]"
                                     />
@@ -357,7 +400,7 @@ export default function CapabilityStack({ services }) {
                                     and neither should the text on it. */}
                                 <span
                                     aria-hidden="true"
-                                    className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black via-black/70 to-transparent"
+                                    className="absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-black via-black/70 to-transparent"
                                 />
 
                                 <span className="label-mono absolute top-4 left-4 rounded-full border border-white/25 bg-black/45 px-2.5 py-1 tabular-nums text-white backdrop-blur-sm">

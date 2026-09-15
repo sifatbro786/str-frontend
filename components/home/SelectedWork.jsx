@@ -94,7 +94,9 @@ export default function SelectedWork({ projects }) {
                                 className="relative block aspect-16/10 overflow-hidden border border-(--line)"
                             >
                                 <Image
-                                    src={mediaUrl(p.thumbnailImage || p.coverImage) ?? MEDIA_FALLBACK}
+                                    src={
+                                        mediaUrl(p.thumbnailImage || p.coverImage) ?? MEDIA_FALLBACK
+                                    }
                                     alt={`${p.title} — ${p.subtitle}`}
                                     fill
                                     sizes="(min-width: 768px) 46vw, 92vw"

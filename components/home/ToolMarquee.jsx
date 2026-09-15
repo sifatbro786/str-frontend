@@ -23,11 +23,32 @@ import LoopMarquee from "@/components/motion/LoopMarquee";
  * rather than as a rail laid across the page, and descenders on the lower
  * rail begin colliding with the section below.
  *
- * Each rail is 132% of the container so the rotated ends are still outside
+ * Each rail is wider than the container so the rotated ends are still outside
  * the viewport after the corners drop; the section clips them. Without the
  * overwidth you get two triangular gaps of bare canvas at the left and right
  * gutters, which is the tell that the angle was added in CSS as an
  * afterthought.
+ *
+ * ── WHY THE ANGLE AND THE WIDTH ARE BOTH RESPONSIVE ⚑ ────────────────────
+ * The two rails share one horizontal axis, so the ONLY thing that makes the
+ * lower one visible is the vertical spread the opposite rotations open up at
+ * the edges. That spread is `railWidth / 2 * (tan a + tan b)` — it scales with
+ * the viewport. The band height does not: it is padding plus a line of type.
+ *
+ * At 1440 the spread is around 80px against a 63px band, so the blue shows in
+ * two wedges at the gutters, which is the shape. At 390 the same angles gave
+ * about 22px of spread against a 46px band, so the blue never cleared the
+ * orange at any point along the rail and the section rendered as one orange
+ * bar. Nothing was overlapping wrongly and nothing was clipped; there was
+ * simply not enough width for the geometry to open up.
+ *
+ * So mobile gets a wider rail, a steeper angle and a thinner band, and the
+ * ratio lands back where the desktop one is. If either angle or either width
+ * is ever changed, check that
+ *
+ *     railWidth / 2 * (tan a + tan b)  >  bandHeight
+ *
+ * still holds at 390px, which is where it fails first.
  *
  * ── TRANSFORM OWNERSHIP ──────────────────────────────────────────────────
  * The rotation lives on an outer wrapper as an inline style and GSAP never
@@ -100,7 +121,13 @@ function Rail({ items, direction, speed }) {
             items={items}
             speed={speed}
             direction={direction}
-            className="py-3.5 md:py-5"
+            /* Thinner on mobile, and that is half the fix for the cross. See
+               the geometry note in the section below: the rails separate by a
+               fixed fraction of their own width, so on a phone the separation
+               shrinks with the viewport while a fixed py keeps the band the
+               same height, and the lower rail ends up entirely underneath the
+               upper one. */
+            className="py-2.5 md:py-5"
             renderItem={(tool, i) => (
                 <span key={`${tool}-${i}`} className="flex shrink-0 items-center">
                     <span className={ITEM}>{tool}</span>
@@ -183,12 +210,17 @@ export default function ToolMarquee() {
                 them out of flow the section would collapse to the label. The
                 value is the rail height plus the vertical reach of the rotation
                 at the widest breakpoint, rounded up. */}
-            <div className="relative mt-20 md:mt-40">
+            <div className="relative mt-20 md:mt-30 md:pb-20">
                 {/* Blue — under, travelling left. */}
-                <div
-                    className="absolute top-1/2 left-1/2 z-10 w-[132%]"
-                    style={{ transform: "translate(-50%, -50%) rotate(-2.6deg)" }}
-                >
+                {/* The rotation moved from an inline style to utilities so it
+                    can carry a breakpoint. It is still on the OUTER wrapper and
+                    GSAP still owns only [data-band] inside, so the one-element-
+                    one-owner rule above is intact. Tailwind v4 writes these as
+                    the individual `translate` and `rotate` properties rather
+                    than one `transform`, and the spec applies them in that
+                    order, so the composed result is identical to the string it
+                    replaces. */}
+                <div className="absolute top-1/2 left-1/2 z-10 w-[188%] -translate-x-1/2 -translate-y-1/2 rotate-[-4.6deg] md:w-[132%] md:rotate-[-2.6deg]">
                     <div
                         data-band=""
                         data-drift="-5"
@@ -201,10 +233,7 @@ export default function ToolMarquee() {
                 {/* Orange — over, travelling right. The drop shadow is doing the
                     real work: without it two flat bands at the same z read as a
                     single printed X, and the layering is the point. */}
-                <div
-                    className="absolute top-1/2 left-1/2 z-20 w-[132%]"
-                    style={{ transform: "translate(-50%, -50%) rotate(2.2deg)" }}
-                >
+                <div className="absolute top-1/2 left-1/2 z-20 w-[188%] -translate-x-1/2 -translate-y-1/2 rotate-[4deg] md:w-[132%] md:rotate-[2.2deg]">
                     <div
                         data-band=""
                         data-drift="5"

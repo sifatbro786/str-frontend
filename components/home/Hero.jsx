@@ -206,6 +206,30 @@ export default function Hero() {
                                     />
                                 </svg>
                             </Link>
+
+                            {/* Secondary action. Outline rather than a second
+                                filled pill: two solid buttons side by side read as
+                                one choice split in half, and the reader has to
+                                compare them instead of following the first.
+
+                                Every colour here is a semantic token, so the pair
+                                flips with the theme on its own — --line and --text
+                                are redefined in the .dark block and inside
+                                surface-ink. The one thing NOT to do is reach for a
+                                literal like border-stock-300, which is what would
+                                turn this into a light-only button.
+
+                                data-hero-cta joins it to the existing stagger in
+                                the timeline above. No change needed there: the
+                                selector already targets every element carrying the
+                                attribute, in DOM order. */}
+                            <Link
+                                data-hero-cta=""
+                                href="/contact"
+                                className="inline-flex items-center rounded-full border border-(--line) px-7 py-3.5 text-[0.9375rem] font-medium text-(--text) transition-colors duration-200 hover:border-(--text)"
+                            >
+                                Start a project
+                            </Link>
                         </div>
                     </div>
 
