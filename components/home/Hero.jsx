@@ -271,7 +271,15 @@ export default function Hero() {
                             className="group/disc flex shrink-0 items-center gap-8 pr-8 md:gap-12 md:pr-12"
                         >
                             <span
-                                className="text-[clamp(1.75rem,4.5vw,3.25rem)] leading-none font-medium tracking-tight transition-colors duration-300 group-hover/disc:text-brand"
+                                /* ⚑ leading-1.25, not leading-none. LoopMarquee's
+                                   root is overflow-hidden and takes its height
+                                   from the tallest item, so at line-height 1 the
+                                   box ends at the baseline and every descender on
+                                   the rail — the g in Editing, the y in Visualization
+                                   — was cut off at the band edge. 1.25 is General
+                                   Sans' own content area, so the glyphs fit
+                                   without the rail needing a taller band. */
+                                className="text-[clamp(1.75rem,4.5vw,3.25rem)] leading-[1.25] font-medium tracking-tight transition-colors duration-300 group-hover/disc:text-brand"
                                 style={
                                     i % 2
                                         ? {

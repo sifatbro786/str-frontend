@@ -16,14 +16,19 @@ import ImageField from "@/components/admin/ImageField";
  * str-backend/src/validators/pageMeta.validator.js, and the schema enum in
  * str-backend/src/models/PageMeta.js. Add an id here only and the PUT is
  * rejected with a 400; add it to the validator only and Mongoose refuses the
- * write. "portfolio" is in all three.
+ * write. "overview" is in all three.
+ *
+ * ⚑ "portfolio" was renamed to "overview" when the route moved. The existing
+ * row was migrated with
+ * db.pagemetas.updateOne({ pageIdentifier: "portfolio" }, { $set: { pageIdentifier: "overview" } })
+ * — a rename here alone would have left that row unreachable from this screen.
  */
 const IDENTIFIERS = [
   "home",
   "about",
   "services",
   "projects",
-  "portfolio",
+  "overview",
   "graphics",
   "packages",
   "blogs",
@@ -36,8 +41,8 @@ const PATHS = {
   services: "/services",
   projects: "/projects",
   // Not in the navbar by design; reachable by direct URL and via the sitemap.
-  portfolio: "/portfolio",
-  // Same call as portfolio: a page you are sent to, not one you browse into.
+  overview: "/overview",
+  // Same call as overview: a page you are sent to, not one you browse into.
   graphics: "/graphics",
   // Bilingual. The row edited here is the ENGLISH <head> — the Bengali view is
   // the same URL with ?lang=bn and inherits this title and description, because

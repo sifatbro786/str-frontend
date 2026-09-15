@@ -90,12 +90,15 @@ export default async function sitemap() {
         { path: "/", priority: 1, changeFrequency: "weekly", lastModified: homeTouched },
         { path: "/services", priority: 0.9, changeFrequency: "monthly", lastModified: servicesTouched },
         { path: "/projects", priority: 0.9, changeFrequency: "weekly", lastModified: projectsTouched },
-        // /portfolio is the sample library and is not linked from the navbar, so
-        // the sitemap is the only route a crawler has to it. It sits below
-        // /projects on purpose: the case studies are the pages that should rank.
-        { path: "/portfolio", priority: 0.7, changeFrequency: "monthly" },
+        // /overview (the old /portfolio) is the sample library and is not linked
+        // from the navbar, so the sitemap is the only route a crawler has to it.
+        // It sits below /projects on purpose: the case studies are the pages
+        // that should rank. The old path 301s here from next.config.mjs and is
+        // deliberately NOT listed as well — submitting a URL that redirects is
+        // the one thing a sitemap should never do.
+        { path: "/overview", priority: 0.7, changeFrequency: "monthly" },
         /* Also unlinked from the navbar, so the sitemap is the only route a
-           crawler has to it. Ranked above /portfolio because the queries it
+           crawler has to it. Ranked above /overview because the queries it
            answers are transactional ("clipping path service", "background
            removal price") rather than brand ones. */
         { path: "/graphics", priority: 0.8, changeFrequency: "monthly" },

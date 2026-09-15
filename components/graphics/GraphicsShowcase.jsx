@@ -91,7 +91,8 @@ function ServiceBlock({ service, position, flipped }) {
                 looking at", which is a different question asked eight sections
                 later by a reader who is no longer near the table. */}
             <p className="label-mono mt-7 border-t border-(--line) pt-4 text-(--text-mute)">
-                From <span className="nums text-(--text)">{formatRate(rate.amount)}</span>{" "}
+                Starting from{" "}
+                <span className="nums text-(--text)">{formatRate(rate.amount)}</span>{" "}
                 {rate.unit}
             </p>
         </div>

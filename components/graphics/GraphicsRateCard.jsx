@@ -30,7 +30,7 @@ import { pad } from "@/lib/utils";
  * the route swapping getGraphicsRateCard for an API call changes nothing here.
  *
  * @param {string} index  Section number in the page's IA.
- * @param {Array}  rates  [{ id, position, title, amount, unit }], cheapest first
+ * @param {Array}  rates  [{ id, position, title, amount, unit }], pipeline order
  * @param {Array}  terms  Plain strings printed under the table
  * @param {object} bulk   { note, whatsappLabel, emailLabel }
  * @param {object} hero   The opening before and after pair

@@ -565,8 +565,25 @@ html {
 
 /* SplitText line masking. `mask: "lines"` wraps each line in a clipping div;
    this is what stops descenders being sheared off during a y-reveal. */
-.split-line {
-  overflow: hidden;
+/* ⚑ NO `overflow: hidden` on the line itself, deliberately.
+ *
+ * useSplitReveal passes mask:"lines" to SplitText, which already wraps every
+ * line in its own clipping box (.split-line-mask, overflow: clip). Clipping the
+ * line as well was a second, tighter box around the same text, and it clipped
+ * to the LINE BOX: text-display runs line-height 1.08 and text-heading 1.15,
+ * both shorter than General Sans' descent, so the tail of g, y, p and j was
+ * shaved off every masked heading. Permanently, not just during the reveal —
+ * the wrapper stays in the DOM long after the tween ends, which is why the
+ * clipPath cleanup in the hook did not help.
+ *
+ * One masker, and it gets clip room. */
+.split-line-mask {
+  /* Padding grows the clip rectangle; the matching negative margin gives the
+     space straight back, so line rhythm and everything below the heading sit
+     exactly where they did. Same pair the hero headline writes inline in
+     Hero.jsx, for the same reason. */
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
 }
 .split-line-inner {
   display: block;

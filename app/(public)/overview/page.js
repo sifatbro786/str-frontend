@@ -14,11 +14,24 @@ import { site } from "@/lib/site";
 
 /**
  * Title, description, keywords and OG image are editable at
- * /admin/page-meta → Portfolio. The values below are the fallback for when
+ * /admin/page-meta → Overview. The values below are the fallback for when
  * that row is empty or the API is unreachable; lib/seo.js holds the
  * precedence rules.
  *
- * ⚑ "portfolio" is enumerated in three places and they move together: the
+ * ⚑ THIS ROUTE WAS /portfolio. It moved to /overview with the identifier
+ * renamed alongside it, so the dashboard row that used to be keyed
+ * "portfolio" was migrated in place:
+ *
+ *     db.pagemetas.updateOne(
+ *       { pageIdentifier: "portfolio" },
+ *       { $set: { pageIdentifier: "overview" } }
+ *     )
+ *
+ * Without that update the row is orphaned and this page silently falls back to
+ * the strings below — getPageMeta swallows its own failures and returns null,
+ * so nothing reports that the dashboard is being ignored.
+ *
+ * ⚑ "overview" is enumerated in three places and they move together: the
  * schema enum in str-backend/src/models/PageMeta.js, IDENTIFIERS in
  * str-backend/src/validators/pageMeta.validator.js, and the admin list in
  * app/(admin)/admin/page-meta/page.js. Drop it from any one of them and this
@@ -28,8 +41,8 @@ import { site } from "@/lib/site";
  */
 export async function generateMetadata() {
     return buildMetadata({
-        identifier: "portfolio",
-        path: "/portfolio",
+        identifier: "overview",
+        path: "/overview",
         title: "Portfolio and pricing",
         /* Kept under 160 characters. The dashboard field enforces that cap
            because Google truncates past roughly there, and a fallback that
@@ -40,7 +53,7 @@ export async function generateMetadata() {
 }
 
 /**
- * /portfolio — the sample library, the published rates, and the reviews.
+ * /overview — the sample library, the published rates, and the reviews.
  *
  * ── HOW THIS DIFFERS FROM /projects, DELIBERATELY ────────────────────────
  * /projects is the written-up case studies: a problem, a decision and a
@@ -48,7 +61,7 @@ export async function generateMetadata() {
  * — individual pieces, most of which will never get a case study because the
  * deliverable was a file rather than a launch. Keeping them apart is what
  * stops either page from becoming a mixed bag: /projects stays arguable,
- * /portfolio stays browsable.
+ * /overview stays browsable.
  *
  * ── WHAT THIS PAGE DOES *NOT* CARRY, AND WHY ─────────────────────────────
  * The v1 /info page it replaces also held a metrics band, a ten-service
@@ -77,7 +90,7 @@ export async function generateMetadata() {
  * accessors this route touches. Point their bodies at the API and this file
  * is unchanged.
  */
-export default async function PortfolioPage() {
+export default async function OverviewPage() {
     /* Two independent round trips — the static accessors resolve immediately,
        the testimonials call is a real fetch. Awaiting them in sequence would
        add its latency to TTFB for nothing. `getTestimonials` is deliberately
@@ -107,7 +120,7 @@ export default async function PortfolioPage() {
 
     return (
         <>
-            <JsonLd data={[breadcrumbSchema([{ name: "Portfolio", path: "/portfolio" }])]} />
+            <JsonLd data={[breadcrumbSchema([{ name: "Portfolio", path: "/overview" }])]} />
 
             <PageMasthead
                 index="06"

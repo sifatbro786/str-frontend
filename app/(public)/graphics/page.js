@@ -50,8 +50,8 @@ export async function generateMetadata() {
 /**
  * /graphics — the image production line, priced per pass.
  *
- * ── HOW THIS DIFFERS FROM /portfolio, DELIBERATELY ───────────────────────
- * /portfolio is the whole shelf across five disciplines, one card per piece,
+ * ── HOW THIS DIFFERS FROM /overview, DELIBERATELY ────────────────────────
+ * /overview is the whole shelf across five disciplines, one card per piece,
  * with EUR build rates for European clients at the bottom. This is one
  * discipline taken apart: eight passes a catalogue image goes through, each
  * one priced on its own in cents, with the before and after that proves it.
@@ -59,12 +59,12 @@ export async function generateMetadata() {
  * shots are not the same reader and should not be handed the same page.
  *
  * ── WHY IT IS NOT IN THE NAVBAR ──────────────────────────────────────────
- * Same call as /portfolio. It is a page you are sent to, not one you browse
+ * Same call as /overview. It is a page you are sent to, not one you browse
  * into, so the sitemap and direct links are the routes in. Adding it to
  * site.nav is a one line change if that ever stops being true.
  *
  * ── WHERE THE CONTENT LIVES ──────────────────────────────────────────────
- * lib/graphics.js, behind two async accessors, exactly as /portfolio's records
+ * lib/graphics.js, behind two async accessors, exactly as /overview's records
  * sit behind getPortfolioItems and getPricing. Point their bodies at the API
  * and this file is unchanged. The prices are single sourced on the service
  * rows and projected into the table, so the rate card and the section that
@@ -127,7 +127,7 @@ export default async function GraphicsPage() {
                 title="Send two images and we will send them back edited."
                 body="No brief needed. Tell us the marketplace you are listing on and the sample comes back cut, cleaned and sized to that spec, with the rate for the full batch beside it."
                 primary={{ label: "Start a project", href: "/contact" }}
-                secondary={{ label: "See the whole shelf", href: "/portfolio" }}
+                secondary={{ label: "See the whole shelf", href: "/overview" }}
             />
         </>
     );
