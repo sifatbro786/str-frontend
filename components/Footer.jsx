@@ -1,6 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
+import {
+    BehanceIcon,
+    FacebookIcon,
+    GitHubIcon,
+    LinkedInIcon,
+    WhatsAppIcon,
+    XIcon,
+} from "@/components/ui/SocialIcons";
 import { site } from "@/lib/site";
 import FooterCurve from "./FooterCurve";
 import FooterReveal from "./footer/FooterReveal";
@@ -43,13 +51,49 @@ import StudioStatus from "./footer/StudioStatus";
  */
 const COLUMN_SPANS = ["lg:col-span-3 lg:col-start-5", "lg:col-span-2", "lg:col-span-3"];
 
+/* ── Social rail ──────────────────────────────────────────────────────────
+ * Icons rather than the word marks these used to be. Five text links reading
+ * "LinkedIn Facebook" sat in the same weight and colour as the sitemap columns
+ * beside them, so the one row a visitor actually clicks read as more footer
+ * boilerplate. A glyph is recognised before it is read.
+ *
+ * ⚑ WhatsApp is NOT in site.social and must not be moved there. site.social is
+ * profile pages; the WhatsApp link is the studio's phone number in wa.me form
+ * and lives with the rest of the contact details in site.contact, which is also
+ * where /graphics and the contact page read it from. One number, one home. So
+ * `href` is resolved per entry below instead of keying blindly into site.social.
+ *
+ * Entries with no href are dropped, which is what keeps the three unused
+ * profiles (github, x, behance — empty strings in lib/site.js) from rendering
+ * as dead tiles. */
 const SOCIALS = [
-    { key: "linkedin", label: "LinkedIn" },
-    { key: "facebook", label: "Facebook" },
-    { key: "github", label: "GitHub" },
-    { key: "behance", label: "Behance" },
-    { key: "x", label: "X" },
-];
+    { key: "linkedin", label: "LinkedIn", href: site.social.linkedin, Icon: LinkedInIcon },
+    { key: "facebook", label: "Facebook", href: site.social.facebook, Icon: FacebookIcon },
+    {
+        key: "whatsapp",
+        label: "WhatsApp",
+        href: site.contact.whatsappHref,
+        Icon: WhatsAppIcon,
+        /* The only one that is a conversation rather than a profile, so it says
+           so on hover and to a screen reader. */
+        hint: `Chat on WhatsApp — ${site.contact.whatsapp}`,
+    },
+    { key: "github", label: "GitHub", href: site.social.github, Icon: GitHubIcon },
+    { key: "behance", label: "Behance", href: site.social.behance, Icon: BehanceIcon },
+    { key: "x", label: "X", href: site.social.x, Icon: XIcon },
+].filter((s) => s.href);
+
+/* 40px hit target, which is the floor for a thumb, and a hairline circle so the
+   rail reads as the same family as the pills on /graphics and /portfolio rather
+   than as a downloaded icon set. Fill on hover, not a tint: at 16px a colour
+   change alone is almost invisible against --raised, and the solid brand disc is
+   the one moment of colour in an otherwise grey footer.
+ *
+ * transition-[...] and not transition-all — the magnetic transform is written
+ * by GSAP on every pointer move, and letting CSS transition it too means the
+ * two fight and the tile lags behind the cursor. */
+const SOCIAL_TILE =
+    "inline-flex size-10 items-center justify-center rounded-full border border-(--line) bg-(--canvas) text-(--text-mute) transition-[color,background-color,border-color] duration-200 hover:border-brand hover:bg-brand hover:text-white";
 
 /* data-magnetic is read by FooterReveal's delegated pointer handler.
    inline-block is not optional — a transform on an inline box is ignored, and
@@ -87,17 +131,25 @@ export default function Footer() {
 
                             <StudioStatus />
 
-                            <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2">
-                                {SOCIALS.filter((s) => site.social[s.key]).map((s) => (
-                                    <li key={s.key}>
+                            <ul className="mt-8 flex flex-wrap gap-3">
+                                {SOCIALS.map(({ key, label, href, Icon, hint }) => (
+                                    <li key={key}>
                                         <a
                                             data-magnetic=""
-                                            href={site.social[s.key]}
+                                            href={href}
                                             target="_blank"
                                             rel="noreferrer noopener"
-                                            className={META}
+                                            /* The link carries the name; the
+                                               glyph inside is aria-hidden. A
+                                               title as well, because an icon
+                                               with no text needs a tooltip for
+                                               anyone who does not recognise
+                                               the mark. */
+                                            aria-label={hint ?? label}
+                                            title={hint ?? label}
+                                            className={SOCIAL_TILE}
                                         >
-                                            {s.label}
+                                            <Icon className="size-[1.0625rem]" />
                                         </a>
                                     </li>
                                 ))}
