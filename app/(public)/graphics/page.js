@@ -3,6 +3,7 @@ import CTABand from "@/components/ui/CTABand";
 import JsonLd from "@/components/seo/JsonLd";
 import GraphicsRateCard from "@/components/graphics/GraphicsRateCard";
 import GraphicsShowcase from "@/components/graphics/GraphicsShowcase";
+import GraphicsQuoteForm from "@/components/graphics/GraphicsQuoteForm";
 import {
     GRAPHICS_HERO,
     formatRate,
@@ -123,10 +124,40 @@ export default async function GraphicsPage() {
 
             <GraphicsShowcase index="02" services={services} />
 
+            {/* ── Where the order form sits, and why ──────────────────────
+                After the eight blocks, not beside the rate card. The rate card
+                answers "what does this cost" and the showcase answers "can they
+                actually do it" — a reader who has just dragged the handle
+                across eight real before-and-afters is the one with something to
+                send, and a reader who has not is being asked to order on a
+                price alone. CTABand stays below it for the other visitor on
+                this page: the one who wants a whole project rather than a
+                batch, and belongs on /contact.
+
+                It is a client component and the only other one on the route is
+                CompareFrame, so the copy above it still ships as HTML. */}
+            <GraphicsQuoteForm
+                index="03"
+                /* The same records the showcase renders, so a pass can never be
+                   orderable under a name the page does not publish. `title` is
+                   what the server stores — see the note on servicesRequired in
+                   str-backend/src/validators/graphicsQuote.validator.js. */
+                services={services.map((s) => ({ id: s.id, title: s.title }))}
+                contact={{
+                    whatsapp: site.contact.whatsapp,
+                    whatsappHref: site.contact.whatsappHref,
+                    email: site.contact.email,
+                }}
+            />
+
             <CTABand
                 title="Send two images and we will send them back edited."
                 body="No brief needed. Tell us the marketplace you are listing on and the sample comes back cut, cleaned and sized to that spec, with the rate for the full batch beside it."
-                primary={{ label: "Start a project", href: "/contact" }}
+                /* Points at the form above it, not at /contact. The band makes a
+                   promise the order desk on this page already keeps; sending a
+                   reader who has scrolled past it to a general inquiry form is
+                   asking them to describe a batch they could have attached. */
+                primary={{ label: "Send two images", href: "#order" }}
                 secondary={{ label: "See the whole shelf", href: "/overview" }}
             />
         </>

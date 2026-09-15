@@ -105,6 +105,16 @@ export const InquiriesIcon = (p) => (
     </Icon>
 );
 
+/* An envelope with a paperclip through it — the one thing that separates a
+   graphics order from an inquiry is that it arrives carrying files. */
+export const GraphicsQuotesIcon = (p) => (
+    <Icon {...p}>
+        <path d="M3 7.5 10.5 12 14 9.9" />
+        <path d="M13 19.5H5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2V11" />
+        <path d="M20.5 14.5v5a2.5 2.5 0 0 1-5 0V14a1.5 1.5 0 0 1 3 0v5" />
+    </Icon>
+);
+
 export const PageMetaIcon = (p) => (
     <Icon {...p}>
         <circle cx="10.5" cy="10.5" r="6.5" />

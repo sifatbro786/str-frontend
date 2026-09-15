@@ -19,6 +19,14 @@ const TONES = {
     new: "bg-signal/12 text-signal",
     contacted: "bg-brand/12 text-brand",
     closed: "bg-(--raised-2) text-(--text-mute)",
+    /* Graphics orders. `quoted` and `in_progress` share the brand tone because
+       both mean "in flight"; only `delivered` is settled. `failed` is the
+       mailStatus of an order whose attachments never left the server — the one
+       row in the table that needs chasing within the hour. */
+    quoted: "bg-brand/12 text-brand",
+    in_progress: "bg-brand/12 text-brand",
+    delivered: "bg-leaf/14 text-leaf",
+    failed: "bg-signal/12 text-signal",
     published: "bg-leaf/14 text-leaf",
     active: "bg-leaf/14 text-leaf",
     featured: "bg-leaf/14 text-leaf",

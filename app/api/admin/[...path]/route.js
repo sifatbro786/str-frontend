@@ -37,6 +37,10 @@ const ALLOWED = new Set([
     "testimonials",
     "team",
     "inquiries",
+    // Orders from /graphics. Its public POST does NOT come through here — it is
+    // multipart and this proxy re-encodes every body as JSON, which would
+    // destroy the upload. Only the dashboard's GET/PATCH/DELETE pass through.
+    "graphics-quotes",
     "page-meta",
     "site-content",
     "stats",
