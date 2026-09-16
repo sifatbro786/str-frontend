@@ -138,10 +138,13 @@ export default async function GraphicsPage() {
                 CompareFrame, so the copy above it still ships as HTML. */}
             <GraphicsQuoteForm
                 index="03"
-                /* The same records the showcase renders, so a pass can never be
-                   orderable under a name the page does not publish. `title` is
-                   what the server stores — see the note on servicesRequired in
-                   str-backend/src/validators/graphicsQuote.validator.js. */
+                /* The same records the showcase renders, so a published pass
+                   can never be orderable under a name this page does not show.
+                   The form adds EXTRA_PASSES to them — work the studio takes
+                   that has no compare pair here yet; lib/graphicsQuote.js says
+                   why those are not rows in this array. `title` is what the
+                   server stores either way — see the note on servicesRequired
+                   in str-backend/src/validators/graphicsQuote.validator.js. */
                 services={services.map((s) => ({ id: s.id, title: s.title }))}
                 contact={{
                     whatsapp: site.contact.whatsapp,

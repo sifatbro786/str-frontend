@@ -8,6 +8,7 @@ import {
     ACCEPTED_LABEL,
     DELIVERY_TIMES,
     DELIVERY_TYPES,
+    EXTRA_PASSES,
     FILE_NOTE,
     ORDER_STEPS,
     UPLOAD_LIMITS,
@@ -68,7 +69,8 @@ import { cn, pad } from "@/lib/utils";
  * as JSON, which would destroy the multipart payload outright.
  *
  * @param {string} index    Section number in the page's IA
- * @param {Array}  services From getGraphicsServices() — the checkbox list
+ * @param {Array}  services From getGraphicsServices(). The published passes in
+ *                          the checkbox list, which EXTRA_PASSES then extends
  * @param {object} contact  { whatsapp, whatsappHref, email }
  */
 
@@ -80,6 +82,11 @@ const FIELD =
     "w-full border border-(--line) bg-(--canvas) px-4 py-3 text-[0.9375rem] text-(--text) placeholder:text-(--text-mute) transition-colors hover:border-(--text-mute) focus:border-signal focus:outline-none";
 
 const LABEL = "label-mono block text-(--text-dim)";
+
+/** One pass in the checkbox row. `has-checked:` styles the box from the state
+ *  of the sr-only input inside it, so the whole chip is the hit target. */
+const PASS_CHIP =
+    "cursor-pointer border border-(--line) bg-(--canvas) px-3.5 py-2 text-[0.875rem] text-(--text-dim) transition-colors select-none has-checked:border-signal has-checked:bg-signal has-checked:text-white hover:border-(--text-mute)";
 
 /** Mono, wide-tracked, uppercase. Used ONLY on the docket furniture — the
  *  header strip, the group indices and the serial — where it is doing the job
@@ -115,20 +122,44 @@ function Required() {
     );
 }
 
-/** A numbered block of fields. The index is what makes a long form read as a
- *  sequence with an end, rather than as a wall of inputs. */
-function Group({ n, title, note, children }) {
+/**
+ * A numbered block of fields. The index is what makes a long form read as a
+ * sequence with an end, rather than as a wall of inputs.
+ *
+ * `accent` marks the one group that is optional and still worth doing: a
+ * signal rule down the left edge, a wash behind it and the note promoted from
+ * a grey aside to a tag. Attached to the fieldset rather than to a wrapper so
+ * the rule runs the full height of the block, however tall it grows.
+ *
+ * ⚑ The sides are set with per-side utilities on purpose. `border-(--line)`
+ * writes the border-color shorthand, and an accent that overrode it with
+ * border-left-color would be relying on Tailwind's emission order to win. Top
+ * colour and left colour never touch this way.
+ */
+function Group({ n, title, note, accent = false, children }) {
     return (
-        <fieldset className="border-t border-(--line) px-6 py-7 md:px-9">
+        <fieldset
+            className={cn(
+                "border-t border-t-(--line) px-6 py-7 md:px-9",
+                accent && "border-l-2 border-l-signal bg-signal/5",
+            )}
+        >
             <legend className="sr-only">{title}</legend>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className={cn(STAMP, "nums text-brand")}>{pad(n)}</span>
+                <span className={cn(STAMP, "nums", accent ? "text-signal" : "text-brand")}>
+                    {pad(n)}
+                </span>
                 <h3 className="text-[1rem] font-semibold tracking-[-0.02em] text-(--text)">
                     {title}
                 </h3>
-                {note && (
-                    <span className="text-[0.8125rem] text-(--text-mute)">{note}</span>
-                )}
+                {note &&
+                    (accent ? (
+                        <span className="label-mono border border-signal/40 bg-signal/10 px-2 py-0.5 text-signal">
+                            {note}
+                        </span>
+                    ) : (
+                        <span className="text-[0.8125rem] text-(--text-mute)">{note}</span>
+                    ))}
             </div>
             <div className="mt-5 space-y-5">{children}</div>
         </fieldset>
@@ -629,19 +660,33 @@ export default function GraphicsQuoteForm({ index = "03", services, contact }) {
                                         Which passes do you need?
                                         <Required />
                                     </span>
+                                    {/* The eight published passes first, in the
+                                        pipeline order the showcase above uses,
+                                        then the two that are orderable without a
+                                        block of their own. One list, because a
+                                        client picking work does not care which
+                                        of them has a before and after on this
+                                        page. See EXTRA_PASSES for why they are
+                                        not rows in GRAPHICS_SERVICES. */}
                                     <div className="mt-3 flex flex-wrap gap-2">
-                                        {services.map((s) => (
-                                            <label
-                                                key={s.id}
-                                                className="cursor-pointer border border-(--line) bg-(--canvas) px-3.5 py-2 text-[0.875rem] text-(--text-dim) transition-colors select-none has-checked:border-signal has-checked:bg-signal has-checked:text-white hover:border-(--text-mute)"
-                                            >
+                                        {[
+                                            ...services.map((s) => ({
+                                                key: s.id,
+                                                title: s.title,
+                                            })),
+                                            ...EXTRA_PASSES.map((title) => ({
+                                                key: title,
+                                                title,
+                                            })),
+                                        ].map((pass) => (
+                                            <label key={pass.key} className={PASS_CHIP}>
                                                 <input
                                                     type="checkbox"
                                                     name="servicesRequired"
-                                                    value={s.title}
+                                                    value={pass.title}
                                                     className="sr-only"
                                                 />
-                                                {s.title}
+                                                {pass.title}
                                             </label>
                                         ))}
                                     </div>
@@ -726,7 +771,17 @@ export default function GraphicsQuoteForm({ index = "03", services, contact }) {
                             </Group>
 
                             {/* ── 03 ── */}
-                            <Group n={3} title="The files" note="Optional, but it speeds the quote up">
+                            <Group
+                                n={3}
+                                title="The files"
+                                note="Optional, but it speeds the quote up"
+                                /* The only optional group in the docket, and the
+                                   one that decides whether the quote comes back
+                                   against the client's own photography or
+                                   against a guess. Left unmarked it read as the
+                                   part you skip. */
+                                accent
+                            >
                                 <div
                                     onDragOver={(e) => {
                                         e.preventDefault();
@@ -735,16 +790,24 @@ export default function GraphicsQuoteForm({ index = "03", services, contact }) {
                                     onDragLeave={() => setDragging(false)}
                                     onDrop={onDrop}
                                     className={cn(
-                                        "border border-dashed bg-(--canvas) p-6 transition-colors",
+                                        /* 2px and signal rather than a hairline in
+                                           --text-mute. On a wash the old dashed
+                                           grey line read as a disabled field, and
+                                           a drop target that does not look like
+                                           one is not a drop target.
+
+                                           The alpha is safe here where it was not
+                                           on the old border: `signal` is a theme
+                                           colour, so `border-signal/45` resolves,
+                                           while `border-(--text-mute)/45` is an
+                                           arbitrary var + alpha that Tailwind
+                                           cannot color-mix without knowing the
+                                           value's type, and it drops the whole
+                                           declaration in silence. */
+                                        "border-2 border-dashed bg-(--canvas) p-6 transition-colors",
                                         dragging
-                                            ? "border-signal bg-signal/5"
-                                            /* A plain token, no opacity modifier:
-                                               `border-(--text-mute)/45` is an
-                                               arbitrary var + alpha, which Tailwind
-                                               cannot color-mix without knowing the
-                                               value's type, and it silently drops
-                                               the whole declaration. */
-                                            : "border-(--text-mute)",
+                                            ? "border-signal bg-signal/10"
+                                            : "border-signal/45 hover:border-signal",
                                     )}
                                 >
                                     <input
