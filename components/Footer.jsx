@@ -149,7 +149,7 @@ export default function Footer() {
                                             title={hint ?? label}
                                             className={SOCIAL_TILE}
                                         >
-                                            <Icon className="size-[1.0625rem]" />
+                                            <Icon className="size-4.25" />
                                         </a>
                                     </li>
                                 ))}
