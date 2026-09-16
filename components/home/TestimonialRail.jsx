@@ -112,7 +112,7 @@ function Avatar({ src, name }) {
 
 /**
  * ── WHY THE HEADING IS PROPS AND NOT LITERALS ────────────────────────────
- * This rail now runs on the homepage AND on /portfolio, where it is section
+ * This rail now runs on the homepage AND on /packages, where it is section
  * 03 rather than 06 and needs a heading that fits a pricing page above it.
  * The alternative was a second rail component duplicating the drag, wheel,
  * keyboard and skew logic for the sake of two strings, which is how a

@@ -51,22 +51,22 @@ export async function generateMetadata() {
 /**
  * /graphics — the image production line, priced per pass.
  *
- * ── HOW THIS DIFFERS FROM /overview, DELIBERATELY ────────────────────────
- * /overview is the whole shelf across five disciplines, one card per piece,
- * with EUR build rates for European clients at the bottom. This is one
- * discipline taken apart: eight passes a catalogue image goes through, each
+ * ── HOW THIS DIFFERS FROM /packages, DELIBERATELY ────────────────────────
+ * /packages is the whole shelf across five disciplines, one card per piece,
+ * with the EUR build rates beside it. This is one discipline taken apart:
+ * eight passes a catalogue image goes through, each
  * one priced on its own in cents, with the before and after that proves it.
  * A client shopping for a website and a client shipping four thousand product
  * shots are not the same reader and should not be handed the same page.
  *
  * ── WHY IT IS NOT IN THE NAVBAR ──────────────────────────────────────────
- * Same call as /overview. It is a page you are sent to, not one you browse
- * into, so the sitemap and direct links are the routes in. Adding it to
- * site.nav is a one line change if that ever stops being true.
+ * It is a page you are sent to, not one you browse into, so the sitemap and
+ * direct links are the routes in. Adding it to site.nav is a one line change
+ * if that ever stops being true.
  *
  * ── WHERE THE CONTENT LIVES ──────────────────────────────────────────────
- * lib/graphics.js, behind two async accessors, exactly as /overview's records
- * sit behind getPortfolioItems and getPricing. Point their bodies at the API
+ * lib/graphics.js, behind two async accessors, exactly as /packages's records
+ * sit behind getCatalogueItems and getPricing. Point their bodies at the API
  * and this file is unchanged. The prices are single sourced on the service
  * rows and projected into the table, so the rate card and the section that
  * describes each pass cannot drift apart.
@@ -75,7 +75,7 @@ export async function generateMetadata() {
  * Neither section owns state. The only client code on the route is
  * CompareFrame, which takes image paths and labels as strings, so the copy
  * ships as HTML rather than as part of a bundle. Same arrangement as
- * PortfolioGrid and PricingGrid.
+ * CatalogueGrid and PricingGrid.
  */
 export default async function GraphicsPage() {
     /* Both accessors resolve immediately today. Awaited in parallel anyway,
@@ -161,7 +161,10 @@ export default async function GraphicsPage() {
                    reader who has scrolled past it to a general inquiry form is
                    asking them to describe a batch they could have attached. */
                 primary={{ label: "Send two images", href: "#order" }}
-                secondary={{ label: "See the whole shelf", href: "/overview" }}
+                /* /packages, not /overview: the two render the same page, but
+                   /overview canonicalises away, and an internal link should
+                   always point at the URL we want indexed. */
+                secondary={{ label: "See the whole shelf", href: "/packages" }}
             />
         </>
     );

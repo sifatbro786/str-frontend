@@ -16,19 +16,19 @@ import ImageField from "@/components/admin/ImageField";
  * str-backend/src/validators/pageMeta.validator.js, and the schema enum in
  * str-backend/src/models/PageMeta.js. Add an id here only and the PUT is
  * rejected with a 400; add it to the validator only and Mongoose refuses the
- * write. "overview" is in all three.
+ * write.
  *
- * ⚑ "portfolio" was renamed to "overview" when the route moved. The existing
- * row was migrated with
- * db.pagemetas.updateOne({ pageIdentifier: "portfolio" }, { $set: { pageIdentifier: "overview" } })
- * — a rename here alone would have left that row unreachable from this screen.
+ * ⚑ "overview" was dropped from all three. The route still exists — see
+ * app/(public)/overview/page.js — but it renders the same page as /packages and
+ * calls buildMetadata with identifier "packages", so it has no <head> of its
+ * own to edit. Its stored row is now orphaned; the migration that goes with
+ * this change is in that file's header.
  */
 const IDENTIFIERS = [
   "home",
   "about",
   "services",
   "projects",
-  "overview",
   "graphics",
   "packages",
   "blogs",
@@ -41,13 +41,13 @@ const PATHS = {
   services: "/services",
   projects: "/projects",
   // Not in the navbar by design; reachable by direct URL and via the sitemap.
-  overview: "/overview",
-  // Same call as overview: a page you are sent to, not one you browse into.
   graphics: "/graphics",
-  // Bilingual. The row edited here is the ENGLISH <head> — the Bengali view is
-  // the same URL with ?lang=bn and inherits this title and description, because
-  // PageMeta has one row per route and no locale dimension. If the Bengali
-  // listing ever needs its own copy, that is a schema change, not a second row.
+  // ⚑ This row also drives /overview, which renders the same page under the
+  // old address and canonicalises here. One row, two routes — there is no
+  // second row to edit, and there should not be.
+  // ⚑ Whatever is stored here was written for the old bilingual BDT catalogue.
+  // It still wins over the code fallbacks, so it needs rewriting for the page
+  // that is actually on this route now.
   packages: "/packages",
   blogs: "/blogs",
   contact: "/contact",

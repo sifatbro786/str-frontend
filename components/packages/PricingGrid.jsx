@@ -249,7 +249,7 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                 </div>
 
                 {/* ── Track selector ──────────────────────────────────────────
-                    Same pill idiom as the portfolio filter above it, deliberately:
+                    Same pill idiom as the catalogue filter above it, deliberately:
                     one page should not teach the reader two ways to switch a view. */}
                 <div
                     role="tablist"

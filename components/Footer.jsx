@@ -84,7 +84,7 @@ const SOCIALS = [
 ].filter((s) => s.href);
 
 /* 40px hit target, which is the floor for a thumb, and a hairline circle so the
-   rail reads as the same family as the pills on /graphics and /portfolio rather
+   rail reads as the same family as the pills on /graphics and /packages rather
    than as a downloaded icon set. Fill on hover, not a tint: at 16px a colour
    change alone is almost invisible against --raised, and the solid brand disc is
    the one moment of colour in an otherwise grey footer.

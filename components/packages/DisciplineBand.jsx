@@ -12,14 +12,14 @@ import { pad } from "@/lib/utils";
  * is the only thing that does. This band answers the question the filter
  * cannot: what you actually receive per discipline. Only `web` hands over a
  * URL; the other four hand over files, and that distinction is the reason
- * /portfolio exists alongside /projects rather than duplicating it.
+ * /packages exists alongside /projects rather than duplicating it.
  *
  * Because it owns no state it has no reason to be a client component, so the
  * whole band ships as HTML. `Reveal` is the only client code in here and it
  * renders its children on the server — the boundary is for code, not content.
  *
- * @param {Array}  disciplines PORTFOLIO_DISCIPLINES
- * @param {object} counts      discipline id → count, from portfolioCounts()
+ * @param {Array}  disciplines DISCIPLINES
+ * @param {object} counts      discipline id → count, from catalogueCounts()
  */
 export default function DisciplineBand({ disciplines, counts = {} }) {
     return (

@@ -9,7 +9,7 @@ import Reveal from "@/components/motion/Reveal";
 /* Taxonomy only — five ids, their labels and their verbs. The records arrive
    as a prop from the route, which fetches them on the server, so no copy
    crosses into the client bundle. Same split as taxonomy/api on /projects. */
-import { DISCIPLINE_BY_ID } from "@/lib/portfolio";
+import { DISCIPLINE_BY_ID } from "@/lib/disciplines";
 import { cn, pad } from "@/lib/utils";
 
 /**
@@ -38,8 +38,8 @@ import { cn, pad } from "@/lib/utils";
  * disciplines instead, in the order the rail lists them, so 3D, marketing,
  * graphics and video all appear above the fold.
  *
- * @param {Array} items       portfolio records, from getPortfolioItems()
- * @param {Array} disciplines PORTFOLIO_DISCIPLINES
+ * @param {Array} items       catalogue records, from getCatalogueItems()
+ * @param {Array} disciplines DISCIPLINES
  * @param {object} counts     discipline id → count
  */
 
@@ -82,7 +82,7 @@ function ArrowOut({ className }) {
     );
 }
 
-function PortfolioCard({ item, position }) {
+function CatalogueCard({ item, position }) {
     const d = DISCIPLINE_BY_ID[item.discipline];
     const href = item.liveUrl ?? item.fileUrl ?? null;
     const label = item.fileLabel ?? d?.action ?? "View";
@@ -215,7 +215,7 @@ function PortfolioCard({ item, position }) {
     );
 }
 
-export default function PortfolioGrid({ items, disciplines, counts, contactEmail }) {
+export default function CatalogueGrid({ items, disciplines, counts, contactEmail }) {
     const [active, setActive] = useState("all");
     const [shown, setShown] = useState(BATCH);
     const grid = useRef(null);
@@ -403,11 +403,11 @@ export default function PortfolioGrid({ items, disciplines, counts, contactEmail
                         </p>
                         <a
                             href={`mailto:${contactEmail}?subject=${encodeURIComponent(
-                                `${activeRow?.label ?? "Portfolio"} sample request`,
+                                `${activeRow?.label ?? "Catalogue"} sample request`,
                             )}`}
                             className="mt-8 inline-flex items-center gap-2 rounded-full border border-(--line) px-6 py-3 text-[0.9375rem] font-medium text-(--text) transition-colors hover:border-(--text)"
                         >
-                            Request the {activeRow?.label ?? "portfolio"} folder
+                            Request the {activeRow?.label ?? "catalogue"} folder
                             <ArrowOut />
                         </a>
                     </div>
@@ -418,7 +418,7 @@ export default function PortfolioGrid({ items, disciplines, counts, contactEmail
                             className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3"
                         >
                             {visible.map((item, i) => (
-                                <PortfolioCard key={item.slug} item={item} position={i + 1} />
+                                <CatalogueCard key={item.slug} item={item} position={i + 1} />
                             ))}
                         </div>
                     </Reveal>

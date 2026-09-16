@@ -54,11 +54,11 @@ const nextConfig = {
      that someone reports as a broken privacy link six months from now. */
     async redirects() {
         return [
-            /* /portfolio was a real, indexed URL: it shipped in the sitemap and
-               is linked from /graphics. The route is now /overview, so this is
-               a 301 rather than a 404 — without it every link and every ranking
-               that page earned is dropped on the floor. */
-            { source: "/portfolio", destination: "/overview", permanent: true },
+            /* ⚑ /overview is deliberately NOT redirected here. It is a live
+               route rendering the same page as /packages, because that address
+               went out to clients by email. See app/(public)/overview/page.js.
+               No other legacy path needs an entry — the only other one that
+               ever existed carried no traffic and was dropped. */
             { source: "/privacy-policy", destination: "/privacy", permanent: true },
             { source: "/terms-of-service", destination: "/terms", permanent: true },
             { source: "/terms-and-conditions", destination: "/terms", permanent: true },

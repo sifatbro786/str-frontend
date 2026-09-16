@@ -90,22 +90,20 @@ export default async function sitemap() {
         { path: "/", priority: 1, changeFrequency: "weekly", lastModified: homeTouched },
         { path: "/services", priority: 0.9, changeFrequency: "monthly", lastModified: servicesTouched },
         { path: "/projects", priority: 0.9, changeFrequency: "weekly", lastModified: projectsTouched },
-        // /overview (the old /portfolio) is the sample library and is not linked
-        // from the navbar, so the sitemap is the only route a crawler has to it.
-        // It sits below /projects on purpose: the case studies are the pages
-        // that should rank. The old path 301s here from next.config.mjs and is
-        // deliberately NOT listed as well — submitting a URL that redirects is
-        // the one thing a sitemap should never do.
-        { path: "/overview", priority: 0.7, changeFrequency: "monthly" },
-        /* Also unlinked from the navbar, so the sitemap is the only route a
-           crawler has to it. Ranked above /overview because the queries it
-           answers are transactional ("clipping path service", "background
-           removal price") rather than brand ones. */
+        /* Unlinked from the navbar, so the sitemap is the only route a crawler
+           has to it. Ranked with /packages because the queries it answers are
+           transactional ("clipping path service", "background removal price")
+           rather than brand ones. */
         { path: "/graphics", priority: 0.8, changeFrequency: "monthly" },
-        /* Listed once, at the bare path. The Bengali view is the same URL with
-           ?lang=bn and is declared to Google through the hreflang alternates in
-           the route's generateMetadata — listing it here as well would submit
-           two URLs for one page and invite a duplicate-content call. */
+        /* The rates and the sample library, linked from the navbar and the
+           footer. It sits below /projects on purpose: the case studies are the
+           pages that should rank.
+
+           ⚑ /overview renders this same page and is deliberately NOT listed.
+           It exists only so the links that went to clients under the old
+           address keep answering 200, and it canonicalises to /packages — so
+           submitting it here would ask the crawler to resolve a contradiction
+           we created ourselves. See app/(public)/overview/page.js. */
         { path: "/packages", priority: 0.8, changeFrequency: "monthly" },
         { path: "/about", priority: 0.7, changeFrequency: "monthly" },
         { path: "/blogs", priority: 0.8, changeFrequency: "weekly", lastModified: blogsTouched },

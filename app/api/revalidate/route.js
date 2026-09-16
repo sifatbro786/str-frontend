@@ -11,7 +11,10 @@ export const dynamic = "force-dynamic";
 const TAGS = new Set([
     "projects",
     "services",
-    "packages",
+    /* ⚑ "packages" was here. Nothing tags a fetch with it any more — /packages
+       renders static data from lib/pricingData.js — so accepting it would
+       answer 200 to a revalidation that busts nothing, which is worse than the
+       400 an unknown tag gets. */
     "blogs",
     "testimonials",
     "team",

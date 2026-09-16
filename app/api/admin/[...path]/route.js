@@ -29,10 +29,11 @@ const BASE = process.env.API_URL;
 const ALLOWED = new Set([
     "projects",
     "services",
-    // Covers /packages, /packages/categories, /packages/tiers and
-    // /packages/page — the guard is on the first segment only, and every
-    // sub-path is gated by checkRole on the Express router behind it.
-    "packages",
+    /* ⚑ "packages" was here, covering /packages, /packages/categories,
+       /packages/tiers and /packages/page. Those endpoints no longer exist on
+       the API — the router is unmounted in str-backend/src/routes/index.js —
+       so leaving the entry would proxy to a 404 and make it look like an auth
+       problem. Do not re-add it without the Express side coming back first. */
     "blogs",
     "testimonials",
     "team",
