@@ -1,0 +1,39 @@
+# ── LINE ENDINGS ─────────────────────────────────────────────────────────
+# Every text file is LF in the repository AND in the working tree.
+#
+# `eol=lf` rather than a bare `text=auto` on purpose. `text=auto` alone only
+# fixes what lands in the index; the checkout still follows whatever
+# core.autocrlf each machine happens to have, so the same clone comes out CRLF
+# on one Windows box and LF on the next. That is precisely how this repo ended
+# up with an LF index and a CRLF working tree — 130 files reporting as fully
+# rewritten in every diff, which makes review impossible and turns any merge
+# into a whole-file conflict. Pinning eol here removes the per-machine
+# variable instead of asking every contributor to configure git correctly.
+#
+# No bulk rewrite is needed here: every blob already committed is LF, so this
+# file only stops git from re-deriving CRLF on the way out. Working copies
+# cloned before it stay CRLF on disk until their next checkout, which is
+# cosmetic — git normalises on comparison, so status and diff read clean
+# either way. If a tree ever does drift, `git add --renormalize .` restages
+# it, and that belongs in its own commit, never mixed with feature work.
+* text=auto eol=lf
+
+# ── BINARY ───────────────────────────────────────────────────────────────
+# Only jpg and png are tracked today; the rest are listed pre-emptively
+# because the failure is silent and permanent. A font or image with no NUL
+# byte in its first 8000 bytes can be misdetected as text, at which point the
+# rule above rewrites bytes inside it on checkout and corrupts the asset.
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.webp  binary
+*.avif  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.mp4   binary
+*.webm  binary
+*.pdf   binary
