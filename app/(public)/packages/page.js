@@ -47,6 +47,7 @@ import { buildMetadata } from "@/lib/seo";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "packages",
+        ogKicker: "Pricing",
         path: "/packages",
         title: "Packages and pricing",
         /* Kept under 160 characters. The dashboard field enforces that cap

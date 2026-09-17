@@ -11,6 +11,7 @@ import { pad } from "@/lib/utils";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "contact",
+        ogKicker: "Contact",
         path: "/contact",
         title: "Contact",
         description:

@@ -38,12 +38,13 @@ export async function generateMetadata({ params }) {
         path: `/services/${service.slug}`,
         title: service.metaTitle || service.title,
         description: service.metaDescription || service.shortDescription,
-        /* The share card wants an absolute, cacheable URL. mediaUrl resolves an
-           uploaded path against the API origin; a service with no artwork yet
-           falls back to the logo rather than shipping a card with a dead
-           image, which some scrapers cache for days. */
-        image: mediaUrl(service.image) ?? "/logo.png",
+        /* mediaUrl resolves an uploaded path against the API origin. The old
+           `?? "/logo.png"` tail is gone: an artwork-less service now falls
+           through to the generated card in /api/og, which carries this
+           service's own name. A shared link is worth more than a logo. */
+        image: mediaUrl(service.image) ?? undefined,
         type: "article",
+        ogKicker: "Service",
     });
 }
 

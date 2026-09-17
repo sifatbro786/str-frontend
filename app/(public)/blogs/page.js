@@ -8,6 +8,7 @@ import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "blogs",
+        ogKicker: "Journal",
         path: "/blogs",
         title: "Insights",
         description:

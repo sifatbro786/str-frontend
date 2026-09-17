@@ -9,6 +9,7 @@ import { breadcrumbSchema, buildMetadata, caseStudySchema } from "@/lib/seo";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "projects",
+        ogKicker: "Work",
         path: "/projects",
         title: "Selected work",
         description:

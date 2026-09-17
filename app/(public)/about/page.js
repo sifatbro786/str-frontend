@@ -13,6 +13,7 @@ import { MEDIA_FALLBACK, mediaUrl, pad } from "@/lib/utils";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "about",
+        ogKicker: "About",
         path: "/about",
         title: "About",
         description:

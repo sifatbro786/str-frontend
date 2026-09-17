@@ -19,6 +19,32 @@ const apiHost = (() => {
     }
 })();
 
+/**
+ * ── THE INVISIBLE-SITE GUARD ⚑ ───────────────────────────────────────────
+ * app/robots.js serves `Disallow: /` unless NEXT_PUBLIC_SITE_ENV is exactly
+ * "production". That default is the right way round — a staging deploy that
+ * competes with the live domain takes weeks to clear out of the index — but
+ * its failure mode is silent and total: forget the variable on the live host
+ * and the site still builds, still serves, still looks perfect, and is simply
+ * absent from Google. Nothing reports it, because nothing is broken.
+ *
+ * So a production build with the variable entirely unset fails here instead.
+ * An explicit value other than "production" passes untouched: that is someone
+ * choosing a staging build, which is a decision rather than an oversight.
+ *
+ * ⚑ NEXT_PUBLIC_* is inlined at BUILD time. Exporting it in the shell that
+ * runs `next start`, or adding it to a process manager's runtime env, does
+ * nothing at all — it has to be present for `next build`.
+ */
+if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_SITE_ENV === undefined) {
+    throw new Error(
+        "NEXT_PUBLIC_SITE_ENV is unset for a production build.\n" +
+            "  Live host        NEXT_PUBLIC_SITE_ENV=production   robots.txt allows crawling\n" +
+            "  Staging/preview  NEXT_PUBLIC_SITE_ENV=staging      robots.txt blocks everything\n" +
+            "Set it before `next build` — NEXT_PUBLIC_* values are inlined at build time.",
+    );
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,

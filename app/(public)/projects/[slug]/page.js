@@ -36,6 +36,7 @@ export async function generateMetadata({ params }) {
         description: p.metaDescription || p.shortDescription,
         image: absoluteMedia(p.ogImage || p.coverImage),
         type: "article",
+        ogKicker: "Case study",
         keywords: p.tags,
         article: {
             publishedTime: p.projectDate ?? p.createdAt,

@@ -30,6 +30,7 @@ import { site } from "@/lib/site";
 export async function generateMetadata() {
     return buildMetadata({
         identifier: "graphics",
+        ogKicker: "Graphics",
         path: "/graphics",
         title: "Image editing rates and samples",
         /* Under 160 characters, same cap the dashboard field enforces. */
