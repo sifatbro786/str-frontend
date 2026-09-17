@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo";
 import CookieConsent from "@/components/providers/CookieConsent";
+import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import IntroLoader from "@/components/providers/IntroLoader";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
@@ -43,6 +44,12 @@ export default function PublicLayout({ children }) {
           Google resolves them into one entity rather than several
           competing ones. Nothing here reaches the client bundle. */}
             <JsonLd data={[organizationSchema(), websiteSchema()]} />
+
+            {/* GTM mounts in this group, not the root layout, so /admin and /login
+          never load a marketing container at all — the same architectural
+          guarantee the motion engine gets above. Every storage category
+          starts denied; CookieConsent is what lifts it. */}
+            <GoogleTagManager />
 
             <IntroLoader />
             <Navbar />

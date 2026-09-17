@@ -14,17 +14,19 @@ import { gsap } from "@/lib/gsap";
  * as if it does. Compliance is about what actually loads:
  *
  *   · Non-essential scripts (analytics, pixels, embedded video, chat widgets)
- *     must not run until `hasConsent()` returns true. Nothing on the site
- *     currently loads any, which is the only reason this component alone is
- *     enough today. The moment a GA snippet or a Meta pixel is added, it has
- *     to be gated on the `str-cookie-consent` event below, not dropped into
- *     the layout.
+ *     must not run until `hasConsent()` returns true. Google Tag Manager is
+ *     the one that does, and it is gated at the storage layer rather than the
+ *     script layer — see components/analytics/GoogleTagManager.jsx. Anything
+ *     added later must hook the `str-cookie-consent` event below or sit
+ *     behind Consent Mode; neither may be dropped straight into a layout.
  *   · Declining has to be as easy as accepting. Both buttons are the same
  *     size and weight for that reason. A greyed-out "Decline" beside a filled
  *     "Accept all" is a dark pattern and is specifically called out in EDPB
  *     guidance.
- *   · The choice has to be revocable. `resetConsent()` is exported for a
- *     "Cookie settings" link in the footer; wire one up before launch.
+ *   · The choice has to be revocable. `resetConsent()` backs
+ *     components/legal/CookieSettingsLink.jsx, rendered at the foot of every
+ *     legal page. GtmConsentBridge listens to the same event, so revoking
+ *     downgrades Consent Mode live, without a reload.
  *
  * ── WHY NO BACKDROP, AND WHY BOTTOM-LEFT ─────────────────────────────────
  * A full-screen modal blocks the content someone arrived to read and trains
@@ -42,8 +44,8 @@ import { gsap } from "@/lib/gsap";
  * The banner mounts only after the effect has read the stored choice.
  */
 
-const KEY = "str-cookie-consent";
-const EVENT = "str-cookie-consent";
+export const KEY = "str-cookie-consent";
+export const EVENT = "str-cookie-consent";
 const DELAY_MS = 1200; // let the page arrive first; the loader owns the moment before this
 
 /** "granted" | "denied" | null. Safe to call from anywhere on the client. */
