@@ -203,7 +203,13 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
     /* A full replace, not a re-flow: switching track swaps all three tiers for
        three different ones, so there is no shared element for Flip to carry and
        nothing to preserve continuity of. A short staggered rise is the honest
-       read of "these are different tiers" — and it costs no plugin. */
+       read of "these are different tiers" — and it costs no plugin.
+
+       ⚑ The selector is scoped to [data-panel-active] rather than to every
+       [data-tier] under the ref. All five panels are now in the DOM (see the
+       note on the panel list below), so an unscoped selector would animate
+       fifteen cells, twelve of them inside a `hidden` panel where the tween
+       runs against a zero box and leaves stale inline styles behind. */
     useGSAP(
         () => {
             if (!grid.current) return;
@@ -212,7 +218,7 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                 return;
             }
 
-            gsap.from(gsap.utils.toArray("[data-tier]", grid.current), {
+            gsap.from(gsap.utils.toArray("[data-panel-active] [data-tier]", grid.current), {
                 autoAlpha: 0,
                 y: 18,
                 duration: 0.5,
@@ -261,9 +267,11 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                         return (
                             <button
                                 key={c.id}
+                                id={`pricing-tab-${c.id}`}
                                 type="button"
                                 role="tab"
                                 aria-selected={on}
+                                aria-controls={`pricing-panel-${c.id}`}
                                 onClick={() => setActiveId(c.id)}
                                 className={cn(
                                     "shrink-0 rounded-full border px-4 py-2 text-[0.875rem] whitespace-nowrap transition-colors duration-200",
@@ -278,26 +286,55 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                     })}
                 </div>
 
-                <div className="mt-9 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h3 className="text-subheading text-(--text)">{category.title}</h3>
-                    <span className="label-mono text-(--text-mute)">{category.platform}</span>
-                </div>
-                <p className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-(--text-dim)">
-                    {category.bestFor}
-                </p>
+                {/* ── Panels ──────────────────────────────────────────────────
+                    ⚑ EVERY track renders. This used to mount only the active
+                    category, which meant the served HTML carried one track's
+                    tier names and EUR figures and four bare tab labels — so the
+                    page's own meta description promised "WooCommerce and Shopify
+                    builds, and monthly SEO retainers" while four fifths of the
+                    published pricing was never in the document a crawler reads.
 
-                <div
-                    ref={grid}
-                    className="mt-8 grid gap-px border border-(--line) bg-(--line) lg:grid-cols-3"
-                >
-                    {category.tiers.map((tier) => (
-                        <TierCell
-                            key={tier.id}
-                            tier={tier}
-                            price={prices[tier.id]}
-                            contactEmail={contactEmail}
-                        />
-                    ))}
+                    The cost is real but small: five panels of three cells is
+                    fifteen TierCells of static markup instead of three, on a
+                    route that is already server-rendered. `hidden` (the
+                    attribute, not a class) is what a tabpanel is supposed to
+                    use — it keeps the inactive tracks out of the a11y tree and
+                    out of tab order while leaving them in the DOM. */}
+                <div ref={grid}>
+                    {categories.map((c) => {
+                        const on = c.id === category.id;
+                        return (
+                            <div
+                                key={c.id}
+                                id={`pricing-panel-${c.id}`}
+                                role="tabpanel"
+                                aria-labelledby={`pricing-tab-${c.id}`}
+                                hidden={!on}
+                                {...(on ? { "data-panel-active": "" } : {})}
+                            >
+                                <div className="mt-9 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                                    <h3 className="text-subheading text-(--text)">{c.title}</h3>
+                                    <span className="label-mono text-(--text-mute)">
+                                        {c.platform}
+                                    </span>
+                                </div>
+                                <p className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-(--text-dim)">
+                                    {c.bestFor}
+                                </p>
+
+                                <div className="mt-8 grid gap-px border border-(--line) bg-(--line) lg:grid-cols-3">
+                                    {c.tiers.map((tier) => (
+                                        <TierCell
+                                            key={tier.id}
+                                            tier={tier}
+                                            price={prices[tier.id]}
+                                            contactEmail={contactEmail}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* ── Terms ───────────────────────────────────────────────────
@@ -319,9 +356,16 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                                 <span className="label-mono tabular-nums text-brand">
                                     {pad(i + 1)}
                                 </span>
-                                <h4 className="mt-5 text-[1.0625rem] font-medium tracking-[-0.02em] text-(--text)">
+                                {/* Not a heading. "Invoiced in EUR" and "Aftercare
+                                    included" are contract terms, and marking them
+                                    <h4> put four headings in the document outline
+                                    that head nothing — under a SectionIndex label
+                                    that is not a heading at all, so they also
+                                    skipped a level. A styled <p> renders
+                                    identically and claims nothing. */}
+                                <p className="mt-5 text-[1.0625rem] font-medium tracking-[-0.02em] text-(--text)">
                                     {t.title}
-                                </h4>
+                                </p>
                                 <p className="mt-3 text-[0.9375rem] leading-relaxed text-(--text-dim)">
                                     {t.detail}
                                 </p>

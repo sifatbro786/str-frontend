@@ -15,8 +15,13 @@ export async function generateMetadata() {
         ogKicker: "Services",
         path: "/services",
         title: "Services",
+        /* ⚑ Kept under 160 and kept in step with the catalogue. The previous
+           version opened "Nine disciplines" and then listed seven, having been
+           written before dashboards, data and video existed as their own
+           services. Any edit here is an edit to a claim about lib/taxonomy.js —
+           count the list before changing the number. */
         description:
-            "Nine disciplines under one delivery team: websites, custom software, consultancy, graphic design, digital marketing, data and analytics, 2D and 3D production, dashboards and mobile apps.",
+            "Ten disciplines under one delivery team: websites, custom software, mobile apps, dashboards, data and analytics, 2D and 3D, graphics, video and digital marketing.",
     });
 }
 

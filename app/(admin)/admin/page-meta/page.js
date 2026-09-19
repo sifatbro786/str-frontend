@@ -53,6 +53,28 @@ const PATHS = {
   contact: "/contact",
 };
 
+/**
+ * What the public site will actually put in <title>.
+ *
+ * ⚑ Mirrors withBrand() in lib/seo.js. The field the author types into is NOT
+ * the title: seo.js appends " | STR Solutions" unless the value already names
+ * the brand. Showing the raw field in the preview below is how a 76-character
+ * title used to pass a form that said it was fine, so the preview renders this
+ * instead and the counter caps the FIELD at 44 (44 + 16 = 60).
+ *
+ * If TITLE_BRAND changes in lib/seo.js, change TITLE_MAX here and the
+ * isLength cap in str-backend/src/validators/pageMeta.validator.js with it.
+ */
+const TITLE_BRAND = site.name;
+const TITLE_MAX = 44;
+const SERP_TITLE_MAX = 60;
+
+function brandedTitle(value) {
+  const v = String(value ?? "").trim();
+  if (!v) return `${site.legalName} — ${site.tagline}`;
+  return v.toLowerCase().includes(TITLE_BRAND.toLowerCase()) ? v : `${v} | ${TITLE_BRAND}`;
+}
+
 const EMPTY = {
   metaTitle: "", metaDescription: "", keywords: [], ogImage: "",
   dynamicHeroHeadline: "", dynamicHeroSubtitle: "",
@@ -133,6 +155,8 @@ export default function PageMetaAdminPage() {
   }
 
   const descLong = (draft.metaDescription ?? "").length > 160;
+  const renderedTitle = brandedTitle(draft.metaTitle);
+  const titleLong = renderedTitle.length > SERP_TITLE_MAX;
   const previewUrl = `${site.url.replace("https://", "")}${PATHS[selected]}`;
 
   if (status === "loading") {
@@ -178,9 +202,22 @@ export default function PageMetaAdminPage() {
         )}
 
         <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Meta title" htmlFor="pm-title" error={errors.metaTitle} className="sm:col-span-2">
+          <Field
+            label="Meta title"
+            htmlFor="pm-title"
+            error={errors.metaTitle}
+            hint={<Counter value={draft.metaTitle} max={TITLE_MAX} />}
+            className="sm:col-span-2"
+          >
             <Input id="pm-title" value={draft.metaTitle} onChange={onInput("metaTitle")} />
           </Field>
+          {titleLong && (
+            <p className="label-mono -mt-2 text-signal sm:col-span-2">
+              The rendered title is {renderedTitle.length} characters — Google will truncate
+              past {SERP_TITLE_MAX}. Do not type the company name into this field; the site
+              appends it.
+            </p>
+          )}
           <Field
             label="Meta description"
             htmlFor="pm-desc"
@@ -227,8 +264,13 @@ export default function PageMetaAdminPage() {
           <h2 className="label-mono text-(--text-mute)">Search preview</h2>
           <div className="mt-4 max-w-2xl">
             <p className="label-mono text-(--text-mute)">{previewUrl}</p>
+            {/* The BRANDED title, not the raw field — this is the string that
+                ends up in <title>, brand suffix and all. Truncated at the same
+                point Google truncates, so an over-long value is visible here
+                rather than only in the SERP three weeks later. */}
             <p className="mt-1.5 text-[1.125rem] leading-snug text-brand">
-              {draft.metaTitle || `${site.legalName} — ${site.tagline}`}
+              {renderedTitle.slice(0, SERP_TITLE_MAX)}
+              {titleLong && "…"}
             </p>
             <p className="mt-1.5 text-[0.875rem] leading-relaxed text-(--text-mute)">
               {(draft.metaDescription || site.description).slice(0, 160)}

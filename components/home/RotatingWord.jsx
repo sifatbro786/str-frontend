@@ -109,7 +109,26 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
                 const host = el?.parentElement;
                 if (!el || !rule || !host) return;
 
-                const natural = rule.getBoundingClientRect().width;
+                /* ⚑ One span, measured N times — NOT N spans measured once.
+                   The ruler used to render every phrase into a hidden stack,
+                   which meant the served HTML carried the whole service list a
+                   second time inside the <h1>: "We deliver" followed by nine
+                   names, then those same nine again, then "that holds up after
+                   launch." Correct for assistive tech (both copies are
+                   aria-hidden and the h1 carries an aria-label), but the h1's
+                   text content is what a crawler indexes, and eighteen comma-less
+                   service names is not a sentence.
+
+                   Writing each phrase into one reusable span costs N layout
+                   reads per resize instead of one, on a span that is
+                   visibility:hidden and nine items long. That is cheap, and it
+                   happens on resize, not per frame. The DOM keeps one copy. */
+                let natural = 0;
+                for (const p of phrases) {
+                    rule.textContent = p;
+                    const w = rule.getBoundingClientRect().width;
+                    if (w > natural) natural = w;
+                }
                 /* 1px of slack. A natural width that lands on a sub-pixel
                    rounds up into the mask and shaves the final glyph — the
                    original bug, reintroduced at 1/60th the size. */
@@ -317,22 +336,19 @@ export default function RotatingWord({ phrases, hold = 2.2, className }) {
                 its font-size divides --rw-fit back out so it always reports
                 the phrase at the INHERITED size. Never split, never tweened —
                 measuring the live phrases mid-handover returns a width the
-                line does not actually need. */}
+                line does not actually need.
+
+                Rendered EMPTY. applyFit writes each phrase into it in turn and
+                keeps the widest, so the phrase list appears in the document
+                exactly once (see the note in applyFit). Do not put children
+                back in here; the measurement does not need them and the <h1>
+                does not want them. */}
             <span
                 ref={ruler}
                 aria-hidden="true"
-                className="pointer-events-none invisible absolute top-0 left-0 grid"
+                className="pointer-events-none invisible absolute top-0 left-0 block whitespace-nowrap"
                 style={{ fontSize: "calc(1em / var(--rw-fit, 1))" }}
-            >
-                {phrases.map((p) => (
-                    <span
-                        key={p}
-                        className="col-start-1 row-start-1 block whitespace-nowrap"
-                    >
-                        {p}
-                    </span>
-                ))}
-            </span>
+            />
 
             {phrases.map((p) => (
                 <span

@@ -110,6 +110,28 @@ const PINNED_LAYOUT = "(min-width: 1024px) and (min-height: 640px)";
 const RAIL_GUTTER =
     "px-5 md:px-10 lg:px-[max(2.5rem,calc((100vw-84rem)/2+2.5rem))]";
 
+/* Spelled out to twelve, then the digit. A headline reading "13 disciplines"
+   is worse than one reading "Thirteen", but inventing a full number-to-words
+   implementation for a sentence that will never plausibly pass twelve is
+   worse than both. */
+const COUNT_WORDS = [
+    "No",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Eleven",
+    "Twelve",
+];
+
+const disciplineCount = (n) => COUNT_WORDS[n] ?? String(n);
+
 export default function CapabilityStack({ services }) {
     const root = useRef(null);
     const scroller = useRef(null);
@@ -271,8 +293,14 @@ export default function CapabilityStack({ services }) {
                 <div className="grid grid-cols-1 gap-x-10 gap-y-5 lg:grid-cols-12">
                     <div className="lg:col-span-5">
                         <SectionIndex index="02" label="Capabilities" />
+                        {/* ⚑ Counted, not typed. This said "Nine disciplines"
+                            while ten were published and linked below it — the
+                            tenth (Video Editing) shipped and nothing told anyone
+                            the sentence had stopped being true. A hand-written
+                            number next to a rendered list is a claim with an
+                            expiry date on it. */}
                         <h2 ref={heading} className="text-heading mt-4">
-                            Nine disciplines, one delivery team.
+                            {disciplineCount(services.length)} disciplines, one delivery team.
                         </h2>
                     </div>
                     <p className="max-w-lg self-end text-[1.0625rem] leading-relaxed text-(--text-dim) lg:col-span-6 lg:col-start-7">

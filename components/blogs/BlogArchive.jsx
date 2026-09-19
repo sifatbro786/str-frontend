@@ -222,11 +222,16 @@ export default function BlogArchive({ posts, categories }) {
                                         </span>
 
                                         <div className="lg:col-span-6">
-                                            <h3 className="text-[1.375rem] leading-snug font-medium tracking-[-0.02em] text-(--text)">
+                                            {/* h2, not h3. These are siblings of the
+                                                lead article above — the only thing that
+                                                made them a level deeper was the layout
+                                                being different, and the outline should
+                                                describe the content, not the grid. */}
+                                            <h2 className="text-[1.375rem] leading-snug font-medium tracking-[-0.02em] text-(--text)">
                                                 <span className="inline-block transition-transform duration-400 ease-out group-hover/row:translate-x-1.5">
                                                     {post.title}
                                                 </span>
-                                            </h3>
+                                            </h2>
                                             <p className="mt-3 max-w-prose text-[0.9375rem] leading-relaxed text-(--text-dim)">
                                                 {post.excerpt}
                                             </p>

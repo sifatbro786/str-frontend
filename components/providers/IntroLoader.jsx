@@ -467,12 +467,19 @@ export default function IntroLoader() {
                     {/* overflow-hidden clips the character rise. Without it the
               descenders show above the line they are rising from. */}
                     <div className="overflow-hidden py-1">
-                        <h2
+                        {/* A <p>, not an <h2>. The overlay renders on every route
+                            and sits before the page's own <h1> in the document, so
+                            as a heading it made the brand name the first entry in
+                            every page's outline and pushed the real h1 to second.
+                            The wrapper is already aria-hidden + inert, so nothing
+                            about the visible or assistive behaviour changes — only
+                            what a parser reading the served HTML sees. */}
+                        <p
                             ref={word}
                             className="text-[clamp(2rem,7vw,5rem)] leading-[1.05] font-medium tracking-[-0.03em]"
                         >
                             {site.legalName}
-                        </h2>
+                        </p>
                     </div>
 
                     <div className="mt-8 flex items-end justify-between gap-6">
