@@ -8,9 +8,9 @@ import {
     GRATICULE_PATH,
     HEIGHT,
     LAND_PATHS,
+    LAYOUT,
     SPHERE_PATH,
     WIDTH,
-    layout,
 } from "@/lib/heroMap";
 
 /**
@@ -65,10 +65,11 @@ import {
  * topology in an effect that cost more than it saved. See lib/heroMap.js.
  */
 
-/* Resolved once at module scope. layout() is pure and deterministic, so server
-   and client compute the same positions, and the projection pass does not
-   re-run on every hover. */
-const MAP = layout();
+/* Resolved at BUILD time, not here — see lib/heroMap.js. This used to call
+   layout(), which ran the whole projection pass in the browser on every
+   visitor; it now reads the answer out of generated JSON. Server and client
+   are reading the same literal, so the positions cannot diverge. */
+const MAP = LAYOUT;
 const { markets, center, rings } = MAP;
 const [CX, CY] = center;
 
