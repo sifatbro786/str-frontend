@@ -6,6 +6,10 @@ import { api, revalidate } from "@/lib/apiClient";
 import { useToast } from "@/hooks/useToast";
 import { useResource } from "@/hooks/useResource";
 import { Field, Input, Textarea, Select, NumberInput, Toggle, Counter } from "./Fields";
+
+/* Shared with the services and page-meta forms and with the API validators.
+   If this moves, it moves in all of them. */
+const TITLE_MAX = 44;
 import TagInput from "./TagInput";
 import MultiSelect from "./MultiSelect";
 import RepeatableRows, { stripKeys } from "./RepeatableRows";
@@ -418,7 +422,17 @@ export default function ProjectForm({ mode, id, initial }) {
             </FormSection>
 
             <FormSection title="SEO">
-                <Field label="Meta title" htmlFor="metaTitle" error={errors.metaTitle}>
+                {/* ⚑ 44, not 60. lib/seo.js → withBrand appends " | STR Solutions"
+                    (16 chars) to whatever is stored, against a ~60-character
+                    display budget. Same number as the page-meta and services
+                    forms. The counter turns red rather than truncating — a
+                    title the author wrote is theirs to shorten. */}
+                <Field
+                    label="Meta title"
+                    htmlFor="metaTitle"
+                    error={errors.metaTitle}
+                    hint={<Counter value={values.metaTitle} max={TITLE_MAX} />}
+                >
                     <Input
                         id="metaTitle"
                         value={values.metaTitle}
