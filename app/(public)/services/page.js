@@ -110,10 +110,19 @@ export default async function ServicesPage() {
                                         >
                                             <ServiceMedia
                                                 src={s.image}
-                                                /* alt="" on purpose: the title below is the
-                                                   same link, so announcing the picture as
-                                                   well reads the destination twice. */
-                                                alt=""
+                                                /* Service.imageAlt, same as the homepage
+                                                   stack and the detail figure — this row was
+                                                   the only surface throwing it away, so an
+                                                   alt an admin had written never shipped.
+
+                                                   The wrapping Link is aria-hidden (the title
+                                                   below is the same destination), so a screen
+                                                   reader still does not read the picture
+                                                   twice. Crawlers and Google Images read the
+                                                   attribute regardless of aria-hidden, which
+                                                   is exactly the traffic this is for.
+                                                   Empty stays decorative. */
+                                                alt={s.imageAlt || ""}
                                                 title={s.title}
                                                 index={i + 1}
                                                 className="aspect-[16/10] rounded-2xl border border-(--line)"

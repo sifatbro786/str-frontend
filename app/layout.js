@@ -29,7 +29,17 @@ export const metadata = {
         url: site.url,
     },
     twitter: { card: "summary_large_image" },
-    icons: { icon: "/strshort.png", apple: "/strshort.png" },
+    /* ⚑ No `icons` key. app/favicon.ico, app/icon.png and app/apple-icon.png
+       are App Router file conventions: Next emits <link rel="icon"> for each
+       one WITH its type and sizes, and serves /favicon.ico from the route
+       root. The old hand-written entry pointed at /strshort.png only, so
+       /favicon.ico — which every browser, crawler and feed reader requests
+       before it has parsed a single tag — 404'd into the not-found page, and
+       the one tag that did exist declared no type and no sizes. Audit tools
+       report that as "favicon may not resolve reliably"; it is the same fact.
+
+       Setting `icons` here again would OVERRIDE the file convention, so if a
+       manifest icon is ever needed, add it to the files, not to this object. */
     robots: { index: true, follow: true },
 };
 
