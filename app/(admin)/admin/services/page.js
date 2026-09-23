@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useResource } from "@/hooks/useResource";
 import { api, revalidate } from "@/lib/apiClient";
 import { useToast } from "@/hooks/useToast";
-import { Field, Input, Textarea, NumberInput, Toggle, CONTROL } from "@/components/admin/Fields";
+import { Field, Input, Textarea, NumberInput, Toggle, Counter, CONTROL } from "@/components/admin/Fields";
 import TagInput from "@/components/admin/TagInput";
 import ImageField from "@/components/admin/ImageField";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
@@ -14,8 +14,14 @@ import { cn, mediaUrl } from "@/lib/utils";
 const EMPTY = {
   title: "", shortDescription: "", detailedOverview: "",
   image: "", imageAlt: "",
+  metaTitle: "", metaDescription: "",
   featuresList: [], deliverableTimeline: "", order: 0, isActive: true,
 };
+
+/* ⚑ 44, not 60. lib/seo.js → withBrand appends " | STR Solutions" (16 chars)
+   to whatever is stored, against a ~60-character display budget. Same number
+   as the page-meta form and as validators/service.validator.js on the API. */
+const TITLE_MAX = 44;
 
 /**
  * Services list. Nine rows and a small form, so this uses an inline expanding
@@ -175,6 +181,44 @@ export default function ServicesAdminPage() {
         </Field>
         <Field label="Short description" htmlFor="svc-short" error={errors.shortDescription} className="sm:col-span-2">
           <Textarea id="svc-short" rows={3} value={draft.shortDescription} onChange={onInput("shortDescription")} />
+        </Field>
+        {/* ── Search appearance ──────────────────────────────────────────
+            OVERRIDES, not required fields. Empty means the service page falls
+            back to the title and short description above, which is right for
+            most records — lib/seo.js reads `metaTitle || title`. Fill these in
+            only when the on-page copy is the wrong thing to show in a search
+            result, e.g. a heading that reads "Development" needs to say
+            "Web Development Agency in Dhaka" to Google. */}
+        <Field
+          label="Meta title"
+          htmlFor="svc-meta-title"
+          error={errors.metaTitle}
+          hint={<Counter value={draft.metaTitle} max={TITLE_MAX} />}
+          className="sm:col-span-2"
+        >
+          <Input
+            id="svc-meta-title"
+            value={draft.metaTitle}
+            onChange={onInput("metaTitle")}
+            error={errors.metaTitle}
+            placeholder={draft.title ? `Falls back to: ${draft.title}` : "Falls back to the title above"}
+          />
+        </Field>
+        <Field
+          label="Meta description"
+          htmlFor="svc-meta-desc"
+          error={errors.metaDescription}
+          hint={<Counter value={draft.metaDescription} max={160} />}
+          className="sm:col-span-2"
+        >
+          <Textarea
+            id="svc-meta-desc"
+            rows={3}
+            value={draft.metaDescription}
+            onChange={onInput("metaDescription")}
+            error={errors.metaDescription}
+            placeholder="Falls back to the short description above"
+          />
         </Field>
         <Field
           label="Detailed overview (HTML)"

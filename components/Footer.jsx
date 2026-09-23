@@ -104,6 +104,43 @@ const LINK =
 const META =
     "label-mono inline-block -mx-1 -my-0.5 px-1 py-0.5 text-(--text-mute) transition-colors hover:text-signal";
 
+/* The column the rail is appended to, matched by title rather than by index so
+   reordering site.footerColumns cannot silently move the icons somewhere else.
+   If that heading is ever renamed, rename it here in the same commit — a
+   mismatch drops the rail from the footer entirely and nothing throws. */
+const SOCIAL_COLUMN = "Reach us";
+
+/* Lives under "Reach us" rather than under the identity block. These are
+   contact affordances, not brand furniture: a visitor who wants to message the
+   studio looks where the email, the phone numbers and the address already are,
+   and the rail sitting three columns away from them was the one row nobody
+   found. Pulled out as a component so the column map below stays readable. */
+function SocialRail() {
+    return (
+        <ul className="mt-6 flex flex-wrap gap-3">
+            {SOCIALS.map(({ key, label, href, Icon, hint }) => (
+                <li key={key}>
+                    <a
+                        data-magnetic=""
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        /* The link carries the name; the glyph inside is
+                           aria-hidden. A title as well, because an icon with
+                           no text needs a tooltip for anyone who does not
+                           recognise the mark. */
+                        aria-label={hint ?? label}
+                        title={hint ?? label}
+                        className={SOCIAL_TILE}
+                    >
+                        <Icon className="size-4.25" />
+                    </a>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 export default function Footer() {
     const year = new Date().getFullYear();
 
@@ -130,30 +167,6 @@ export default function Footer() {
                             </p>
 
                             <StudioStatus />
-
-                            <ul className="mt-8 flex flex-wrap gap-3">
-                                {SOCIALS.map(({ key, label, href, Icon, hint }) => (
-                                    <li key={key}>
-                                        <a
-                                            data-magnetic=""
-                                            href={href}
-                                            target="_blank"
-                                            rel="noreferrer noopener"
-                                            /* The link carries the name; the
-                                               glyph inside is aria-hidden. A
-                                               title as well, because an icon
-                                               with no text needs a tooltip for
-                                               anyone who does not recognise
-                                               the mark. */
-                                            aria-label={hint ?? label}
-                                            title={hint ?? label}
-                                            className={SOCIAL_TILE}
-                                        >
-                                            <Icon className="size-4.25" />
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
                         </div>
 
                         {/* ── Link stacks ───────────────────────────────────── */}
@@ -192,6 +205,7 @@ export default function Footer() {
                                         );
                                     })}
                                 </ul>
+                                {col.title === SOCIAL_COLUMN && <SocialRail />}
                             </nav>
                         ))}
                     </div>
