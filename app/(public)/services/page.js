@@ -125,6 +125,15 @@ export default async function ServicesPage() {
                                                 alt={s.imageAlt || ""}
                                                 title={s.title}
                                                 index={i + 1}
+                                                /* First row only. This picture is the LCP
+                                                   element on /services, and without `priority`
+                                                   next/image emits loading="lazy", so the
+                                                   browser cannot discover it until layout —
+                                                   which is the "LCP request discovery" audit.
+                                                   Marking more than the first row would
+                                                   preload below-the-fold images and make the
+                                                   page slower, not faster. */
+                                                priority={i === 0}
                                                 className="aspect-[16/10] rounded-2xl border border-(--line)"
                                                 imageClassName="transition-transform duration-700 ease-out motion-safe:group-hover/row:scale-[1.03]"
                                             />

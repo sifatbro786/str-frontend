@@ -61,6 +61,15 @@ export default function RootLayout({ children }) {
             full DNS+TLS round trip before the font CSS can even be requested. */}
                 <link rel="preconnect" href="https://api.fontshare.com" />
                 <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="anonymous" />
+                {/* General Sans. Here rather than as an @import in globals.css so the
+                    browser finds it in the first HTML chunk and fetches it alongside
+                    the app CSS instead of after it — see the note in globals.css.
+                    display=swap is in the URL, so text paints in the fallback face
+                    immediately and never blocks on the font itself. */}
+                <link
+                    rel="stylesheet"
+                    href="https://api.fontshare.com/v2/css?f%5B%5D=general-sans@400,500,600,700&display=swap"
+                />
             </head>
             <body className="min-h-dvh antialiased" suppressHydrationWarning>
                 {/* Public chrome (skip link, Navbar, <main>, Footer) lives in

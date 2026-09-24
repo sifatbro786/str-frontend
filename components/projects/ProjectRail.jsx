@@ -216,6 +216,11 @@ export default function ProjectRail({ projects, services }) {
                                                 src={mediaUrl(p.coverImage) ?? MEDIA_FALLBACK}
                                                 alt={p.title}
                                                 fill
+                                                /* First card only — it is the LCP element and
+                                                   was lazy-loaded, which is why /projects
+                                                   measured LCP 2.0s against 0.3s FCP. Every
+                                                   other card stays lazy. */
+                                                priority={i === 0}
                                                 sizes="(max-width: 1024px) 100vw, 55vw"
                                                 className="object-cover object-top transition-transform duration-900 ease-out group-hover/card:scale-[1.035]"
                                             />

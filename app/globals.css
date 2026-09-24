@@ -16,7 +16,13 @@
    .woff2 files are in /public/fonts. The CDN @import is render-blocking
    and costs roughly 120ms of LCP.
    ───────────────────────────────────────────────────────────── */
-@import url("https://api.fontshare.com/v2/css?f%5B%5D=general-sans@400,500,600,700&display=swap");
+/* ⚑ The General Sans @import that used to sit here has MOVED to a <link> in
+   app/layout.js. An @import inside a stylesheet is discovered only after that
+   stylesheet has been downloaded AND parsed, so the font CSS could not even
+   start until this file finished — a serial round trip Lighthouse reports as
+   a render-blocking request. As a <link> in the document head it is found in
+   the first HTML chunk and fetched in parallel with this file.
+   The PRODUCTION NOTE above still stands: self-hosting is the real fix. */
 @import "tailwindcss";
 
 /* next-themes writes class="dark" on <html>; Tailwind v4 defaults `dark:` to
