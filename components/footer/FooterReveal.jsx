@@ -1,46 +1,38 @@
-"use client";
-
-import { useRef } from "react";
-import { useMagnetic } from "@/components/motion/useMagnetic";
-
 /**
- * Footer wrapper. Magnetic links, and nothing else.
+ * The footer shell.
  *
- * ── THE UNVEIL WAS REMOVED, ON PURPOSE ───────────────────────────────────
- * This used to hold the footer in an overflow:hidden window and counter-
- * translate it on scrub, so the page appeared to slide off a stationary
- * footer. It looked good in isolation and was wrong in practice.
+ * ── WHAT THIS USED TO DO, AND WHY IT DOES NOTHING NOW ────────────────────
+ * Two effects have been removed from this file, in that order.
  *
- * The problem is not the effect, it is what the effect requires. The reveal
- * only completes when the window's bottom edge reaches the viewport bottom,
- * which is the very last pixel of the document. Every scroll position before
- * that shows the footer translated up inside a clipping box, so part of it is
- * cut off. On any viewport shorter than the footer, and under ScrollSmoother's
- * easing (which asymptotically approaches the end of the scroll range rather
- * than snapping to it), there is effectively no moment where the whole footer
- * is on screen at once. Contact details you cannot reliably read are worse
- * than no animation.
+ * First the unveil: the footer was held in an overflow:hidden window and
+ * counter-translated on scrub, so the page appeared to slide off a stationary
+ * footer. It only completed at the very last pixel of the document, which meant
+ * that on any viewport shorter than the footer there was effectively no scroll
+ * position where the whole thing was legible. Contact details you cannot
+ * reliably read are worse than no animation.
  *
- * Fixing it inside the effect means either shortening the scrub so it finishes
- * early (at which point the footer visibly jumps to rest mid-scroll) or making
- * the window taller than the footer (which reintroduces the empty band the
- * original was written to avoid). Neither is worth it for a parallax on a
- * sitemap.
+ * Then the magnetic links: every [data-magnetic] child was nudged toward the
+ * pointer on hover, through a single delegated handler mounted here. Removed at
+ * the studio's request along with the rest of the footer's motion — the footer
+ * now runs no GSAP at all, and neither does anything it renders.
  *
- * ── WHAT STAYED, AND WHY ─────────────────────────────────────────────────
- * `data-footer-mask` remains as a measurement anchor. FooterCurve and
- * KineticWordmark both resolve their ScrollTriggers up to it, and with the
- * transform gone it is now simply the footer's own untransformed box — which
- * is what those triggers wanted to measure against in the first place. Their
- * start/end values need no change; they get more accurate, not less.
+ * ── WHY THE FILE SURVIVES ────────────────────────────────────────────────
+ * It is the footer's outer positioning context, which `FooterEdge` and the
+ * absolutely-positioned marks inside the plate still need. Folding this div
+ * into Footer.jsx would work and would be one file fewer; it is kept separate
+ * so the footer's shell and its content stay in different files, as everywhere
+ * else in this tree.
+ *
+ * `data-footer-mask` is kept as a stable hook. Nothing reads it today — the two
+ * ScrollTriggers that measured against it are gone — but it costs one attribute
+ * and it is the anchor anyone reintroducing footer motion will look for first.
+ *
+ * ⚑ No "use client". This whole subtree renders on the server now. Adding a
+ * hook here pulls Footer.jsx's children back into the client bundle.
  */
 export default function FooterReveal({ children }) {
-    const root = useRef(null);
-
-    useMagnetic(root);
-
     return (
-        <div ref={root} data-footer-mask="" className="relative">
+        <div data-footer-mask="" className="relative">
             {children}
         </div>
     );

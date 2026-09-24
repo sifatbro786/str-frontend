@@ -424,6 +424,69 @@ html:not(.dark) :is([data-admin], [data-auth]) {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Footer motion, in CSS.
+
+   The footer used to run GSAP for all of this. It no longer runs GSAP at all,
+   so the two effects worth keeping — the availability pulse and the seconds
+   roll on the Dhaka clock — live here as keyframes. Both are composited
+   properties only (transform + opacity), so they never touch the main thread
+   and cost nothing in Total Blocking Time, which was the whole point of
+   dropping the library from this subtree.
+
+   ⚑ Scoped to their own class names rather than added to @theme as animation
+   utilities: these are two one-off effects in one component, and a theme entry
+   implies a vocabulary the rest of the site is meant to reach for.
+   ───────────────────────────────────────────────────────────── */
+@keyframes str-status-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  /* Holds at nothing for the tail of the cycle — the old tween had a
+     repeatDelay, and without this the ring restarts the instant it fades. */
+  70%,
+  to {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+
+.str-status-pulse {
+  animation: str-status-pulse 2.55s ease-out infinite;
+}
+
+/* Replayed by remounting the element (React `key` on the seconds span), which
+   is the CSS equivalent of the old gsap.fromTo — an animation restarts when
+   the node it is on is new. */
+@keyframes str-digit-roll {
+  from {
+    transform: translateY(55%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.str-digit-roll {
+  animation: str-digit-roll 0.34s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .str-status-pulse,
+  .str-digit-roll {
+    animation: none;
+  }
+  /* The roll's `both` fill would otherwise leave the digit at its FROM frame
+     (translated and transparent) when the animation is switched off. */
+  .str-digit-roll {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    .prose-str — rich text for /blogs/[slug] and service overviews.
    Scoped, token-driven, no @tailwindcss/typography dependency.
    ───────────────────────────────────────────────────────────── */

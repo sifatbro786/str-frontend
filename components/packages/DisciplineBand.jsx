@@ -18,16 +18,22 @@ import { pad } from "@/lib/utils";
  * whole band ships as HTML. `Reveal` is the only client code in here and it
  * renders its children on the server — the boundary is for code, not content.
  *
+ * @param {string} index       Section number, e.g. "02". A prop rather than a
+ *                             literal because this band's position on the page
+ *                             is decided by PackagesContent — it was hardcoded
+ *                             "01" and silently went stale the moment pricing
+ *                             moved above it. PricingGrid and TestimonialRail
+ *                             already take theirs this way.
  * @param {Array}  disciplines DISCIPLINES
  * @param {object} counts      discipline id → count, from catalogueCounts()
  */
-export default function DisciplineBand({ disciplines, counts = {} }) {
+export default function DisciplineBand({ index = "01", disciplines, counts = {} }) {
     return (
         <section className="border-b border-(--line)">
             <div className="shell py-20 md:py-24">
                 <div className="grid gap-x-12 gap-y-6 lg:grid-cols-12 lg:items-end">
                     <div className="lg:col-span-6">
-                        <SectionIndex index="01" label="Disciplines" />
+                        <SectionIndex index={index} label="Disciplines" />
                         <h2 className="text-heading mt-6 max-w-[18ch]">
                             Five shelves.{" "}
                             <span className="text-(--text-mute)">

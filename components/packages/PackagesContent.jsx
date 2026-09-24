@@ -96,20 +96,33 @@ export default async function PackagesContent({ path = "/packages" }) {
                 meta={catalogueStats(items)}
             />
 
-            <DisciplineBand disciplines={DISCIPLINES} counts={counts} />
+            {/* ── ⚑ PRICING FIRST ─────────────────────────────────────────
+                Investment used to sit under the disciplines and the catalogue,
+                at 02. It is 01 now and it renders first, because the page is
+                called Packages and the question that brings someone to it is
+                what the tracks cost — making them scroll a five-shelf taxonomy
+                and a sample library to reach the number is asking them to work
+                for the one thing they came for.
+
+                The section numbers are a reading order, not labels: they have
+                to run 01, 02, 03 down the page. Moving this block WITHOUT
+                moving its index (or the other way round) leaves the page
+                counting 02, 01, 03, which reads as a bug. Both change
+                together, here and in DisciplineBand's `index` below. */}
+            <PricingGrid
+                index="01"
+                categories={pricing.categories}
+                prices={pricing.prices}
+                terms={pricing.terms}
+                contactEmail={site.contact.email}
+            />
+
+            <DisciplineBand index="02" disciplines={DISCIPLINES} counts={counts} />
 
             <CatalogueGrid
                 items={items}
                 disciplines={DISCIPLINES}
                 counts={counts}
-                contactEmail={site.contact.email}
-            />
-
-            <PricingGrid
-                index="02"
-                categories={pricing.categories}
-                prices={pricing.prices}
-                terms={pricing.terms}
                 contactEmail={site.contact.email}
             />
 

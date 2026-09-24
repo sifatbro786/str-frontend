@@ -1,8 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 
 /**
@@ -14,13 +12,23 @@ import { site } from "@/lib/site";
  * mismatch. Same pattern as ThemeToggle. The placeholder is the same glyph
  * count as the real value, so nothing reflows when it lands.
  *
- * ── WHY gsap.ticker AND NOT setInterval ──────────────────────────────────
- * The seconds roll is a GSAP tween. Driving the value from setInterval means
- * two independent clocks — the interval's and GSAP's — and the roll starts one
- * to sixteen milliseconds after the value changes, at random, forever. The
- * ticker is already running for the rest of the page's motion, so this costs
- * one integer comparison per frame and the roll begins on the same frame the
- * digit changes.
+ * ── setInterval, NOT gsap.ticker ─────────────────────────────────────────
+ * This used to ride GSAP's ticker so the seconds roll began on the exact frame
+ * the digit changed, rather than up to 16ms late. The footer runs no GSAP now,
+ * so the clock owns its own interval and the roll is a CSS keyframe.
+ *
+ * The interval is 250ms and not 1000ms on purpose: a one-second interval drifts
+ * against the wall clock and lands the update at an arbitrary offset inside the
+ * second, so a digit can sit visibly late. Polling four times a second and
+ * writing only when the second actually changes keeps the update within 250ms
+ * of the boundary for the cost of three integer comparisons a second.
+ *
+ * ── WHY THE TIME IS STATE AND NOT A REF ──────────────────────────────────
+ * The old version wrote textContent directly to avoid a render a second. The
+ * roll now replays by remounting the seconds span (React `key`), which only
+ * works if React owns that node — so the value is state. One render a second
+ * on a static three-node subtree is not a cost worth engineering around, and
+ * `open` was already state doing exactly this.
  *
  * ── AVAILABILITY IS COMPUTED, NOT ASSERTED ───────────────────────────────
  * Derived from site.contact.hours (Sat–Thu, 10:00–19:00, GMT+6) against the
@@ -52,99 +60,55 @@ function isOpen(now) {
 }
 
 export default function StudioStatus() {
-    const [open, setOpen] = useState(null); // null until mounted — see above
-    const hm = useRef(null);
-    const sec = useRef(null);
-    const ring = useRef(null);
+    /* null until mounted — see the hydration note above. One object rather than
+       three useStates so a tick is one render, not three. */
+    const [clock, setClock] = useState(null);
 
-    useGSAP(() => {
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        /* ── Clock ────────────────────────────────────────────────────────── */
+    useEffect(() => {
         let lastSecond = -1;
+
         const tick = () => {
-            const now = Date.now();
-            const s = Math.floor(now / 1000);
+            const ms = Date.now();
+            const s = Math.floor(ms / 1000);
             if (s === lastSecond) return;
             lastSecond = s;
 
-            const d = new Date(now);
+            const d = new Date(ms);
             const [h, m, ss] = TIME.format(d).split(":");
-            hm.current.textContent = `${h}:${m}`;
-            sec.current.textContent = ss;
-
-            // Only the seconds roll. Rolling hours and minutes on every tick would
-            // animate two digits that did not change, which reads as a glitch.
-            if (!reduced) {
-                gsap.fromTo(
-                    sec.current,
-                    { yPercent: 55, opacity: 0 },
-                    {
-                        yPercent: 0,
-                        opacity: 1,
-                        duration: 0.34,
-                        ease: "power3.out",
-                        overwrite: true,
-                    },
-                );
-            }
-
-            // Cheap: one Intl call a second, and setOpen is a no-op unless the
-            // boolean actually flips (React bails out on identical state).
-            setOpen(isOpen(d));
+            setClock({ hm: `${h}:${m}`, ss, open: isOpen(d) });
         };
 
         tick();
-        gsap.ticker.add(tick);
-
-        /* ── Pulse ────────────────────────────────────────────────────────── */
-        let pulse;
-        if (!reduced) {
-            pulse = gsap.fromTo(
-                ring.current,
-                { scale: 1, opacity: 0.5 },
-                {
-                    scale: 3.4,
-                    opacity: 0,
-                    duration: 2.2,
-                    ease: "power2.out",
-                    repeat: -1,
-                    repeatDelay: 0.35,
-                },
-            );
-        }
-
-        return () => {
-            gsap.ticker.remove(tick);
-            pulse?.kill();
-        };
+        const id = setInterval(tick, 250);
+        return () => clearInterval(id);
     }, []);
 
-    // `open === null` is the pre-hydration state: neutral colour, no claim.
-    const tone =
-        open === null ? "var(--text-mute)" : open ? "var(--color-leaf)" : "var(--color-signal)";
+    // No clock yet is the pre-hydration state: neutral colour, no claim.
+    const tone = !clock
+        ? "var(--text-mute)"
+        : clock.open
+          ? "var(--color-leaf)"
+          : "var(--color-signal)";
 
-    const message =
-        open === null
-            ? "Dhaka studio"
-            : open
-              ? "Open for projects · in studio now"
-              : site.contact.responseTime;
+    const message = !clock
+        ? "Dhaka studio"
+        : clock.open
+          ? "Open for projects · in studio now"
+          : site.contact.responseTime;
 
     return (
         <div className="mt-8" style={{ "--pulse": tone }}>
             <div className="flex items-center gap-2.5">
                 <span className="relative flex size-2 shrink-0 items-center justify-center">
                     <span
-                        ref={ring}
                         aria-hidden="true"
-                        className="absolute size-2 rounded-full bg-(--pulse)"
+                        className="str-status-pulse absolute size-2 rounded-full bg-(--pulse)"
                     />
                     <span className="relative size-2 rounded-full bg-(--pulse)" />
                 </span>
 
                 {/* aria-live so a screen reader hears the status flip if the visitor is
-            still on the page when the studio opens or closes. */}
+                    still on the page when the studio opens or closes. */}
                 <p aria-live="polite" className="label-mono text-(--text-dim)">
                     {message}
                 </p>
@@ -153,15 +117,24 @@ export default function StudioStatus() {
             <p className="mt-3 flex items-baseline gap-2 font-mono text-(--text-mute)">
                 <span className="label-mono">Dhaka</span>
                 {/* nums = tabular figures. Without it the clock jitters horizontally
-            every time a 1 rolls past. */}
+                    every time a 1 rolls past. */}
                 <span className="nums text-[1.375rem] leading-none tracking-tight text-(--text)">
-                    <span ref={hm}>--:--</span>
+                    <span>{clock?.hm ?? "--:--"}</span>
                     <span className="text-(--text-mute)">:</span>
-                    {/* The roll needs a clipping box, and it must be inline-block or the
-              transform is discarded on an inline element. */}
+                    {/* The roll needs a clipping box, and the moving node must be
+                        inline-block or the transform is discarded on an inline element.
+
+                        ⚑ `key` is what replays the animation. A CSS animation runs when
+                        its element is new, so changing the key remounts this span and the
+                        roll fires — the same trigger the old gsap.fromTo gave it. Only
+                        the seconds roll: rolling hours and minutes on every tick would
+                        animate two digits that did not change, which reads as a glitch. */}
                     <span className="inline-block overflow-hidden align-bottom">
-                        <span ref={sec} className="inline-block text-(--text-mute)">
-                            --
+                        <span
+                            key={clock?.ss ?? "placeholder"}
+                            className="str-digit-roll inline-block text-(--text-mute)"
+                        >
+                            {clock?.ss ?? "--"}
                         </span>
                     </span>
                 </span>

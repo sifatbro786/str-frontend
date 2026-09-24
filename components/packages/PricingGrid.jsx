@@ -128,7 +128,13 @@ function TierCell({ tier, price, contactEmail }) {
     const hot = Boolean(tier.highlighted);
 
     return (
-        <div data-tier="" className="relative flex flex-col bg-(--canvas) p-7 md:p-8">
+        <div
+            data-tier=""
+            /* The border is the mobile separator and is removed at lg, where the
+               parent's gap-px hairlines take over — keeping both would double
+               every internal rule to 2px. */
+            className="relative flex flex-col border border-(--line) bg-(--canvas) p-7 md:p-8 lg:border-0"
+        >
             {/* The recommended marker. A rule, not a pill: the pill version hung off
                 the card's top edge and only worked because the v1 card floated. */}
             {hot && (
@@ -322,7 +328,23 @@ export default function PricingGrid({ categories, prices, terms, contactEmail, i
                                     {c.bestFor}
                                 </p>
 
-                                <div className="mt-8 grid gap-px border border-(--line) bg-(--line) lg:grid-cols-3">
+                                {/* ⚑ TWO LAYOUTS, ONE GRID.
+                                    From lg this is the hairline spec sheet the
+                                    rest of the site uses: one bordered box,
+                                    gap-px, and the container's own background
+                                    showing through the gaps as the rules.
+
+                                    Below lg that falls apart. Three tiers stack
+                                    into one column and gap-px leaves a single
+                                    hairline between cards, so a phone sees one
+                                    tall slab and no signal that the price above
+                                    belongs to a different tier than the one
+                                    below. So on mobile the shared background and
+                                    outer border are dropped, each card carries
+                                    its own border, and they get real space
+                                    between them. The hairline look is a desktop
+                                    idea; on a phone, separation is the job. */}
+                                <div className="mt-8 grid gap-5 sm:gap-6 lg:grid-cols-3 lg:gap-px lg:border lg:border-(--line) lg:bg-(--line)">
                                     {c.tiers.map((tier) => (
                                         <TierCell
                                             key={tier.id}

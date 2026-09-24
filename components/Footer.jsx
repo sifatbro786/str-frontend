@@ -10,7 +10,7 @@ import {
     XIcon,
 } from "@/components/ui/SocialIcons";
 import { site } from "@/lib/site";
-import FooterCurve from "./FooterCurve";
+import FooterEdge from "./FooterEdge";
 import FooterReveal from "./footer/FooterReveal";
 import KineticWordmark from "./footer/KineticWordmark";
 import StudioStatus from "./footer/StudioStatus";
@@ -95,10 +95,11 @@ const SOCIALS = [
 const SOCIAL_TILE =
     "inline-flex size-10 items-center justify-center rounded-full border border-(--line) bg-(--canvas) text-(--text-mute) transition-[color,background-color,border-color] duration-200 hover:border-brand hover:bg-brand hover:text-white";
 
-/* data-magnetic is read by FooterReveal's delegated pointer handler.
-   inline-block is not optional — a transform on an inline box is ignored, and
-   that is the usual reason a magnetic text link does nothing. The negative
-   margin gives the magnet a little room to move inside without nudging layout. */
+/* ⚑ The negative margin plus matching padding is what is left of the magnetic
+   hover: it gave the magnet room to move inside its own box without nudging
+   layout. The effect is gone with the rest of the footer's GSAP, but the
+   inset is kept — it is also the link's hit area, and collapsing it would
+   shrink every footer link's tap target by half a line. */
 const LINK =
     "inline-block -mx-1 -my-0.5 px-1 py-0.5 text-[0.9375rem] text-(--text-dim) transition-colors hover:text-signal";
 const META =
@@ -121,7 +122,6 @@ function SocialRail() {
             {SOCIALS.map(({ key, label, href, Icon, hint }) => (
                 <li key={key}>
                     <a
-                        data-magnetic=""
                         href={href}
                         target="_blank"
                         rel="noreferrer noopener"
@@ -149,7 +149,7 @@ export default function Footer() {
             {/* The curve is inside the reveal window, in normal flow, so it is
           clipped along with everything else while the footer is being unveiled
           and lands as the plate's top edge exactly when the reveal completes. */}
-            <FooterCurve />
+            <FooterEdge />
 
             <footer className="relative bg-(--raised)">
                 <div className="shell pt-4 md:pt-8">
@@ -180,7 +180,6 @@ export default function Footer() {
                                             <li key={link.href}>
                                                 {external ? (
                                                     <a
-                                                        data-magnetic=""
                                                         href={link.href}
                                                         target={
                                                             link.href.startsWith("http")
@@ -194,7 +193,6 @@ export default function Footer() {
                                                     </a>
                                                 ) : (
                                                     <Link
-                                                        data-magnetic=""
                                                         href={link.href}
                                                         className={LINK}
                                                     >
@@ -246,7 +244,7 @@ export default function Footer() {
                         <ul className="flex flex-wrap gap-x-5 gap-y-2">
                             {site.legalLinks.map((l) => (
                                 <li key={l.href}>
-                                    <Link data-magnetic="" href={l.href} className={META}>
+                                    <Link href={l.href} className={META}>
                                         {l.label}
                                     </Link>
                                 </li>
